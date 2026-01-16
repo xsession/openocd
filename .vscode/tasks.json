@@ -95,6 +95,48 @@
         }
       },
       "problemMatcher": []
+    },
+    {
+      "label": "ti: serial flash (F28004x/F280049)",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}\\tools\\ti\\flash_f28004x_serial.ps1",
+        "-ComPort",
+        "${input:tiComPort}",
+        "-AppFile",
+        "${input:tiAppFile}",
+        "-BaudRate",
+        "${input:tiBaudRate}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "tiComPort",
+      "type": "promptString",
+      "description": "COM port for SCI bootloader (e.g. COM7)",
+      "default": "COM7"
+    },
+    {
+      "id": "tiBaudRate",
+      "type": "promptString",
+      "description": "Baud rate (e.g. 9600, 115200)",
+      "default": "9600"
+    },
+    {
+      "id": "tiAppFile",
+      "type": "promptString",
+      "description": "SCI boot format app file to program (e.g. C:\\path\\to\\your_app.txt)",
+      "default": "C:\\ti\\C2000Ware_5_03_00_00\\utilities\\flash_programmers\\serial_flash_programmer\\f28004x_fw_upgrade_example\\led_ex1_blinky.txt"
     }
   ]
 }
