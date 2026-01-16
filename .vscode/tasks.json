@@ -1,0 +1,100 @@
+{
+  // OpenOCD uses autotools. These tasks assume you have a POSIX shell available.
+  // Recommended on Windows: MSYS2 MinGW-w64 (bash, make, gcc, gdb) or WSL.
+  // If using MSYS2, ensure its bash is on PATH when launching VS Code.
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "openocd: bootstrap",
+      "type": "shell",
+      "command": "bash",
+      "windows": {
+        "command": "C:\\msys64\\usr\\bin\\bash.exe"
+      },
+      "args": [
+        "-lc",
+        "set -euo pipefail; export PATH=/mingw64/bin:/usr/bin:$PATH; ./bootstrap"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "CHERE_INVOKING": "1",
+          "MSYSTEM": "MINGW64"
+        }
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "openocd: configure (debug)",
+      "type": "shell",
+      "command": "bash",
+      "windows": {
+        "command": "C:\\msys64\\usr\\bin\\bash.exe"
+      },
+      "args": [
+        "-lc",
+        "set -euo pipefail; export PATH=/mingw64/bin:/usr/bin:$PATH; mkdir -p build-vscode; cd build-vscode; ../configure --disable-werror --enable-internal-jimtcl --enable-internal-libjaylink --enable-ftdi=auto --enable-ftdi-cjtag=auto --enable-ch347=auto --enable-stlink=auto --enable-ti-icdi=auto --enable-ulink=auto --enable-angie=auto --enable-usb-blaster-2=auto --enable-ft232r=auto --enable-vsllink=auto --enable-xds110=auto --enable-osbdm=auto --enable-opendous=auto --enable-armjtagew=auto --enable-rlink=auto --enable-usbprog=auto --enable-esp-usb-jtag=auto --enable-cmsis-dap-v2=auto --enable-cmsis-dap=auto --enable-cmsis-dap-tcp=auto --enable-nulink=auto --enable-kitprog=auto --enable-usb-blaster=auto --enable-presto=auto --enable-openjtag=auto --enable-remote-bitbang=auto --enable-dummy=auto --enable-vdebug=auto --enable-jtag-dpi=auto --enable-jtag-vpi=auto --enable-xlnx-xvc=auto --enable-jlink=auto --enable-linuxgpiod=no --enable-sysfsgpio=no --enable-linuxspidev=no --enable-rshim=no --enable-dmem=no --enable-buspirate=no CFLAGS='-O0 -g3'"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "CHERE_INVOKING": "1",
+          "MSYSTEM": "MINGW64"
+        }
+      },
+      "dependsOn": [
+        "openocd: bootstrap"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "openocd: build (debug)",
+      "type": "shell",
+      "command": "bash",
+      "windows": {
+        "command": "C:\\msys64\\usr\\bin\\bash.exe"
+      },
+      "args": [
+        "-lc",
+        "set -euo pipefail; export PATH=/mingw64/bin:/usr/bin:$PATH; cd build-vscode; make -j$(nproc 2>/dev/null || echo 4)"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "CHERE_INVOKING": "1",
+          "MSYSTEM": "MINGW64"
+        }
+      },
+      "dependsOn": [
+        "openocd: configure (debug)"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
+      "label": "openocd: clean (build-vscode)",
+      "type": "shell",
+      "command": "bash",
+      "windows": {
+        "command": "C:\\msys64\\usr\\bin\\bash.exe"
+      },
+      "args": [
+        "-lc",
+        "set -euo pipefail; rm -rf build-vscode"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "CHERE_INVOKING": "1",
+          "MSYSTEM": "MINGW64"
+        }
+      },
+      "problemMatcher": []
+    }
+  ]
+}

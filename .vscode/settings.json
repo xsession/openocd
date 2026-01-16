@@ -1,0 +1,8 @@
+{
+    "iis.configDir": "",
+
+    "C_Cpp.default.cStandard": "gnu99",
+    "C_Cpp.default.cppStandard": "gnu++17",
+    "C_Cpp.errorSquiggles": "enabled",
+    "files.eol": "\n"
+}
