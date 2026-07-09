@@ -1,0 +1,130 @@
+# syntax=docker/dockerfile:1.7
+# Cross-compile OpenOCD for Windows x86_64 from Docker.
+# Intended usage from repo root:
+#   docker buildx build -f docker/Dockerfile.windows-cross --output type=local,dest=docker/data/dist/windows .
+
+ARG ALPINE_VERSION=3.20
+FROM alpine:${ALPINE_VERSION} AS build
+
+ARG TARGET=x86_64-w64-mingw32
+ARG JOBS=0
+ARG OPENOCD_PREFIX=/opt/openocd-win64
+ARG CONFIGURE_FLAGS="--enable-ftdi --enable-stlink --enable-cmsis-dap --enable-jlink --enable-internal-jimtcl"
+ARG LIBUSB_VERSION=1.0.27
+ARG HIDAPI_VERSION=0.14.0
+ARG LIBFTDI_VERSION=1.5
+ARG LIBJAYLINK_VERSION=0.3.1
+
+RUN --mount=type=cache,target=/var/cache/apk \
+    apk add --no-cache \
+      ca-certificates git curl tar xz bzip2 file zip pkgconf \
+      autoconf automake libtool make gettext gettext-dev texinfo \
+      gcc g++ cmake ninja meson python3 \
+      mingw-w64-gcc mingw-w64-binutils mingw-w64-headers mingw-w64-crt
+
+# Normalize Docker build argument JOBS. Docker defaults this file to JOBS=0,
+# but GNU Make rejects -j0. Treat empty or 0 as "use all available CPUs".
+RUN printf '%s\n' \
+      '#!/bin/sh' \
+      'if [ -z "${JOBS:-}" ] || [ "${JOBS}" = "0" ]; then' \
+      '  nproc' \
+      'else' \
+      '  printf "%s\\n" "${JOBS}"' \
+      'fi' \
+      > /usr/local/bin/docker-jobs && chmod +x /usr/local/bin/docker-jobs
+
+ENV TARGET=${TARGET} \
+    PREFIX=${OPENOCD_PREFIX} \
+    PATH="/usr/${TARGET}/bin:/usr/bin:${PATH}" \
+    PKG_CONFIG_LIBDIR="${OPENOCD_PREFIX}/lib/pkgconfig" \
+    PKG_CONFIG_PATH="${OPENOCD_PREFIX}/lib/pkgconfig" \
+    CC="${TARGET}-gcc" \
+    CXX="${TARGET}-g++" \
+    AR="${TARGET}-ar" \
+    RANLIB="${TARGET}-ranlib" \
+    STRIP="${TARGET}-strip" \
+    WINDRES="${TARGET}-windres"
+
+WORKDIR /deps
+
+# libusb for Windows. ST-Link, CMSIS-DAP/libusb and many other adapters depend on this.
+RUN set -eux; \
+    curl -fsSL "https://github.com/libusb/libusb/releases/download/v${LIBUSB_VERSION}/libusb-${LIBUSB_VERSION}.tar.bz2" -o libusb.tar.bz2; \
+    tar -xf libusb.tar.bz2; \
+    cd "libusb-${LIBUSB_VERSION}"; \
+    ./configure --host="${TARGET}" --prefix="${PREFIX}" --disable-shared --enable-static; \
+    make -j"$(docker-jobs)"; \
+    make install
+
+# hidapi for HID-backed CMSIS-DAP probes.
+RUN set -eux; \
+    git clone --depth 1 --branch "hidapi-${HIDAPI_VERSION}" https://github.com/libusb/hidapi.git; \
+    cmake -S hidapi -B hidapi-build -G Ninja \
+      -DCMAKE_SYSTEM_NAME=Windows \
+      -DCMAKE_C_COMPILER="${TARGET}-gcc" \
+      -DCMAKE_RC_COMPILER="${TARGET}-windres" \
+      -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DHIDAPI_WITH_LIBUSB=ON \
+      -DHIDAPI_WITH_HIDRAW=OFF; \
+    cmake --build hidapi-build --parallel "$(docker-jobs)"; \
+    cmake --install hidapi-build
+
+# libftdi for FTDI/MPSSE adapters.
+RUN set -eux; \
+    curl -fsSL "https://www.intra2net.com/en/developer/libftdi/download/libftdi1-${LIBFTDI_VERSION}.tar.bz2" -o libftdi.tar.bz2; \
+    tar -xf libftdi.tar.bz2; \
+    cmake -S "libftdi1-${LIBFTDI_VERSION}" -B libftdi-build -G Ninja \
+      -DCMAKE_SYSTEM_NAME=Windows \
+      -DCMAKE_C_COMPILER="${TARGET}-gcc" \
+      -DCMAKE_CXX_COMPILER="${TARGET}-g++" \
+      -DCMAKE_RC_COMPILER="${TARGET}-windres" \
+      -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
+      -DBUILD_SHARED_LIBS=OFF \
+      -DFTDIPP=OFF \
+      -DEXAMPLES=OFF \
+      -DDOCUMENTATION=OFF \
+      -DLIBUSB_INCLUDE_DIR="${PREFIX}/include/libusb-1.0" \
+      -DLIBUSB_LIBRARIES="${PREFIX}/lib/libusb-1.0.a"; \
+    cmake --build libftdi-build --parallel "$(docker-jobs)"; \
+    cmake --install libftdi-build
+
+# libjaylink for SEGGER J-Link.
+RUN set -eux; \
+    curl -fsSL "https://repo.or.cz/libjaylink.git/snapshot/refs/tags/${LIBJAYLINK_VERSION}.tar.gz" -o libjaylink.tar.gz || \
+    curl -fsSL "https://repo.or.cz/libjaylink.git/snapshot/HEAD.tar.gz" -o libjaylink.tar.gz; \
+    mkdir libjaylink-src; \
+    tar -xf libjaylink.tar.gz -C libjaylink-src --strip-components=1; \
+    cd libjaylink-src; \
+    ./autogen.sh || autoreconf -fi; \
+    ./configure --host="${TARGET}" --prefix="${PREFIX}" --disable-shared --enable-static PKG_CONFIG_LIBDIR="${PKG_CONFIG_LIBDIR}"; \
+    make -j"$(docker-jobs)"; \
+    make install
+
+WORKDIR /src/openocd
+COPY . .
+
+RUN set -eux; \
+    ./bootstrap; \
+    ./configure \
+      --host="${TARGET}" \
+      --build="$(gcc -dumpmachine)" \
+      --prefix="${PREFIX}" \
+      PKG_CONFIG_LIBDIR="${PKG_CONFIG_LIBDIR}" \
+      CFLAGS="-I${PREFIX}/include -I${PREFIX}/include/libusb-1.0" \
+      LDFLAGS="-L${PREFIX}/lib -static -static-libgcc -static-libstdc++" \
+      LIBS="-lws2_32 -lsetupapi -lole32 -luuid" \
+      ${CONFIGURE_FLAGS} \
+      --disable-werror; \
+    make -j"$(docker-jobs)"; \
+    make install; \
+    "${STRIP}" "${PREFIX}/bin/openocd.exe" || true; \
+    mkdir -p /out/openocd-windows-x86_64; \
+    cp -a "${PREFIX}/bin" "${PREFIX}/share" /out/openocd-windows-x86_64/; \
+    cp -a README* COPYING* LICENSE* /out/openocd-windows-x86_64/ 2>/dev/null || true; \
+    printf '@echo off\r\n%%~dp0bin\\openocd.exe %%*\r\n' > /out/openocd-windows-x86_64/openocd.cmd; \
+    cd /out; \
+    zip -r openocd-windows-x86_64.zip openocd-windows-x86_64
+
+FROM scratch AS export
+COPY --from=build /out/ /

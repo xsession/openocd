@@ -1,0 +1,12 @@
+.git
+.gitmodules
+.github
+build
+build-*
+*.o
+*.a
+*.so
+*.la
+*.log
+.cache
+.DS_Store
