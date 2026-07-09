@@ -24,24 +24,8 @@
 
 #include <stdarg.h>
 
-#ifdef _DEBUG_FREE_SPACE_
-#ifdef HAVE_MALLOC_H
+#if defined(HAVE_MALLINFO) || defined(HAVE_MALLINFO2)
 #include <malloc.h>
-#else
-#error "malloc.h is required to use --enable-malloc-logging"
-#endif
-
-#ifdef __GLIBC__
-#if __GLIBC_PREREQ(2, 33)
-#define FORDBLKS_FORMAT " %zu"
-#else
-/* glibc older than 2.33 (2021-02-01) use mallinfo(). Overwrite it */
-#define mallinfo2 mallinfo
-#define FORDBLKS_FORMAT " %d"
-#endif
-#else
-#error "GNU glibc is required to use --enable-malloc-logging"
-#endif
 #endif
 
 int debug_level = LOG_LVL_INFO;
@@ -53,16 +37,17 @@ static int64_t last_time;
 
 static int64_t start;
 
-static const char * const log_strings[6] = {
+static const char * const log_strings[7] = {
 	"User : ",
 	"Error: ",
 	"Warn : ",	/* want a space after each colon, all same width, colons aligned */
 	"Info : ",
 	"Debug: ",
-	"Debug: "
+	"Debug: ",
+	"Debug: ",  /* corresponds to LOG_LVL_DEBUG_USB */
 };
 
-static int count;
+static unsigned int count;
 
 /* forward the log to the listeners */
 static void log_forward(const char *file, unsigned int line, const char *function, const char *string)
@@ -75,6 +60,32 @@ static void log_forward(const char *file, unsigned int line, const char *functio
 		cb->fn(cb->priv, file, line, function, string);
 		cb = next;
 	}
+}
+
+// whitespace + SIZE_MAX + zero termination
+#define MEM_STR_LEN (1 + 21 + 1)
+static void get_free_memory_space(char *s)
+{
+#if defined(HAVE_MALLINFO2)
+	if (LOG_LEVEL_IS(LOG_LVL_DEBUG_MALLOC)) {
+		struct mallinfo2 info = mallinfo2();
+		snprintf(s, MEM_STR_LEN, " %zu", info.fordblks);
+		return;
+	}
+#elif defined(HAVE_MALLINFO)
+	if (LOG_LEVEL_IS(LOG_LVL_DEBUG_MALLOC)) {
+		struct mallinfo info = mallinfo();
+#if IS_CYGWIN
+		snprintf(s, MEM_STR_LEN, " %zu", info.fordblks);
+#else
+		snprintf(s, MEM_STR_LEN, " %d", info.fordblks);
+#endif
+		return;
+	}
+#endif
+
+	// empty string
+	*s = 0;
 }
 
 /* The log_puts() serves two somewhat different goals:
@@ -93,7 +104,7 @@ static void log_puts(enum log_levels level,
 	const char *function,
 	const char *string)
 {
-	char *f;
+	const char *f;
 
 	if (!log_output) {
 		/* log_init() not called yet; print on stderr */
@@ -116,18 +127,13 @@ static void log_puts(enum log_levels level,
 	if (LOG_LEVEL_IS(LOG_LVL_DEBUG)) {
 		/* print with count and time information */
 		int64_t t = timeval_ms() - start;
-#ifdef _DEBUG_FREE_SPACE_
-		struct mallinfo2 info = mallinfo2();
-#endif
-		fprintf(log_output, "%s%d %" PRId64 " %s:%d %s()"
-#ifdef _DEBUG_FREE_SPACE_
-			FORDBLKS_FORMAT
-#endif
-			": %s", log_strings[level + 1], count, t, file, line, function,
-#ifdef _DEBUG_FREE_SPACE_
-			info.fordblks,
-#endif
-			string);
+
+		char free_memory[MEM_STR_LEN];
+		get_free_memory_space(free_memory);
+
+		fprintf(log_output, "%s%u %" PRId64 " %s:%d %s()%s: %s",
+			log_strings[level + 1], count, t, file, line, function,
+			free_memory, string);
 	} else {
 		/* if we are using gdb through pipes then we do not want any output
 		 * to the pipe otherwise we get repeated strings */
@@ -152,9 +158,10 @@ void log_printf(enum log_levels level,
 	char *string;
 	va_list ap;
 
-	count++;
 	if (level > debug_level)
 		return;
+
+	count++;
 
 	va_start(ap, format);
 
@@ -172,10 +179,10 @@ void log_vprintf_lf(enum log_levels level, const char *file, unsigned int line,
 {
 	char *tmp;
 
-	count++;
-
 	if (level > debug_level)
 		return;
+
+	count++;
 
 	tmp = alloc_vprintf(format, args);
 
@@ -212,8 +219,8 @@ COMMAND_HANDLER(handle_debug_level_command)
 	} else if (CMD_ARGC == 1) {
 		int new_level;
 		COMMAND_PARSE_NUMBER(int, CMD_ARGV[0], new_level);
-		if ((new_level > LOG_LVL_DEBUG_IO) || (new_level < LOG_LVL_SILENT)) {
-			command_print(CMD, "level must be between %d and %d", LOG_LVL_SILENT, LOG_LVL_DEBUG_IO);
+		if (new_level > LOG_LVL_DEBUG_USB || new_level < LOG_LVL_SILENT) {
+			command_print(CMD, "level must be between %d and %d", LOG_LVL_SILENT, LOG_LVL_DEBUG_USB);
 			return ERROR_COMMAND_ARGUMENT_INVALID;
 		}
 		debug_level = new_level;
@@ -523,7 +530,7 @@ void log_socket_error(const char *socket_desc)
 const char *find_nonprint_char(const char *buf, unsigned int buf_len)
 {
 	for (unsigned int i = 0; i < buf_len; i++) {
-		if (!isprint(buf[i]))
+		if (!isprint((unsigned char)buf[i]))
 			return buf + i;
 	}
 	return NULL;

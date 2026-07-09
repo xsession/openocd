@@ -238,7 +238,6 @@ static const struct {
 
 static int mips32_get_core_reg(struct reg *reg)
 {
-	int retval;
 	struct mips32_core_reg *mips32_reg = reg->arch_info;
 	struct target *target = mips32_reg->target;
 	struct mips32_common *mips32_target = target_to_mips32(target);
@@ -246,9 +245,7 @@ static int mips32_get_core_reg(struct reg *reg)
 	if (target->state != TARGET_HALTED)
 		return ERROR_TARGET_NOT_HALTED;
 
-	retval = mips32_target->read_core_reg(target, mips32_reg->num);
-
-	return retval;
+	return mips32_target->read_core_reg(target, mips32_reg->num);
 }
 
 static int mips32_set_core_reg(struct reg *reg, uint8_t *buf)
@@ -734,8 +731,6 @@ int mips32_examine(struct target *target)
 	struct mips32_common *mips32 = target_to_mips32(target);
 
 	if (!target_was_examined(target)) {
-		target_set_examined(target);
-
 		/* we will configure later */
 		mips32->bp_scanned = 0;
 		mips32->num_inst_bpoints = 0;
@@ -770,8 +765,7 @@ static int mips32_configure_ibs(struct target *target)
 			(ejtag_info->ejtag_iba_step_size * i);
 
 	/* clear IBIS reg */
-	retval = target_write_u32(target, ejtag_info->ejtag_ibs_addr, 0);
-	return retval;
+	return target_write_u32(target, ejtag_info->ejtag_ibs_addr, 0);
 }
 
 static int mips32_configure_dbs(struct target *target)
@@ -797,8 +791,7 @@ static int mips32_configure_dbs(struct target *target)
 			(ejtag_info->ejtag_dba_step_size * i);
 
 	/* clear DBIS reg */
-	retval = target_write_u32(target, ejtag_info->ejtag_dbs_addr, 0);
-	return retval;
+	return target_write_u32(target, ejtag_info->ejtag_dbs_addr, 0);
 }
 
 int mips32_configure_break_unit(struct target *target)
@@ -1310,8 +1303,8 @@ int mips32_checksum_memory(struct target *target, target_addr_t address,
 
 /** Checks whether a memory region is erased. */
 int mips32_blank_check_memory(struct target *target,
-		struct target_memory_check_block *blocks, int num_blocks,
-		uint8_t erased_value)
+		struct target_memory_check_block *blocks, unsigned int num_blocks,
+		uint8_t erased_value, unsigned int *checked)
 {
 	struct working_area *erase_check_algorithm;
 	struct reg_param reg_params[3];
@@ -1367,8 +1360,10 @@ int mips32_blank_check_memory(struct target *target,
 	retval = target_run_algorithm(target, 0, NULL, 3, reg_params, erase_check_algorithm->address,
 			erase_check_algorithm->address + (sizeof(erase_check_code) - 4), 10000, &mips32_info);
 
-	if (retval == ERROR_OK)
+	if (retval == ERROR_OK) {
 		blocks[0].result = buf_get_u32(reg_params[2].value, 0, 32);
+		*checked = 1;	/* only one block has been checked */
+	}
 
 	destroy_reg_param(&reg_params[0]);
 	destroy_reg_param(&reg_params[1]);
@@ -1377,10 +1372,7 @@ int mips32_blank_check_memory(struct target *target,
 cleanup:
 	target_free_working_area(target, erase_check_algorithm);
 
-	if (retval != ERROR_OK)
-		return retval;
-
-	return 1;       /* only one block has been checked */
+	return retval;
 }
 
 static int mips32_verify_pointer(struct command_invocation *cmd,

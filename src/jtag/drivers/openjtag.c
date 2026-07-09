@@ -32,6 +32,7 @@
 #include "config.h"
 #endif
 
+#include <jtag/adapter.h>
 #include <jtag/interface.h>
 #include <jtag/commands.h>
 #include "libusb_helper.h"
@@ -74,10 +75,8 @@ enum openjtag_tap_state {
 #include "libftdi_helper.h"
 
 /* OpenJTAG vid/pid */
-static uint16_t openjtag_vid = 0x0403;
-static uint16_t openjtag_pid = 0x6001;
-
-static char *openjtag_device_desc;
+static uint16_t openjtag_vids[] = {0x0403, 0};
+static uint16_t openjtag_pids[] = {0x6001, 0};
 
 static struct ftdi_context ftdic;
 
@@ -119,8 +118,6 @@ static const uint16_t cy7c65215_pids[] = {0x0007, 0};
 
 static unsigned int ep_in, ep_out;
 
-#ifdef _DEBUG_USB_COMMS_
-
 #define DEBUG_TYPE_READ     0
 #define DEBUG_TYPE_WRITE    1
 #define DEBUG_TYPE_OCD_READ 2
@@ -129,6 +126,9 @@ static unsigned int ep_in, ep_out;
 #define LINE_LEN  16
 static void openjtag_debug_buffer(uint8_t *buffer, int length, uint8_t type)
 {
+	if (!LOG_LEVEL_IS(LOG_LVL_DEBUG_USB))
+		return;
+
 	char line[128];
 	char s[4];
 	int i;
@@ -149,7 +149,7 @@ static void openjtag_debug_buffer(uint8_t *buffer, int length, uint8_t type)
 		break;
 	}
 
-	LOG_DEBUG("%s", line);
+	LOG_DEBUG_USB("%s", line);
 
 	for (i = 0; i < length; i += LINE_LEN) {
 		switch (type) {
@@ -171,12 +171,10 @@ static void openjtag_debug_buffer(uint8_t *buffer, int length, uint8_t type)
 			sprintf(s, " %02x", buffer[j]);
 			strcat(line, s);
 		}
-		LOG_DEBUG("%s", line);
+		LOG_DEBUG_USB("%s", line);
 	}
 
 }
-
-#endif
 
 static int8_t openjtag_get_tap_state(int8_t state)
 {
@@ -207,9 +205,8 @@ static int openjtag_buf_write_standard(
 	uint8_t *buf, int size, uint32_t *bytes_written)
 {
 	int retval;
-#ifdef _DEBUG_USB_COMMS_
+
 	openjtag_debug_buffer(buf, size, DEBUG_TYPE_WRITE);
-#endif
 
 	retval = ftdi_write_data(&ftdic, buf, size);
 	if (retval < 0) {
@@ -228,9 +225,7 @@ static int openjtag_buf_write_cy7c65215(
 {
 	int ret;
 
-#ifdef _DEBUG_USB_COMMS_
 	openjtag_debug_buffer(buf, size, DEBUG_TYPE_WRITE);
-#endif
 
 	if (size == 0) {
 		*bytes_written = 0;
@@ -287,9 +282,7 @@ static int openjtag_buf_read_standard(
 		*bytes_read += retval;
 	}
 
-#ifdef _DEBUG_USB_COMMS_
 	openjtag_debug_buffer(buf, *bytes_read, DEBUG_TYPE_READ);
-#endif
 
 	return ERROR_OK;
 }
@@ -320,9 +313,7 @@ static int openjtag_buf_read_cy7c65215(
 	*bytes_read = ret;
 
 out:
-#ifdef _DEBUG_USB_COMMS_
 	openjtag_debug_buffer(buf, *bytes_read, DEBUG_TYPE_READ);
-#endif
 
 	return ERROR_OK;
 }
@@ -385,20 +376,32 @@ static int openjtag_init_standard(void)
 {
 	uint8_t latency_timer;
 
+	const char *usb_product_name = adapter_usb_get_product_name();
+
 	/* Open by device description */
-	if (!openjtag_device_desc) {
-		LOG_WARNING("no openjtag device description specified, "
+	if (!usb_product_name) {
+		LOG_WARNING("no openjtag USB product name specified, "
 				"using default 'Open JTAG Project'");
-		openjtag_device_desc = "Open JTAG Project";
+		usb_product_name = "Open JTAG Project";
 	}
 
 	if (ftdi_init(&ftdic) < 0)
 		return ERROR_JTAG_INIT_FAILED;
 
-	/* context, vendor id, product id, description, serial id */
-	if (ftdi_usb_open_desc(&ftdic, openjtag_vid, openjtag_pid, openjtag_device_desc, NULL) < 0) {
-		LOG_ERROR("unable to open ftdi device: %s", ftdic.error_str);
-		return ERROR_JTAG_INIT_FAILED;
+	const uint16_t *vids = openjtag_vids;
+	const uint16_t *pids = openjtag_pids;
+
+	if (adapter_usb_get_vids()[0] != 0) {
+		vids = adapter_usb_get_vids();
+		pids = adapter_usb_get_pids();
+	}
+
+	for (unsigned int i = 0; vids[i] != 0; i++) {
+		/* context, vendor id, product id, description, serial id */
+		if (ftdi_usb_open_desc(&ftdic, vids[i], pids[i], usb_product_name, NULL) < 0) {
+			LOG_ERROR("unable to open ftdi device: %s", ftdic.error_str);
+			return ERROR_JTAG_INIT_FAILED;
+		}
 	}
 
 	if (ftdi_usb_reset(&ftdic) < 0) {
@@ -585,10 +588,9 @@ static int openjtag_execute_tap_queue(void)
 				count++;
 			}
 
-#ifdef _DEBUG_USB_COMMS_
 			openjtag_debug_buffer(buffer,
 				DIV_ROUND_UP(openjtag_scan_result_buffer[res_count].bits, 8), DEBUG_TYPE_OCD_READ);
-#endif
+
 			jtag_read_buffer(buffer, openjtag_scan_result_buffer[res_count].command);
 
 			free(openjtag_scan_result_buffer[res_count].buffer);
@@ -725,9 +727,8 @@ static void openjtag_execute_scan(struct jtag_command *cmd)
 	tap_set_end_state(cmd->cmd.scan->end_state);
 	scan_size = jtag_build_buffer(cmd->cmd.scan, &buffer);
 
-#ifdef _DEBUG_USB_COMMS_
 	openjtag_debug_buffer(buffer, (scan_size + 7) / 8, DEBUG_TYPE_BUFFER);
-#endif
+
 	/* set state */
 	old_state = tap_get_end_state();
 	openjtag_set_state(cmd->cmd.scan->ir_scan ? TAP_IRSHIFT : TAP_DRSHIFT);
@@ -849,16 +850,6 @@ static int openjtag_khz(int khz, int *jtag_speed)
 	return ERROR_OK;
 }
 
-COMMAND_HANDLER(openjtag_handle_device_desc_command)
-{
-	if (CMD_ARGC == 1)
-		openjtag_device_desc = strdup(CMD_ARGV[0]);
-	else
-		LOG_ERROR("require exactly one argument to "
-				  "openjtag_device_desc <description>");
-	return ERROR_OK;
-}
-
 COMMAND_HANDLER(openjtag_handle_variant_command)
 {
 	if (CMD_ARGC == 1) {
@@ -878,38 +869,13 @@ COMMAND_HANDLER(openjtag_handle_variant_command)
 	return ERROR_OK;
 }
 
-COMMAND_HANDLER(openjtag_handle_vid_pid_command)
-{
-	if (CMD_ARGC != 2)
-		return ERROR_COMMAND_SYNTAX_ERROR;
-
-	COMMAND_PARSE_NUMBER(u16, CMD_ARGV[0], openjtag_vid);
-	COMMAND_PARSE_NUMBER(u16, CMD_ARGV[1], openjtag_pid);
-
-	return ERROR_OK;
-}
-
 static const struct command_registration openjtag_subcommand_handlers[] = {
-	{
-		.name = "device_desc",
-		.handler = openjtag_handle_device_desc_command,
-		.mode = COMMAND_CONFIG,
-		.help = "set the USB device description of the OpenJTAG",
-		.usage = "description-string",
-	},
 	{
 		.name = "variant",
 		.handler = openjtag_handle_variant_command,
 		.mode = COMMAND_CONFIG,
 		.help = "set the OpenJTAG variant",
 		.usage = "variant-string",
-	},
-	{
-		.name = "vid_pid",
-		.handler = openjtag_handle_vid_pid_command,
-		.mode = COMMAND_CONFIG,
-		.help = "USB VID and PID of the adapter",
-		.usage = "vid pid",
 	},
 	COMMAND_REGISTRATION_DONE
 };

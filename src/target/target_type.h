@@ -16,6 +16,7 @@
 
 #include <helper/jim-nvp.h>
 
+struct command_invocation;
 struct target;
 
 /**
@@ -141,8 +142,8 @@ struct target_type {
 	int (*checksum_memory)(struct target *target, target_addr_t address,
 			uint32_t count, uint32_t *checksum);
 	int (*blank_check_memory)(struct target *target,
-			struct target_memory_check_block *blocks, int num_blocks,
-			uint8_t erased_value);
+			struct target_memory_check_block *blocks, unsigned int num_blocks,
+			uint8_t erased_value, unsigned int *checked);
 
 	/*
 	 * target break-/watchpoint control
@@ -311,6 +312,17 @@ struct target_type {
 	 * will typically be 32 for 32-bit targets, and 64 for 64-bit targets. If
 	 * not implemented, it's assumed to be 32. */
 	unsigned int (*data_bits)(struct target *target);
+
+	/*
+	 * Reports the instruction set in execution on the CPU.
+	 * The returned string should be statically allocated, no free() required.
+	 * The strings should be the same used by Capstone 'cstool' command line
+	 * parameter <arch+mode>.
+	 * Returns ERROR_OK or an error code if the current instruction set cannot
+	 * be determined.
+	 */
+	int (*insn_set)(struct command_invocation *cmd, struct target *target,
+					const char **insn_set);
 };
 
 // Keep in alphabetic order this list of targets

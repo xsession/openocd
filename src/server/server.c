@@ -193,6 +193,8 @@ static void free_service(struct service *c)
 {
 	if (c->type == CONNECTION_PIPE && c->fd != -1)
 		close(c->fd);
+	if (c->type == CONNECTION_TCP && c->fd != -1)
+		close_socket(c->fd);
 	if (c->service_dtor)
 		c->service_dtor(c);
 	free(c->name);
@@ -208,7 +210,11 @@ int add_service(const struct service_driver *driver, const char *port,
 	struct hostent *hp;
 	int so_reuseaddr_option = 1;
 
-	c = malloc(sizeof(struct service));
+	c = calloc(1, sizeof(*c));
+	if (!c) {
+		LOG_ERROR("Out of memory");
+		return ERROR_FAIL;
+	}
 
 	c->name = strdup(driver->name);
 	c->port = strdup(port);
@@ -223,6 +229,12 @@ int add_service(const struct service_driver *driver, const char *port,
 	c->service_dtor = driver->service_dtor_handler;
 	c->priv = priv;
 	c->next = NULL;
+
+	if (!c->name || !c->port) {
+		LOG_ERROR("Out of memory");
+		goto error;
+	}
+
 	long portnumber;
 	if (strcmp(c->port, "pipe") == 0)
 		c->type = CONNECTION_STDINOUT;
@@ -242,8 +254,7 @@ int add_service(const struct service_driver *driver, const char *port,
 		c->fd = socket(AF_INET, SOCK_STREAM, 0);
 		if (c->fd == -1) {
 			LOG_ERROR("error creating socket: %s", strerror(errno));
-			free_service(c);
-			return ERROR_FAIL;
+			goto error;
 		}
 
 		setsockopt(c->fd,
@@ -264,8 +275,7 @@ int add_service(const struct service_driver *driver, const char *port,
 			if (!hp) {
 				LOG_ERROR("couldn't resolve bindto address: %s", bindto_name);
 				close_socket(c->fd);
-				free_service(c);
-				return ERROR_FAIL;
+				goto error;
 			}
 			memcpy(&c->sin.sin_addr, hp->h_addr_list[0], hp->h_length);
 		}
@@ -274,8 +284,7 @@ int add_service(const struct service_driver *driver, const char *port,
 		if (bind(c->fd, (struct sockaddr *)&c->sin, sizeof(c->sin)) == -1) {
 			LOG_ERROR("couldn't bind %s to socket on port %d: %s", c->name, c->portnumber, strerror(errno));
 			close_socket(c->fd);
-			free_service(c);
-			return ERROR_FAIL;
+			goto error;
 		}
 
 #ifndef _WIN32
@@ -294,8 +303,7 @@ int add_service(const struct service_driver *driver, const char *port,
 		if (listen(c->fd, 1) == -1) {
 			LOG_ERROR("couldn't listen on socket: %s", strerror(errno));
 			close_socket(c->fd);
-			free_service(c);
-			return ERROR_FAIL;
+			goto error;
 		}
 
 		struct sockaddr_in addr_in;
@@ -323,15 +331,13 @@ int add_service(const struct service_driver *driver, const char *port,
 		/* we currently do not support named pipes under win32
 		 * so exit openocd for now */
 		LOG_ERROR("Named pipes currently not supported under this os");
-		free_service(c);
-		return ERROR_FAIL;
+		goto error;
 #else
 		/* Pipe we're reading from */
 		c->fd = open(c->port, O_RDONLY | O_NONBLOCK);
 		if (c->fd == -1) {
 			LOG_ERROR("could not open %s", c->port);
-			free_service(c);
-			return ERROR_FAIL;
+			goto error;
 		}
 #endif
 	}
@@ -342,6 +348,14 @@ int add_service(const struct service_driver *driver, const char *port,
 	*p = c;
 
 	return ERROR_OK;
+
+error:
+	// Only free() what has been locally allocated
+	free(c->port);
+	free(c->name);
+	free(c);
+
+	return ERROR_FAIL;
 }
 
 static void remove_connections(struct service *service)
@@ -443,7 +457,7 @@ int server_loop(struct command_context *command_context)
 		for (service = services; service; service = service->next) {
 			if (service->fd != -1) {
 				/* listen for new connections */
-				FD_SET(service->fd, &read_fds);
+				OCD_FD_SET(service->fd, &read_fds);
 
 				if (service->fd > fd_max)
 					fd_max = service->fd;
@@ -454,7 +468,7 @@ int server_loop(struct command_context *command_context)
 
 				for (c = service->connections; c; c = c->next) {
 					/* check for activity on the connection */
-					FD_SET(c->fd, &read_fds);
+					OCD_FD_SET(c->fd, &read_fds);
 					if (c->fd > fd_max)
 						fd_max = c->fd;
 				}
@@ -532,7 +546,7 @@ int server_loop(struct command_context *command_context)
 		for (service = services; service; service = service->next) {
 			/* handle new connections on listeners */
 			if ((service->fd != -1)
-				&& (FD_ISSET(service->fd, &read_fds))) {
+				&& (OCD_FD_ISSET(service->fd, &read_fds))) {
 				if (service->max_connections != 0)
 					add_connection(service, command_context);
 				else {
@@ -556,7 +570,7 @@ int server_loop(struct command_context *command_context)
 				struct connection *c;
 
 				for (c = service->connections; c; ) {
-					if ((c->fd >= 0 && FD_ISSET(c->fd, &read_fds)) || c->input_pending) {
+					if ((c->fd >= 0 && OCD_FD_ISSET(c->fd, &read_fds)) || c->input_pending) {
 						retval = service->input(c);
 						if (retval != ERROR_OK) {
 							struct connection *next = c->next;
@@ -599,7 +613,6 @@ static void sig_handler(int sig)
 	/* store only first signal that hits us */
 	if (shutdown_openocd == CONTINUE_MAIN_LOOP) {
 		shutdown_openocd = SHUTDOWN_WITH_SIGNAL_CODE;
-		assert(sig >= SIG_ATOMIC_MIN && sig <= SIG_ATOMIC_MAX);
 		last_signal = sig;
 		LOG_DEBUG("Terminating on Signal %d", sig);
 	} else
@@ -769,6 +782,23 @@ COMMAND_HANDLER(handle_shutdown_command)
 	return ERROR_COMMAND_CLOSE_CONNECTION;
 }
 
+COMMAND_HANDLER(handle_exit_command)
+{
+	if (!tcl_is_from_tcl_session(CMD_CTX)
+			&& !telnet_is_from_telnet_session(CMD_CTX)) {
+		LOG_WARNING("DEPRECATED: 'exit' should only be used in telnet or Tcl "
+			"sessions to close the session");
+		LOG_WARNING("Did you mean 'shutdown'?");
+		return command_run_line(CMD_CTX, "shutdown");
+	}
+
+	if (CMD_ARGC != 0)
+		return ERROR_COMMAND_SYNTAX_ERROR;
+
+	/* Disconnect telnet / Tcl session */
+	return ERROR_COMMAND_CLOSE_CONNECTION;
+}
+
 COMMAND_HANDLER(handle_poll_period_command)
 {
 	if (CMD_ARGC == 0)
@@ -804,6 +834,13 @@ static const struct command_registration server_command_handlers[] = {
 		.mode = COMMAND_ANY,
 		.usage = "",
 		.help = "shut the server down",
+	},
+	{
+		.name = "exit",
+		.handler = &handle_exit_command,
+		.mode = COMMAND_ANY,
+		.usage = "",
+		.help = "exit (disconnect) telnet or Tcl session",
 	},
 	{
 		.name = "poll_period",

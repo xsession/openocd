@@ -2175,12 +2175,10 @@ static int ulink_init(void)
 			ulink_handle = NULL;
 			return ERROR_FAIL;
 		}
-#ifdef _DEBUG_USB_COMMS_
 		else {
 			/* Successfully received Bulk IN packet -> continue */
-			LOG_INFO("Recovered from lost Bulk IN packet");
+			LOG_DEBUG_USB("Recovered from lost Bulk IN packet");
 		}
-#endif
 	}
 	ulink_clear_queue(ulink_handle);
 
@@ -2222,8 +2220,6 @@ static int ulink_quit(void)
  */
 COMMAND_HANDLER(ulink_download_firmware_handler)
 {
-	int ret;
-
 	if (CMD_ARGC != 1)
 		return ERROR_COMMAND_SYNTAX_ERROR;
 
@@ -2231,10 +2227,8 @@ COMMAND_HANDLER(ulink_download_firmware_handler)
 	LOG_INFO("Downloading ULINK firmware image %s", CMD_ARGV[0]);
 
 	/* Download firmware image in CMD_ARGV[0] */
-	ret = ulink_load_firmware_and_renumerate(&ulink_handle, CMD_ARGV[0],
+	return ulink_load_firmware_and_renumerate(&ulink_handle, CMD_ARGV[0],
 			ULINK_RENUMERATION_DELAY);
-
-	return ret;
 }
 
 /*************************** Command Registration **************************/

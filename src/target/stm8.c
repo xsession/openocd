@@ -13,6 +13,7 @@
 #include <helper/log.h>
 #include "target.h"
 #include "target_type.h"
+#include "jtag/adapter.h"
 #include "jtag/interface.h"
 #include "jtag/jtag.h"
 #include "jtag/swim.h"
@@ -33,7 +34,6 @@ static void stm8_enable_watchpoints(struct target *target);
 static int stm8_unset_watchpoint(struct target *target,
 		struct watchpoint *watchpoint);
 static int (*adapter_speed)(int speed);
-extern struct adapter_driver *adapter_driver;
 
 static const struct {
 	unsigned int id;
@@ -584,7 +584,6 @@ static int stm8_write_regs(struct target *target, uint32_t regs[])
 
 static int stm8_get_core_reg(struct reg *reg)
 {
-	int retval;
 	struct stm8_core_reg *stm8_reg = reg->arch_info;
 	struct target *target = stm8_reg->target;
 	struct stm8_common *stm8 = target_to_stm8(target);
@@ -592,9 +591,7 @@ static int stm8_get_core_reg(struct reg *reg)
 	if (target->state != TARGET_HALTED)
 		return ERROR_TARGET_NOT_HALTED;
 
-	retval = stm8->read_core_reg(target, stm8_reg->num);
-
-	return retval;
+	return stm8->read_core_reg(target, stm8_reg->num);
 }
 
 static int stm8_set_core_reg(struct reg *reg, uint8_t *buf)
@@ -1747,8 +1744,6 @@ static int stm8_examine(struct target *target)
 			}
 		}
 
-		target_set_examined(target);
-
 		return ERROR_OK;
 	}
 
@@ -1757,7 +1752,8 @@ static int stm8_examine(struct target *target)
 
 /** Checks whether a memory region is erased. */
 static int stm8_blank_check_memory(struct target *target,
-		struct target_memory_check_block *blocks, int num_blocks, uint8_t erased_value)
+		struct target_memory_check_block *blocks, unsigned int num_blocks,
+		uint8_t erased_value, unsigned int *checked)
 {
 	struct working_area *erase_check_algorithm;
 	struct reg_param reg_params[2];
@@ -1801,8 +1797,10 @@ static int stm8_blank_check_memory(struct target *target,
 			erase_check_algorithm->address + (sizeof(stm8_erase_check_code) - 1),
 			10000, &stm8_info);
 
-	if (retval == ERROR_OK)
+	if (retval == ERROR_OK) {
 		blocks[0].result = (*(reg_params[0].value) == 0xff);
+		*checked = 1;	/* only one block has been checked */
+	}
 
 	destroy_mem_param(&mem_params[0]);
 	destroy_mem_param(&mem_params[1]);
@@ -1811,10 +1809,7 @@ static int stm8_blank_check_memory(struct target *target,
 
 	target_free_working_area(target, erase_check_algorithm);
 
-	if (retval != ERROR_OK)
-		return retval;
-
-	return 1;	/* only one block has been checked */
+	return retval;
 }
 
 static int stm8_checksum_memory(struct target *target, target_addr_t address,

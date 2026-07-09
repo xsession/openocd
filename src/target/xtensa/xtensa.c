@@ -907,7 +907,6 @@ int xtensa_examine(struct target *target)
 		return ERROR_TARGET_FAILURE;
 	}
 	LOG_DEBUG("OCD_ID = %08" PRIx32, xtensa->dbg_mod.device_id);
-	target_set_examined(target);
 	xtensa_smpbreak_write(xtensa, xtensa->smp_break);
 	return ERROR_OK;
 }
@@ -3493,6 +3492,10 @@ static void xtensa_free_reg_cache(struct target *target)
 		free(xtensa->optregs);
 	}
 	xtensa->optregs = NULL;
+	free(xtensa->contiguous_regs_desc);
+	xtensa->contiguous_regs_desc = NULL;
+	free(xtensa->contiguous_regs_list);
+	xtensa->contiguous_regs_list = NULL;
 }
 
 void xtensa_target_deinit(struct target *target)
@@ -3896,6 +3899,10 @@ COMMAND_HELPER(xtensa_cmd_xtreg_do, struct xtensa *xtensa)
 		xtensa->total_regs_num = numregs;
 		xtensa->core_regs_num = 0;
 		xtensa->num_optregs = 0;
+		/* Prevent memory leak in case xtregs is called twice */
+		free(xtensa->optregs);
+		free(xtensa->contiguous_regs_desc);
+		xtensa->contiguous_regs_desc = NULL;
 		/* A little more memory than required, but saves a second initialization pass */
 		xtensa->optregs = calloc(xtensa->total_regs_num, sizeof(struct xtensa_reg_desc));
 		if (!xtensa->optregs) {

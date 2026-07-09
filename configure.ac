@@ -16,7 +16,7 @@ AS_IF([test "x$MAKEINFO" = "x"], [
 ])
 AC_SUBST([MAKEINFO])
 
-AM_INIT_AUTOMAKE([-Wall -Wno-portability dist-bzip2 dist-zip subdir-objects])
+AM_INIT_AUTOMAKE([foreign -Wall -Wno-portability dist-bzip2 dist-zip subdir-objects])
 
 AC_CONFIG_HEADERS([config.h])
 
@@ -48,6 +48,8 @@ AC_TYPE_LONG_LONG_INT
 AC_SEARCH_LIBS([ioperm], [ioperm])
 AC_SEARCH_LIBS([dlopen], [dl])
 AC_SEARCH_LIBS([openpty], [util])
+# Older versions of Linux put clock_gettime in librt
+AC_SEARCH_LIBS([clock_gettime], [rt])
 
 AC_CHECK_HEADERS([sys/socket.h])
 AC_CHECK_HEADERS([elf.h])
@@ -56,15 +58,9 @@ AC_CHECK_TYPE([Elf64_Ehdr],
 	AC_DEFINE([HAVE_ELF64], [1], [Define to 1 if the system has the type 'Elf64_Ehdr'.]),
 	[], [[#include <elf.h>]])
 
-AC_MSG_CHECKING([for glibc])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <features.h>]], [[int v = __GLIBC__;return 0;]])],
-	[have_glibc=yes], [have_glibc=no])
-AC_MSG_RESULT($have_glibc)
-
 AC_CHECK_HEADERS([fcntl.h])
 AC_CHECK_HEADERS([linux/pci.h])
 AC_CHECK_HEADERS([linux/spi/spidev.h])
-AC_CHECK_HEADERS([malloc.h])
 AC_CHECK_HEADERS([netdb.h])
 AC_CHECK_HEADERS([poll.h])
 AC_CHECK_HEADERS([strings.h])
@@ -99,9 +95,11 @@ AC_C_BIGENDIAN
 
 AC_CHECK_FUNCS([strndup])
 AC_CHECK_FUNCS([strnlen])
-AC_CHECK_FUNCS([gettimeofday])
+AC_CHECK_FUNCS([clock_gettime])
 AC_CHECK_FUNCS([usleep])
 AC_CHECK_FUNCS([realpath])
+AC_CHECK_FUNCS([mallinfo])
+AC_CHECK_FUNCS([mallinfo2])
 
 # guess-rev.sh only exists in the repository, not in the released archives
 AC_MSG_CHECKING([whether to build a release])
@@ -132,6 +130,7 @@ m4_define([USB1_ADAPTERS],
 	[[[ftdi], [MPSSE mode of FTDI based devices], [FTDI]],
 	[[ftdi_cjtag], [cJTAG (OScan1, JScan3) tunneled thru MPSSE], [FTDI_CJTAG]],
 	[[ch347], [CH347 based devices], [CH347]],
+	[[cklink], [T-Head CK-Link JTAG Probe], [CKLINK]],
 	[[stlink], [ST-Link Programmer], [HLADAPTER_STLINK]],
 	[[ti_icdi], [TI ICDI JTAG Programmer], [HLADAPTER_ICDI]],
 	[[ulink], [Keil ULINK JTAG Programmer], [ULINK]],
@@ -188,6 +187,9 @@ m4_define([SERIAL_PORT_ADAPTERS],
 
 m4_define([PARALLEL_PORT_ADAPTER],
 	[[[parport], [PC Parallel Port], [PARPORT]]])
+
+m4_define([NETWORK_ADAPTERS],
+	[[[xvc], [Xilinx XVC TCP], [XVC]]])
 
 m4_define([LINUXSPIDEV_ADAPTER],
 	[[[linuxspidev], [Linux spidev driver], [LINUXSPIDEV]]])
@@ -268,39 +270,6 @@ AS_IF([test "x$enable_gcov" = "xyes"], [
   AC_DEFINE([USE_GCOV], [0], [0 to leave coverage collection disabled.])
 ])
 
-# set default for debug_usb_comms, overridden by following options
-debug_usb_comms=no
-
-AC_ARG_ENABLE([verbose],
-  AS_HELP_STRING([--enable-verbose],
-      [Enable verbose JTAG I/O messages (for debugging).]),
-  [
-  debug_usb_comms=$enableval
-  ], [])
-
-AC_ARG_ENABLE([verbose_usb_comms],
-  AS_HELP_STRING([--enable-verbose-usb-comms],
-      [Enable verbose USB communication messages (for debugging)]),
-  [debug_usb_comms=$enableval], [])
-
-AC_MSG_CHECKING([whether to enable verbose USB communication messages]);
-AC_MSG_RESULT([$debug_usb_comms])
-AS_IF([test "x$debug_usb_comms" = "xyes"], [
-  AC_DEFINE([_DEBUG_USB_COMMS_],[1], [Print verbose USB communication messages])
-])
-
-debug_malloc=no
-AC_ARG_ENABLE([malloc_logging],
-  AS_HELP_STRING([--enable-malloc-logging],
-      [Include free space in logging messages (requires malloc.h).]),
-  [debug_malloc=$enableval], [])
-
-AC_MSG_CHECKING([whether to enable malloc free space logging]);
-AC_MSG_RESULT([$debug_malloc])
-AS_IF([test "x$debug_malloc" = "xyes" -a "x$have_glibc" = "xyes"], [
-  AC_DEFINE([_DEBUG_FREE_SPACE_],[1], [Include malloc free space in logging])
-])
-
 m4_define([AC_ARG_ADAPTERS], [
   m4_foreach([adapter_driver], [$1],
 	[AC_ARG_ENABLE(ADAPTER_OPT([adapter_driver]),
@@ -333,7 +302,8 @@ AC_ARG_ADAPTERS([
   RSHIM_ADAPTER,
   XVC_ADAPTERS,
   LIBJAYLINK_ADAPTERS,
-  CMSIS_DAP_TCP_ADAPTER
+  CMSIS_DAP_TCP_ADAPTER,
+  NETWORK_ADAPTERS
   ],[auto])
 
 AC_ARG_ADAPTERS([
@@ -564,10 +534,6 @@ AS_IF([test "x$enable_capstone" != xno], [
 	])
 ])
 
-AS_IF([test "x$enable_capstone" == xno], [
-	AC_DEFINE([HAVE_CAPSTONE], [0], [0 if you don't have Capstone disassembly framework.])
-])
-
 for hidapi_lib in hidapi hidapi-hidraw hidapi-libusb; do
 	PKG_CHECK_MODULES([HIDAPI],[$hidapi_lib],[
 		use_hidapi=yes
@@ -657,6 +623,11 @@ PROCESS_ADAPTERS([AMTJTAGACCEL_ADAPTER], [true], [unused])
 PROCESS_ADAPTERS([HOST_ARM_BITBANG_ADAPTERS], ["x$ac_cv_header_sys_mman_h" = "xyes"], [header sys/mman.h])
 PROCESS_ADAPTERS([HOST_ARM_OR_AARCH64_BITBANG_ADAPTERS], ["x$ac_cv_header_sys_mman_h" = "xyes"], [header sys/mman.h])
 PROCESS_ADAPTERS([DUMMY_ADAPTER], [true], [unused])
+PROCESS_ADAPTERS([NETWORK_ADAPTERS], [true], [unused])
+
+AS_IF([test "x$enable_xvc" != "xno"], [
+  build_bitbang=yes
+])
 
 AS_IF([test "x$enable_linuxgpiod" != "xno"], [
   build_bitbang=yes
@@ -785,11 +756,13 @@ AC_DEFINE([_GNU_SOURCE],[1],[Use GNU C library extensions (e.g. stdndup).])
 GCC_WARNINGS="-Wall -Wstrict-prototypes -Wformat-security -Wshadow"
 AS_IF([test "x${gcc_wextra}" = "xyes"], [
   GCC_WARNINGS="${GCC_WARNINGS} -Wextra -Wno-unused-parameter"
+  GCC_WARNINGS="${GCC_WARNINGS} -Wno-gnu-folding-constant"
   GCC_WARNINGS="${GCC_WARNINGS} -Wbad-function-cast"
   GCC_WARNINGS="${GCC_WARNINGS} -Wcast-align"
   GCC_WARNINGS="${GCC_WARNINGS} -Wredundant-decls"
   GCC_WARNINGS="${GCC_WARNINGS} -Wpointer-arith"
   GCC_WARNINGS="${GCC_WARNINGS} -Wundef"
+  GCC_WARNINGS="${GCC_WARNINGS} -Wsign-compare"
 ])
 AS_IF([test "x${gcc_werror}" = "xyes"], [
   GCC_WARNINGS="${GCC_WARNINGS} -Werror"
@@ -850,6 +823,7 @@ m4_foreach([adapter_driver], [USB1_ADAPTERS,
 	LIBJAYLINK_ADAPTERS, XVC_ADAPTERS,
 	SERIAL_PORT_ADAPTERS,
 	PARALLEL_PORT_ADAPTER,
+	NETWORK_ADAPTERS,
 	LINUXSPIDEV_ADAPTER,
 	VDEBUG_ADAPTER,
 	JTAG_DPI_ADAPTER,
