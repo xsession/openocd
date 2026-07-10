@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
-# Cross-compile OpenOCD for Windows x86_64 from Docker.
-# Intended usage from repo root:
-#   docker buildx build -f docker/Dockerfile.windows-cross --output type=local,dest=docker/data/dist/windows .
+# Cross-compile OpenOCD for Windows x86_64 from Docker and export a ZIP package.
+# Usage:
+#   docker buildx build -f docker/Dockerfile.windows-cross --target export --output type=local,dest=docker/data/dist/windows .
 
 ARG ALPINE_VERSION=3.20
 FROM alpine:${ALPINE_VERSION} AS build
@@ -9,21 +9,19 @@ FROM alpine:${ALPINE_VERSION} AS build
 ARG TARGET=x86_64-w64-mingw32
 ARG JOBS=0
 ARG OPENOCD_PREFIX=/opt/openocd-win64
-ARG CONFIGURE_FLAGS="--enable-ftdi --enable-stlink --enable-cmsis-dap --enable-jlink --enable-internal-jimtcl"
+ARG CONFIGURE_FLAGS="--enable-ftdi --enable-stlink --enable-cmsis-dap --enable-jlink --enable-jimtcl-maintainer --enable-internal-jimtcl"
 ARG LIBUSB_VERSION=1.0.27
 ARG HIDAPI_VERSION=0.14.0
+ARG LIBCONFUSE_VERSION=3.3
 ARG LIBFTDI_VERSION=1.5
 ARG LIBJAYLINK_VERSION=0.3.1
 
-RUN --mount=type=cache,target=/var/cache/apk \
+RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     apk add --no-cache \
-      ca-certificates git curl tar xz bzip2 file zip pkgconf \
-      autoconf automake libtool make gettext gettext-dev texinfo \
-      gcc g++ cmake ninja meson python3 \
-      mingw-w64-gcc mingw-w64-binutils mingw-w64-headers mingw-w64-crt
+      autoconf automake bash ca-certificates cmake coreutils curl file gcc g++ git \
+      gettext gettext-dev libtool make meson mingw-w64-binutils mingw-w64-crt \
+      mingw-w64-gcc mingw-w64-headers ninja pkgconf python3 tar texinfo xz bzip2 zip
 
-# Normalize Docker build argument JOBS. Docker defaults this file to JOBS=0,
-# but GNU Make rejects -j0. Treat empty or 0 as "use all available CPUs".
 RUN printf '%s\n' \
       '#!/bin/sh' \
       'if [ -z "${JOBS:-}" ] || [ "${JOBS}" = "0" ]; then' \
@@ -47,7 +45,6 @@ ENV TARGET=${TARGET} \
 
 WORKDIR /deps
 
-# libusb for Windows. ST-Link, CMSIS-DAP/libusb and many other adapters depend on this.
 RUN set -eux; \
     curl -fsSL "https://github.com/libusb/libusb/releases/download/v${LIBUSB_VERSION}/libusb-${LIBUSB_VERSION}.tar.bz2" -o libusb.tar.bz2; \
     tar -xf libusb.tar.bz2; \
@@ -56,7 +53,6 @@ RUN set -eux; \
     make -j"$(docker-jobs)"; \
     make install
 
-# hidapi for HID-backed CMSIS-DAP probes.
 RUN set -eux; \
     git clone --depth 1 --branch "hidapi-${HIDAPI_VERSION}" https://github.com/libusb/hidapi.git; \
     cmake -S hidapi -B hidapi-build -G Ninja \
@@ -64,13 +60,24 @@ RUN set -eux; \
       -DCMAKE_C_COMPILER="${TARGET}-gcc" \
       -DCMAKE_RC_COMPILER="${TARGET}-windres" \
       -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DHIDAPI_WITH_LIBUSB=ON \
-      -DHIDAPI_WITH_HIDRAW=OFF; \
+      -DBUILD_SHARED_LIBS=OFF; \
     cmake --build hidapi-build --parallel "$(docker-jobs)"; \
     cmake --install hidapi-build
 
-# libftdi for FTDI/MPSSE adapters.
+# libconfuse is required when libftdi builds the ftdi_eeprom utility.
+# Build only the library subtree. The upstream examples are not needed for
+# OpenOCD/libftdi packaging and some examples include Unix-only headers such
+# as <err.h>, which breaks MinGW cross-compilation.
+RUN set -eux; \
+    curl -fsSL "https://github.com/libconfuse/libconfuse/releases/download/v${LIBCONFUSE_VERSION}/confuse-${LIBCONFUSE_VERSION}.tar.xz" -o confuse.tar.xz; \
+    tar -xf confuse.tar.xz; \
+    cd "confuse-${LIBCONFUSE_VERSION}"; \
+    ./configure --host="${TARGET}" --prefix="${PREFIX}" --disable-shared --enable-static --disable-nls; \
+    make -C src -j"$(docker-jobs)"; \
+    make -C src install; \
+    install -d "${PREFIX}/lib/pkgconfig"; \
+    install -m 0644 libconfuse.pc "${PREFIX}/lib/pkgconfig/libconfuse.pc"
+
 RUN set -eux; \
     curl -fsSL "https://www.intra2net.com/en/developer/libftdi/download/libftdi1-${LIBFTDI_VERSION}.tar.bz2" -o libftdi.tar.bz2; \
     tar -xf libftdi.tar.bz2; \
@@ -82,21 +89,36 @@ RUN set -eux; \
       -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
       -DBUILD_SHARED_LIBS=OFF \
       -DFTDIPP=OFF \
+      -DFTDI_EEPROM=ON \
       -DEXAMPLES=OFF \
       -DDOCUMENTATION=OFF \
       -DLIBUSB_INCLUDE_DIR="${PREFIX}/include/libusb-1.0" \
-      -DLIBUSB_LIBRARIES="${PREFIX}/lib/libusb-1.0.a"; \
+      -DLIBUSB_LIBRARIES="${PREFIX}/lib/libusb-1.0.a" \
+      -DCONFUSE_INCLUDE_DIR="${PREFIX}/include" \
+      -DCONFUSE_LIBRARY="${PREFIX}/lib/libconfuse.a"; \
     cmake --build libftdi-build --parallel "$(docker-jobs)"; \
     cmake --install libftdi-build
 
-# libjaylink for SEGGER J-Link.
+# libjaylink for SEGGER J-Link. repo.or.cz snapshot downloads can fail with
+# TLS EOF errors from Docker/Alpine, so prefer Git clone from the upstream
+# GitLab repository, fall back to a GitHub mirror, and only then try repo.or.cz.
 RUN set -eux; \
-    curl -fsSL "https://repo.or.cz/libjaylink.git/snapshot/refs/tags/${LIBJAYLINK_VERSION}.tar.gz" -o libjaylink.tar.gz || \
-    curl -fsSL "https://repo.or.cz/libjaylink.git/snapshot/HEAD.tar.gz" -o libjaylink.tar.gz; \
-    mkdir libjaylink-src; \
-    tar -xf libjaylink.tar.gz -C libjaylink-src --strip-components=1; \
+    git config --global http.version HTTP/1.1; \
+    git config --global http.postBuffer 104857600; \
+    if git clone --depth 1 --branch "${LIBJAYLINK_VERSION}" https://gitlab.zapb.de/libjaylink/libjaylink.git libjaylink-src; then \
+      echo "Fetched libjaylink ${LIBJAYLINK_VERSION} from gitlab.zapb.de"; \
+    elif git clone --depth 1 --branch "${LIBJAYLINK_VERSION}" https://github.com/damienhackett-eaton/libjaylink.git libjaylink-src; then \
+      echo "Fetched libjaylink ${LIBJAYLINK_VERSION} from GitHub mirror"; \
+    else \
+      curl --retry 5 --retry-delay 2 --retry-connrefused -fsSL "https://repo.or.cz/libjaylink.git/snapshot/refs/tags/${LIBJAYLINK_VERSION}.tar.gz" -o libjaylink.tar.gz || \
+      curl --retry 5 --retry-delay 2 --retry-connrefused -fsSL "https://repo.or.cz/libjaylink.git/snapshot/HEAD.tar.gz" -o libjaylink.tar.gz; \
+      mkdir libjaylink-src; \
+      tar -xf libjaylink.tar.gz -C libjaylink-src --strip-components=1; \
+    fi; \
     cd libjaylink-src; \
-    ./autogen.sh || autoreconf -fi; \
+    find . -type f \( -name autogen.sh -o -name '*.sh' -o -name configure.ac -o -name 'Makefile.am' -o -name '*.m4' \) -exec sed -i 's/\r$//' {} +; \
+    find . -type f \( -name autogen.sh -o -name '*.sh' \) -exec chmod +x {} +; \
+    if [ -f autogen.sh ]; then sh ./autogen.sh; else autoreconf -fi; fi; \
     ./configure --host="${TARGET}" --prefix="${PREFIX}" --disable-shared --enable-static PKG_CONFIG_LIBDIR="${PKG_CONFIG_LIBDIR}"; \
     make -j"$(docker-jobs)"; \
     make install
@@ -104,8 +126,46 @@ RUN set -eux; \
 WORKDIR /src/openocd
 COPY . .
 
+# Support both archive layouts and Windows checkouts:
+#   1) OpenOCD source files are at the Docker build context root.
+#   2) The build context contains one nested openocd/ source directory.
+# Also normalize CRLF and run bootstrap through sh, because Windows checkouts
+# can leave a valid-looking script that fails with: ./bootstrap: not found.
 RUN set -eux; \
-    ./bootstrap; \
+    src="."; \
+    if [ ! -f "${src}/bootstrap" ]; then \
+      if [ -f "./openocd/bootstrap" ]; then \
+        src="./openocd"; \
+      else \
+        echo "ERROR: cannot find OpenOCD bootstrap script in build context" >&2; \
+        echo "Expected ./bootstrap or ./openocd/bootstrap" >&2; \
+        find . -maxdepth 4 -type f -name bootstrap -print >&2; \
+        exit 127; \
+      fi; \
+    fi; \
+    cd "${src}"; \
+    if [ ! -f jimtcl/autogen.sh ]; then \
+      echo "OpenOCD jimtcl submodule is missing; trying to initialize or fetch it" >&2; \
+      if [ -d .git ]; then \
+        git submodule update --init --recursive jimtcl || true; \
+      fi; \
+      if [ ! -f jimtcl/autogen.sh ]; then \
+        rm -rf jimtcl; \
+        git clone --depth 1 https://github.com/msteveb/jimtcl.git jimtcl; \
+      fi; \
+    fi; \
+    find . -type f \( \
+      -name bootstrap -o \
+      -name autogen.sh -o \
+      -name configure.ac -o \
+      -name 'Makefile.am' -o \
+      -name '*.m4' -o \
+      -name '*.ac' -o \
+      -name '*.am' -o \
+      -name '*.sh' \
+    \) -exec sed -i 's/\r$//' {} +; \
+    find . -type f \( -name bootstrap -o -name autogen.sh -o -name '*.sh' \) -exec chmod +x {} +; \
+    sh ./bootstrap; \
     ./configure \
       --host="${TARGET}" \
       --build="$(gcc -dumpmachine)" \
@@ -119,12 +179,19 @@ RUN set -eux; \
     make -j"$(docker-jobs)"; \
     make install; \
     "${STRIP}" "${PREFIX}/bin/openocd.exe" || true; \
-    mkdir -p /out/openocd-windows-x86_64; \
-    cp -a "${PREFIX}/bin" "${PREFIX}/share" /out/openocd-windows-x86_64/; \
-    cp -a README* COPYING* LICENSE* /out/openocd-windows-x86_64/ 2>/dev/null || true; \
-    printf '@echo off\r\n%%~dp0bin\\openocd.exe %%*\r\n' > /out/openocd-windows-x86_64/openocd.cmd; \
+    "${STRIP}" "${PREFIX}/bin/ftdi_eeprom.exe" || true; \
+    pkg="openocd-windows-x86_64"; \
+    mkdir -p "/out/${pkg}"; \
+    cp -a "${PREFIX}/bin" "${PREFIX}/share" "/out/${pkg}/"; \
+    cp -a README* COPYING* LICENSE* "/out/${pkg}/" 2>/dev/null || true; \
+    printf '@echo off\r\n%%~dp0bin\\openocd.exe %%*\r\n' > "/out/${pkg}/openocd.cmd"; \
     cd /out; \
-    zip -r openocd-windows-x86_64.zip openocd-windows-x86_64
+    zip -r "${pkg}.zip" "${pkg}"
+
+FROM alpine:${ALPINE_VERSION} AS package
+COPY --from=build /out/ /out/
+VOLUME ["/dist"]
+CMD ["/bin/sh", "-c", "set -eu; mkdir -p /dist; cp -a /out/. /dist/; find /dist -maxdepth 3 -type f | sort"]
 
 FROM scratch AS export
 COPY --from=build /out/ /

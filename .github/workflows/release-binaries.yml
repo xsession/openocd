@@ -1,0 +1,79 @@
+name: release-binaries
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+      - 'release-*'
+
+permissions:
+  contents: write
+
+jobs:
+  docker-packages:
+    name: Docker packages Linux/Windows
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Build Docker-exported packages
+        run: docker buildx bake
+      - name: List packages
+        run: find docker/data/dist -type f -maxdepth 5 -print | sort
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openocd-docker-built-packages
+          path: |
+            docker/data/dist/linux/**/*.tar.gz
+            docker/data/dist/windows/*.zip
+
+  macos-packages:
+    name: macOS ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-13
+            arch: x86_64
+          - runner: macos-14
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        run: |
+          brew update
+          brew install autoconf automake libtool pkg-config texinfo libusb hidapi libftdi libgpiod libjaylink
+      - name: Build macOS package
+        env:
+          ARCH_NAME: ${{ matrix.arch }}
+          OUT_DIR: docker/data/dist/macos
+        run: scripts/build-macos-package.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openocd-macos-${{ matrix.arch }}
+          path: docker/data/dist/macos/*.tar.gz
+
+  github-release:
+    name: Attach to GitHub release
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [docker-packages, macos-packages]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Flatten artifacts
+        run: |
+          mkdir -p release
+          find artifacts -type f \( -name '*.tar.gz' -o -name '*.zip' \) -exec cp -v {} release/ \;
+          ls -la release
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
