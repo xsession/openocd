@@ -116,3 +116,5 @@ GTAGS
 compile_commands.json
 
 build-vscode/
+
+dist/
