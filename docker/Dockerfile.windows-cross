@@ -1,7 +1,9 @@
 # syntax=docker/dockerfile:1.7
-# Cross-compile OpenOCD for Windows x86_64 from Docker and export a ZIP package.
-# Usage:
-#   docker buildx build -f docker/Dockerfile.windows-cross --target export --output type=local,dest=docker/data/dist/windows .
+# Cross-compile OpenOCD for Windows x86_64 and export a portable ZIP.
+#
+# Direct export:
+#   docker buildx build -f docker/Dockerfile.windows-cross \
+#     --target export --output type=local,dest=docker/data/dist/windows .
 
 ARG ALPINE_VERSION=3.20
 FROM alpine:${ALPINE_VERSION} AS build
@@ -9,18 +11,20 @@ FROM alpine:${ALPINE_VERSION} AS build
 ARG TARGET=x86_64-w64-mingw32
 ARG JOBS=0
 ARG OPENOCD_PREFIX=/opt/openocd-win64
-ARG CONFIGURE_FLAGS="--enable-ftdi --enable-stlink --enable-cmsis-dap --enable-jlink --enable-jimtcl-maintainer --enable-internal-jimtcl"
+ARG CONFIGURE_FLAGS="--enable-ftdi --enable-stlink --enable-cmsis-dap --enable-jlink --enable-internal-libjaylink --enable-jimtcl-maintainer --enable-internal-jimtcl"
 ARG LIBUSB_VERSION=1.0.27
 ARG HIDAPI_VERSION=0.14.0
 ARG LIBCONFUSE_VERSION=3.3
 ARG LIBFTDI_VERSION=1.5
-ARG LIBJAYLINK_VERSION=0.3.1
+ARG JIMTCL_COMMIT=f160866171457474f7c4d6ccda70f9b77524407e
+ARG LIBJAYLINK_COMMIT=0d23921a05d5d427332a142d154c213d0c306eb1
 
 RUN --mount=type=cache,target=/var/cache/apk,sharing=locked \
     apk add --no-cache \
-      autoconf automake bash ca-certificates cmake coreutils curl file gcc g++ git \
-      gettext gettext-dev libtool make meson mingw-w64-binutils mingw-w64-crt \
-      mingw-w64-gcc mingw-w64-headers ninja pkgconf python3 tar texinfo xz bzip2 zip
+      autoconf automake bash bzip2 ca-certificates cmake coreutils curl file \
+      gcc g++ git gettext gettext-dev libtool make meson \
+      mingw-w64-binutils mingw-w64-crt mingw-w64-gcc mingw-w64-headers \
+      ninja patch pkgconf python3 tar texinfo xz zip
 
 RUN printf '%s\n' \
       '#!/bin/sh' \
@@ -29,7 +33,8 @@ RUN printf '%s\n' \
       'else' \
       '  printf "%s\\n" "${JOBS}"' \
       'fi' \
-      > /usr/local/bin/docker-jobs && chmod +x /usr/local/bin/docker-jobs
+      > /usr/local/bin/docker-jobs \
+    && chmod +x /usr/local/bin/docker-jobs
 
 ENV TARGET=${TARGET} \
     PREFIX=${OPENOCD_PREFIX} \
@@ -41,12 +46,16 @@ ENV TARGET=${TARGET} \
     AR="${TARGET}-ar" \
     RANLIB="${TARGET}-ranlib" \
     STRIP="${TARGET}-strip" \
-    WINDRES="${TARGET}-windres"
+    WINDRES="${TARGET}-windres" \
+    JIMTCL_COMMIT=${JIMTCL_COMMIT} \
+    LIBJAYLINK_COMMIT=${LIBJAYLINK_COMMIT}
 
 WORKDIR /deps
 
 RUN set -eux; \
-    curl -fsSL "https://github.com/libusb/libusb/releases/download/v${LIBUSB_VERSION}/libusb-${LIBUSB_VERSION}.tar.bz2" -o libusb.tar.bz2; \
+    curl --retry 5 --retry-delay 2 --retry-connrefused -fsSL \
+      "https://github.com/libusb/libusb/releases/download/v${LIBUSB_VERSION}/libusb-${LIBUSB_VERSION}.tar.bz2" \
+      -o libusb.tar.bz2; \
     tar -xf libusb.tar.bz2; \
     cd "libusb-${LIBUSB_VERSION}"; \
     ./configure --host="${TARGET}" --prefix="${PREFIX}" --disable-shared --enable-static; \
@@ -60,16 +69,17 @@ RUN set -eux; \
       -DCMAKE_C_COMPILER="${TARGET}-gcc" \
       -DCMAKE_RC_COMPILER="${TARGET}-windres" \
       -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
+      -DCMAKE_BUILD_TYPE=Release \
       -DBUILD_SHARED_LIBS=OFF; \
     cmake --build hidapi-build --parallel "$(docker-jobs)"; \
     cmake --install hidapi-build
 
-# libconfuse is required when libftdi builds the ftdi_eeprom utility.
-# Build only the library subtree. The upstream examples are not needed for
-# OpenOCD/libftdi packaging and some examples include Unix-only headers such
-# as <err.h>, which breaks MinGW cross-compilation.
+# libconfuse is needed by libftdi's ftdi_eeprom utility. Build only the
+# library subtree because the upstream example programs use Unix-only headers.
 RUN set -eux; \
-    curl -fsSL "https://github.com/libconfuse/libconfuse/releases/download/v${LIBCONFUSE_VERSION}/confuse-${LIBCONFUSE_VERSION}.tar.xz" -o confuse.tar.xz; \
+    curl --retry 5 --retry-delay 2 --retry-connrefused -fsSL \
+      "https://github.com/libconfuse/libconfuse/releases/download/v${LIBCONFUSE_VERSION}/confuse-${LIBCONFUSE_VERSION}.tar.xz" \
+      -o confuse.tar.xz; \
     tar -xf confuse.tar.xz; \
     cd "confuse-${LIBCONFUSE_VERSION}"; \
     ./configure --host="${TARGET}" --prefix="${PREFIX}" --disable-shared --enable-static --disable-nls; \
@@ -79,7 +89,9 @@ RUN set -eux; \
     install -m 0644 libconfuse.pc "${PREFIX}/lib/pkgconfig/libconfuse.pc"
 
 RUN set -eux; \
-    curl -fsSL "https://www.intra2net.com/en/developer/libftdi/download/libftdi1-${LIBFTDI_VERSION}.tar.bz2" -o libftdi.tar.bz2; \
+    curl --retry 5 --retry-delay 2 --retry-connrefused -fsSL \
+      "https://www.intra2net.com/en/developer/libftdi/download/libftdi1-${LIBFTDI_VERSION}.tar.bz2" \
+      -o libftdi.tar.bz2; \
     tar -xf libftdi.tar.bz2; \
     cmake -S "libftdi1-${LIBFTDI_VERSION}" -B libftdi-build -G Ninja \
       -DCMAKE_SYSTEM_NAME=Windows \
@@ -87,6 +99,7 @@ RUN set -eux; \
       -DCMAKE_CXX_COMPILER="${TARGET}-g++" \
       -DCMAKE_RC_COMPILER="${TARGET}-windres" \
       -DCMAKE_INSTALL_PREFIX="${PREFIX}" \
+      -DCMAKE_BUILD_TYPE=Release \
       -DBUILD_SHARED_LIBS=OFF \
       -DFTDIPP=OFF \
       -DFTDI_EEPROM=ON \
@@ -99,80 +112,24 @@ RUN set -eux; \
     cmake --build libftdi-build --parallel "$(docker-jobs)"; \
     cmake --install libftdi-build
 
-# libjaylink for SEGGER J-Link. repo.or.cz snapshot downloads can fail with
-# TLS EOF errors from Docker/Alpine, so prefer Git clone from the upstream
-# GitLab repository, fall back to a GitHub mirror, and only then try repo.or.cz.
-RUN set -eux; \
-    git config --global http.version HTTP/1.1; \
-    git config --global http.postBuffer 104857600; \
-    if git clone --depth 1 --branch "${LIBJAYLINK_VERSION}" https://gitlab.zapb.de/libjaylink/libjaylink.git libjaylink-src; then \
-      echo "Fetched libjaylink ${LIBJAYLINK_VERSION} from gitlab.zapb.de"; \
-    elif git clone --depth 1 --branch "${LIBJAYLINK_VERSION}" https://github.com/damienhackett-eaton/libjaylink.git libjaylink-src; then \
-      echo "Fetched libjaylink ${LIBJAYLINK_VERSION} from GitHub mirror"; \
-    else \
-      curl --retry 5 --retry-delay 2 --retry-connrefused -fsSL "https://repo.or.cz/libjaylink.git/snapshot/refs/tags/${LIBJAYLINK_VERSION}.tar.gz" -o libjaylink.tar.gz || \
-      curl --retry 5 --retry-delay 2 --retry-connrefused -fsSL "https://repo.or.cz/libjaylink.git/snapshot/HEAD.tar.gz" -o libjaylink.tar.gz; \
-      mkdir libjaylink-src; \
-      tar -xf libjaylink.tar.gz -C libjaylink-src --strip-components=1; \
-    fi; \
-    cd libjaylink-src; \
-    find . -type f \( -name autogen.sh -o -name '*.sh' -o -name configure.ac -o -name 'Makefile.am' -o -name '*.m4' \) -exec sed -i 's/\r$//' {} +; \
-    find . -type f \( -name autogen.sh -o -name '*.sh' \) -exec chmod +x {} +; \
-    if [ -f autogen.sh ]; then sh ./autogen.sh; else autoreconf -fi; fi; \
-    ./configure --host="${TARGET}" --prefix="${PREFIX}" --disable-shared --enable-static PKG_CONFIG_LIBDIR="${PKG_CONFIG_LIBDIR}"; \
-    make -j"$(docker-jobs)"; \
-    make install
-
 WORKDIR /src/openocd
 COPY . .
+COPY docker/prepare-openocd-source.sh /usr/local/bin/prepare-openocd-source
+COPY docker/patch-jimtcl-mingw-aio.py /usr/local/bin/patch-jimtcl-mingw-aio
+RUN chmod +x /usr/local/bin/prepare-openocd-source /usr/local/bin/patch-jimtcl-mingw-aio
 
-# Support both archive layouts and Windows checkouts:
-#   1) OpenOCD source files are at the Docker build context root.
-#   2) The build context contains one nested openocd/ source directory.
-# Also normalize CRLF and run bootstrap through sh, because Windows checkouts
-# can leave a valid-looking script that fails with: ./bootstrap: not found.
 RUN set -eux; \
-    src="."; \
-    if [ ! -f "${src}/bootstrap" ]; then \
-      if [ -f "./openocd/bootstrap" ]; then \
-        src="./openocd"; \
-      else \
-        echo "ERROR: cannot find OpenOCD bootstrap script in build context" >&2; \
-        echo "Expected ./bootstrap or ./openocd/bootstrap" >&2; \
-        find . -maxdepth 4 -type f -name bootstrap -print >&2; \
-        exit 127; \
-      fi; \
-    fi; \
+    src="$(prepare-openocd-source /src/openocd)"; \
     cd "${src}"; \
-    if [ ! -f jimtcl/autogen.sh ]; then \
-      echo "OpenOCD jimtcl submodule is missing; trying to initialize or fetch it" >&2; \
-      if [ -d .git ]; then \
-        git submodule update --init --recursive jimtcl || true; \
-      fi; \
-      if [ ! -f jimtcl/autogen.sh ]; then \
-        rm -rf jimtcl; \
-        git clone --depth 1 https://github.com/msteveb/jimtcl.git jimtcl; \
-      fi; \
-    fi; \
-    find . -type f \( \
-      -name bootstrap -o \
-      -name autogen.sh -o \
-      -name configure.ac -o \
-      -name 'Makefile.am' -o \
-      -name '*.m4' -o \
-      -name '*.ac' -o \
-      -name '*.am' -o \
-      -name '*.sh' \
-    \) -exec sed -i 's/\r$//' {} +; \
-    find . -type f \( -name bootstrap -o -name autogen.sh -o -name '*.sh' \) -exec chmod +x {} +; \
+    patch-jimtcl-mingw-aio jimtcl; \
     sh ./bootstrap; \
     ./configure \
       --host="${TARGET}" \
       --build="$(gcc -dumpmachine)" \
       --prefix="${PREFIX}" \
       PKG_CONFIG_LIBDIR="${PKG_CONFIG_LIBDIR}" \
-      CFLAGS="-I${PREFIX}/include -I${PREFIX}/include/libusb-1.0" \
-      LDFLAGS="-L${PREFIX}/lib -static -static-libgcc -static-libstdc++" \
+      CFLAGS="-O2 -I${PREFIX}/include -I${PREFIX}/include/libusb-1.0" \
+      LDFLAGS="-L${PREFIX}/lib -static -static-libgcc" \
       LIBS="-lws2_32 -lsetupapi -lole32 -luuid" \
       ${CONFIGURE_FLAGS} \
       --disable-werror; \
@@ -180,7 +137,7 @@ RUN set -eux; \
     make install; \
     "${STRIP}" "${PREFIX}/bin/openocd.exe" || true; \
     "${STRIP}" "${PREFIX}/bin/ftdi_eeprom.exe" || true; \
-    pkg="openocd-windows-x86_64"; \
+    pkg=openocd-windows-x86_64; \
     mkdir -p "/out/${pkg}"; \
     cp -a "${PREFIX}/bin" "${PREFIX}/share" "/out/${pkg}/"; \
     cp -a README* COPYING* LICENSE* "/out/${pkg}/" 2>/dev/null || true; \
