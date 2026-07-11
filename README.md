@@ -1,22 +1,65 @@
-# OpenOCD source layout Docker packaging fix
+# OpenOCD: reproducible multi-platform packages
 
-Use this direct replacement package if Docker fails with:
+This repository is an OpenOCD fork with a reviewed packaging layer for Linux, Windows, and macOS. Docker is used to build portable Linux and Windows archives; macOS packages are built natively or in CI.
+
+## Build the default packages
+
+```console
+$ git clone --recursive https://github.com/xsession/openocd.git
+$ cd openocd
+$ docker compose up --build
+```
+
+Artifacts:
 
 ```text
-/bin/sh: ./bootstrap: not found
+artifacts/linux/amd64/openocd-linux-x86_64.tar.gz
+artifacts/windows/openocd-windows-x86_64.zip
 ```
 
-The packaging Dockerfiles now support both layouts:
+Build Linux ARM64 when the Docker engine has ARM64 emulation or runs natively on ARM64:
 
-- source files at the build context root: `./bootstrap`
-- source files nested one level down: `./openocd/bootstrap`
-
-From your current project root:
-
-```powershell
-Expand-Archive .\openocd-source-layout-replacement-files.zip -DestinationPath .\_replacement
-.\_replacement\openocd-source-layout-replacement-files\install-overwrite.ps1
-docker compose up --build
+```console
+$ docker compose --profile arm64 up --build
 ```
 
-Manual copy also works: copy the contents of `files/` over your project root.
+Build every Docker-supported package with direct local export:
+
+```console
+$ docker buildx bake all
+```
+
+## Documentation
+
+The task-oriented guide is under [`docs/`](docs/index.md):
+
+- [Quick start](docs/getting-started/quickstart.md)
+- [Windows package](docs/deployment/windows.md)
+- [Linux packages](docs/deployment/linux.md)
+- [macOS packages](docs/deployment/macos.md)
+- [Build troubleshooting](docs/deployment/troubleshooting.md)
+- [First debug session](docs/usage/first-session.md)
+- [Build-system design](docs/development/build-system.md)
+
+Build the searchable Sphinx site:
+
+```console
+$ ./build/scripts/build-docs.sh
+```
+
+Equivalent commands:
+
+```console
+$ docker buildx bake documentation
+$ docker compose --profile docs up --build docs
+```
+
+The upstream command reference remains in [`doc/openocd.texi`](doc/openocd.texi), and source API documentation remains configured by [`Doxyfile.in`](Doxyfile.in).
+
+## Project status
+
+The packaging flow produces portable archives and keeps platform-specific compatibility fixes isolated in reviewed helper scripts. See [build review](docs/development/build-review.md) for the current build design and [change history](docs/development/change-history.md) for historical fixes.
+
+## License
+
+OpenOCD is licensed under GNU GPL v2. See [`COPYING`](COPYING) and [`LICENSES/`](LICENSES/).

@@ -1,0 +1,15 @@
+:root {
+  --content-width: 52rem;
+}
+
+.sidebar-brand-text {
+  font-weight: 700;
+}
+
+table.docutils {
+  width: 100%;
+}
+
+code.literal {
+  overflow-wrap: anywhere;
+}

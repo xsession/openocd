@@ -1,0 +1,69 @@
+name: Multi-platform packages
+
+on:
+  push:
+    branches: [master, main, custom-cores]
+    tags: ["v*"]
+    paths:
+      - "build/**"
+      - "compose.yaml"
+      - "docker-bake.hcl"
+      - "configure.ac"
+      - "Makefile.am"
+      - "src/**"
+      - "tcl/**"
+      - ".github/workflows/packages.yml"
+  pull_request:
+    paths:
+      - "build/**"
+      - "compose.yaml"
+      - "docker-bake.hcl"
+      - "configure.ac"
+      - "Makefile.am"
+      - "src/**"
+      - "tcl/**"
+      - ".github/workflows/packages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  docker-packages:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Build Linux and Windows packages
+        run: docker buildx bake all
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openocd-linux-windows-packages
+          path: artifacts/
+          if-no-files-found: error
+
+  macos-package:
+    strategy:
+      matrix:
+        include:
+          - runner: macos-13
+            arch: x86_64
+          - runner: macos-14
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        run: brew install autoconf automake libtool libusb libftdi hidapi libjaylink pkg-config texinfo
+      - name: Build package
+        run: ./build/scripts/build-macos-package.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openocd-macos-${{ matrix.arch }}
+          path: artifacts/macos/*.tar.gz
+          if-no-files-found: error

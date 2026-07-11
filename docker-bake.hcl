@@ -20,7 +20,7 @@ group "all" {
 
 target "linux-common" {
   context = "."
-  dockerfile = "docker/Dockerfile.linux-package"
+  dockerfile = "build/containers/linux-package.Dockerfile"
   target = "export"
   args = {
     JOBS = JOBS
@@ -31,23 +31,34 @@ target "linux-common" {
 target "linux-amd64" {
   inherits = ["linux-common"]
   platforms = ["linux/amd64"]
-  output = ["type=local,dest=docker/data/dist/linux/amd64"]
+  output = ["type=local,dest=artifacts/linux/amd64"]
 }
 
 target "linux-arm64" {
   inherits = ["linux-common"]
   platforms = ["linux/arm64"]
-  output = ["type=local,dest=docker/data/dist/linux/arm64"]
+  output = ["type=local,dest=artifacts/linux/arm64"]
 }
 
 target "windows-x86_64" {
   context = "."
-  dockerfile = "docker/Dockerfile.windows-cross"
+  dockerfile = "build/containers/windows-cross.Dockerfile"
   target = "export"
   platforms = ["linux/amd64"]
   args = {
     JOBS = JOBS
     CONFIGURE_FLAGS = WINDOWS_CONFIGURE_FLAGS
   }
-  output = ["type=local,dest=docker/data/dist/windows"]
+  output = ["type=local,dest=artifacts/windows"]
+}
+
+target "docs" {
+  context = "."
+  dockerfile = "build/containers/docs.Dockerfile"
+  target = "export"
+  output = ["type=local,dest=docs/_build/export"]
+}
+
+group "documentation" {
+  targets = ["docs"]
 }

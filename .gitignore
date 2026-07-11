@@ -117,4 +117,12 @@ compile_commands.json
 
 build-vscode/
 
+# Sphinx output
+docs/_build/
+
+# Generated multi-platform packages and local build staging
+/artifacts/*
+!/artifacts/.gitkeep
+/.build/
+
 dist/
