@@ -93,3 +93,10 @@ The expected package output remains:
 ```text
 artifacts/windows/openocd-windows-x86_64.zip
 ```
+
+## 2026-07-11 Docker build-context correction
+
+- Stopped excluding the enterprise `build/` directory from `.dockerignore`.
+- Kept generated `build-*` trees excluded.
+- Excluded generated package artifacts and rendered documentation from the Docker context.
+- The migration installer removes the obsolete `docker-compose.yml` so Compose uses only `compose.yaml`.

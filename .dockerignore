@@ -1,7 +1,8 @@
 .git
 .gitmodules
 .github
-build
+
+# Generated build products, but keep build/ because Dockerfiles COPY helper scripts from it.
 build-*
 *.o
 *.a
@@ -9,4 +10,9 @@ build-*
 *.la
 *.log
 .cache
+
+# Exported packages and generated documentation.
+artifacts
+docs/_build
+
 .DS_Store
