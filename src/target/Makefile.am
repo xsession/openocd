@@ -28,6 +28,7 @@ noinst_LTLIBRARIES += %D%/libtarget.la
 	%D%/dsp563xx_once.c \
 	%D%/dsp5680xx.c \
 	%D%/hla_target.c \
+	%D%/mchp_ri4_bridge.c \
 	$(ARMV8_SRC) \
 	$(MIPS64_SRC)
 
