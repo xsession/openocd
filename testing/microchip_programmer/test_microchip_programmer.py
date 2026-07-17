@@ -208,6 +208,48 @@ class MicrochipProgrammerTests(unittest.TestCase):
         self.assertIn("adapter usb vid_pid 0x03eb 0x2177", pickit4)
         self.assertIn("adapter usb vid_pid 0x03eb 0x217c", icd4)
 
+class MicrochipLocalIntegrationTests(unittest.TestCase):
+    def test_local_ri4_presets_and_launchers(self) -> None:
+        pickit4 = (PROGRAMMER_DIR / "pickit4-ri4.cfg").read_text(encoding="utf-8")
+        icd4 = (PROGRAMMER_DIR / "icd4-ri4.cfg").read_text(encoding="utf-8")
+        self.assertIn("set MCHP_RI4_TOOL pk4", pickit4)
+        self.assertIn("set MCHP_RI4_PID 0x9012", pickit4)
+        self.assertIn("set MCHP_RI4_TOOL icd4", icd4)
+        self.assertIn("set MCHP_RI4_PID 0x9036", icd4)
+        self.assertIn("source [find target/mchp-ri4.cfg]", pickit4)
+        self.assertIn("source [find target/mchp-ri4.cfg]", icd4)
+
+        powershell = (REPO_ROOT / "scripts/start-microchip-ri4-bridge.ps1").read_text(
+            encoding="utf-8"
+        )
+        shell = (REPO_ROOT / "scripts/start-microchip-ri4-bridge.sh").read_text(encoding="utf-8")
+        self.assertIn("OPEN_MICROCHIP_TOOLS_ROOT", powershell)
+        self.assertIn("mchp_openocd.bridge_server", powershell)
+        self.assertIn("OPEN_MICROCHIP_TOOLS_ROOT", shell)
+        self.assertIn("mchp_openocd.bridge_server", shell)
+
+    def test_ri4_target_and_flash_drivers_are_registered(self) -> None:
+        target_makefile = (REPO_ROOT / "src/target/Makefile.am").read_text(encoding="utf-8")
+        target_types = (REPO_ROOT / "src/target/target_type.h").read_text(encoding="utf-8")
+        flash_makefile = (REPO_ROOT / "src/flash/nor/Makefile.am").read_text(encoding="utf-8")
+        flash_drivers = (REPO_ROOT / "src/flash/nor/drivers.c").read_text(encoding="utf-8")
+        self.assertIn("%D%/mchp_ri4_bridge.c", target_makefile)
+        self.assertIn("mchp_ri4_bridge_target", target_types)
+        self.assertIn("%D%/mchp_ri4.c", flash_makefile)
+        self.assertIn("&mchp_ri4_flash", flash_drivers)
+
+    def test_generated_dspic_svds_are_present(self) -> None:
+        svd_dir = REPO_ROOT / "svd"
+        for name in (
+            "dspic30f5011.svd",
+            "dspic33fj128mc802.svd",
+            "dspic33fj128mc804.svd",
+            "dspic33ep128gm604.svd",
+        ):
+            text = (svd_dir / name).read_text(encoding="utf-8")
+            self.assertIn("<device", text)
+            self.assertIn("<peripherals>", text)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

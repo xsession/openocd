@@ -87,6 +87,7 @@ EXTRA_DIST += \
 	tools/rlink_make_speed_table \
 	tools/st7_dtc_as \
 	contrib \
+	svd \
 	docs/programmers/microchip-pickit-icd.md \
 	docs/index.md \
 	MERGE_MANIFEST.md \

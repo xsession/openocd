@@ -46,10 +46,22 @@ TARGET_CORE_SRC = \
 	%D%/breakpoints.c \
 	%D%/target.c \
 	%D%/target_request.c \
+	%D%/mchp_ri4_bridge.c \
+	%D%/mchp_ri4_bridge.h \
+	%D%/mchp_ri4_native.c \
+	%D%/mchp_ri4_native.h \
 	%D%/testee.c \
 	%D%/semihosting_common.c \
 	%D%/smp.c \
 	%D%/rtt.c
+
+if USE_LIBUSB1
+%C%_libtarget_la_CPPFLAGS += $(LIBUSB1_CFLAGS)
+%C%_libtarget_la_LIBADD += $(LIBUSB1_LIBS)
+endif
+
+%C%_libtarget_la_CPPFLAGS += $(ZLIB_CFLAGS)
+%C%_libtarget_la_LIBADD += $(ZLIB_LIBS)
 
 ARMV4_5_SRC = \
 	%D%/armv4_5.c \

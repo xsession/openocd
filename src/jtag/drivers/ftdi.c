@@ -142,6 +142,14 @@ struct signal {
 
 static struct signal *signals;
 
+struct ftdi_initial_signal {
+	char *name;
+	char value;
+	struct ftdi_initial_signal *next;
+};
+
+static struct ftdi_initial_signal *ftdi_initial_signals;
+
 /* FIXME: Where to store per-instance data? We need an SWD context. */
 static struct swd_cmd_queue_entry {
 	uint8_t cmd;
@@ -771,6 +779,34 @@ static int ftdi_initialize(void)
 	mpsse_set_data_bits_low_byte(mpsse_ctx, output & 0xff, direction & 0xff);
 	mpsse_set_data_bits_high_byte(mpsse_ctx, output >> 8, direction >> 8);
 
+	/*
+	 * Some FTDI adapters need a GPIO transition after the MPSSE engine is
+	 * open, but before the JTAG chain is examined. Commit the layout's base
+	 * state first, then queue configured initial signals. This guarantees a
+	 * physical edge rather than only two states in one unflushed command
+	 * stream. The normal final initialization flush commits the new state.
+	 */
+	if (ftdi_initial_signals) {
+		int retval = mpsse_flush(mpsse_ctx);
+		if (retval != ERROR_OK) {
+			LOG_ERROR("couldn't commit initial FTDI GPIO state");
+			return retval;
+		}
+	}
+
+	for (struct ftdi_initial_signal *initial = ftdi_initial_signals;
+			initial; initial = initial->next) {
+		struct signal *sig = find_signal_by_name(initial->name);
+		if (!sig) {
+			LOG_ERROR("initial FTDI signal '%s' is not defined", initial->name);
+			return ERROR_JTAG_INIT_FAILED;
+		}
+
+		int retval = ftdi_set_signal(sig, initial->value);
+		if (retval != ERROR_OK)
+			return retval;
+	}
+
 	mpsse_loopback_config(mpsse_ctx, false);
 
 	freq = mpsse_set_frequency(mpsse_ctx, adapter_get_speed_khz() * 1000);
@@ -789,6 +825,15 @@ static int ftdi_quit(void)
 		free(sig);
 		sig = next;
 	}
+
+	struct ftdi_initial_signal *initial = ftdi_initial_signals;
+	while (initial) {
+		struct ftdi_initial_signal *next = initial->next;
+		free(initial->name);
+		free(initial);
+		initial = next;
+	}
+	ftdi_initial_signals = NULL;
 
 	free(swd_cmd_queue);
 
@@ -1199,6 +1244,38 @@ COMMAND_HANDLER(ftdi_handle_set_signal_command)
 	return mpsse_flush(mpsse_ctx);
 }
 
+COMMAND_HANDLER(ftdi_handle_initial_signal_command)
+{
+	if (CMD_ARGC != 2 || strlen(CMD_ARGV[1]) != 1)
+		return ERROR_COMMAND_SYNTAX_ERROR;
+
+	char value = CMD_ARGV[1][0];
+	if (value != '0' && value != '1' && value != 'z' && value != 'Z') {
+		LOG_ERROR("unknown signal level '%s', use 0, 1 or z", CMD_ARGV[1]);
+		return ERROR_COMMAND_SYNTAX_ERROR;
+	}
+
+	struct ftdi_initial_signal **entry = &ftdi_initial_signals;
+	while (*entry && strcmp((*entry)->name, CMD_ARGV[0]) != 0)
+		entry = &(*entry)->next;
+
+	if (!*entry) {
+		*entry = calloc(1, sizeof(**entry));
+		if (!*entry)
+			return ERROR_FAIL;
+
+		(*entry)->name = strdup(CMD_ARGV[0]);
+		if (!(*entry)->name) {
+			free(*entry);
+			*entry = NULL;
+			return ERROR_FAIL;
+		}
+	}
+
+	(*entry)->value = value;
+	return ERROR_OK;
+}
+
 COMMAND_HANDLER(ftdi_handle_get_signal_command)
 {
 	if (CMD_ARGC < 1)
@@ -1293,6 +1370,14 @@ static const struct command_registration ftdi_subcommand_handlers[] = {
 		.help = "define a signal controlled by one or more FTDI GPIO as data "
 			"and/or output enable",
 		.usage = "name [-data mask|-ndata mask] [-oe mask|-noe mask] [-alias|-nalias name]",
+	},
+	{
+		.name = "initial_signal",
+		.handler = &ftdi_handle_initial_signal_command,
+		.mode = COMMAND_CONFIG,
+		.help = "set a layout-specific signal after adapter open "
+			"and before JTAG examination",
+		.usage = "name (1|0|z)",
 	},
 	{
 		.name = "set_signal",

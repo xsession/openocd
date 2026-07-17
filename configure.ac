@@ -515,6 +515,12 @@ PKG_CHECK_MODULES([LIBUSB1], [libusb-1.0], [
 	AC_MSG_WARN([libusb-1.x not found, trying legacy libusb-0.1 as a fallback; consider installing libusb-1.x instead])
 ])
 
+PKG_CHECK_MODULES([ZLIB], [zlib], [
+	AC_DEFINE([HAVE_ZLIB], [1], [Define if zlib is available])
+], [
+	AC_MSG_WARN([zlib not found; Microchip RI4 compressed script catalogs will be unavailable])
+])
+
 AC_ARG_WITH([capstone],
 		AS_HELP_STRING([--with-capstone], [Use Capstone disassembly library (default=auto)])
 	, [

@@ -103,6 +103,7 @@ static struct target_type *target_types[] = {
 	&hla_target,
 	&ls1_sap_target,
 	&mem_ap_target,
+	&mchp_ri4_bridge_target,
 	&mips_m4k_target,
 	&mips_mips64_target,
 	&or1k_target,

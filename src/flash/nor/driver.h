@@ -276,6 +276,7 @@ extern const struct flash_driver lpc2900_flash;
 extern const struct flash_driver lpcspifi_flash;
 extern const struct flash_driver max32xxx_flash;
 extern const struct flash_driver mdr_flash;
+extern const struct flash_driver mchp_ri4_flash;
 extern const struct flash_driver mrvlqspi_flash;
 extern const struct flash_driver msp432_flash;
 extern const struct flash_driver mspm0_flash;

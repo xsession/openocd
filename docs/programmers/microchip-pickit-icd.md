@@ -29,6 +29,13 @@ The PICkit 4 and ICD 4 interface files are a separate direct CMSIS-DAP path for
 target families and tool modes that expose a standard JTAG/SWD endpoint. They
 do not turn PIC/dsPIC ICSP into CMSIS-DAP.
 
+For PICkit 4 and ICD 4, this tree also includes a native OpenOCD target and NOR
+flash path using the clean-room RI4 protocol research from `open_microchip_tools`.
+That path supports normal OpenOCD target control, memory access, breakpoints,
+watchpoints, erase, write and verify operations. PICkit 2 and PICkit 3 use
+older, incompatible USB protocols; the reference project does not implement
+those transports, so they continue to use `pk2cmd` or IPECMD.
+
 ## Installed OpenOCD files
 
 ```text
@@ -38,7 +45,35 @@ scripts/programmer/microchip/pickit4.cfg
 scripts/programmer/microchip/icd4.cfg
 scripts/interface/microchip/pickit4-cmsis-dap.cfg
 scripts/interface/microchip/icd4-cmsis-dap.cfg
+scripts/programmer/microchip/pickit4-ri4.cfg
+scripts/programmer/microchip/icd4-ri4.cfg
 ```
+
+## Local RI4 support for PICkit 4 and ICD 4
+
+No Python process, TCP bridge, or vendor executable is used. Build OpenOCD with
+libusb-1.0; zlib is also needed when loading the compressed `scripts.yaml.gz`
+catalog shipped in the PICkit 4 or ICD 4 tool pack.
+
+Launch OpenOCD with the exact processor, family, RI4 script catalog and flash
+geometry. The catalog must be the probe firmware `scripts.xml`, `scripts.yaml`,
+or `scripts.yaml.gz`; an EDC device description does not contain executable
+RI4 scripts.
+
+```powershell
+openocd `
+  -c "set MCHP_RI4_PROCESSOR DSPIC30F5011" `
+  -c "set MCHP_RI4_FAMILY DSPIC30F" `
+  -c "set MCHP_RI4_SCRIPTS E:/GIT/open_microchip_tools/vendor/mplabx_yaml_gz/packs/Microchip/PICkit4_TP/2.12.2541/firmware/scripts.yaml.gz" `
+  -c "set MCHP_RI4_FLASH_SIZE 0x12000" `
+  -f programmer/microchip/pickit4-ri4.cfg `
+  -c "program firmware.hex verify reset exit"
+```
+
+For ICD4, use `programmer/microchip/icd4-ri4.cfg`. Override
+`MCHP_RI4_PID` when the probe enumerates with a different application PID.
+OpenOCD owns the USB interface while the session is active, so MPLAB X/IPE
+must not use the same probe concurrently.
 
 ## Backend installation
 
