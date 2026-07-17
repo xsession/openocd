@@ -209,7 +209,7 @@ class MicrochipProgrammerTests(unittest.TestCase):
         self.assertIn("adapter usb vid_pid 0x03eb 0x217c", icd4)
 
 class MicrochipLocalIntegrationTests(unittest.TestCase):
-    def test_local_ri4_presets_and_launchers(self) -> None:
+    def test_local_ri4_presets_use_native_usb(self) -> None:
         pickit4 = (PROGRAMMER_DIR / "pickit4-ri4.cfg").read_text(encoding="utf-8")
         icd4 = (PROGRAMMER_DIR / "icd4-ri4.cfg").read_text(encoding="utf-8")
         self.assertIn("set MCHP_RI4_TOOL pk4", pickit4)
@@ -219,14 +219,15 @@ class MicrochipLocalIntegrationTests(unittest.TestCase):
         self.assertIn("source [find target/mchp-ri4.cfg]", pickit4)
         self.assertIn("source [find target/mchp-ri4.cfg]", icd4)
 
-        powershell = (REPO_ROOT / "scripts/start-microchip-ri4-bridge.ps1").read_text(
-            encoding="utf-8"
-        )
-        shell = (REPO_ROOT / "scripts/start-microchip-ri4-bridge.sh").read_text(encoding="utf-8")
-        self.assertIn("OPEN_MICROCHIP_TOOLS_ROOT", powershell)
-        self.assertIn("mchp_openocd.bridge_server", powershell)
-        self.assertIn("OPEN_MICROCHIP_TOOLS_ROOT", shell)
-        self.assertIn("mchp_openocd.bridge_server", shell)
+        interface = (REPO_ROOT / "tcl/interface/mchp-ri4.cfg").read_text(encoding="utf-8")
+        target = (REPO_ROOT / "tcl/target/mchp-ri4.cfg").read_text(encoding="utf-8")
+        native = (REPO_ROOT / "src/target/mchp_ri4_native.c").read_text(encoding="utf-8")
+        self.assertNotIn("MCHP_RI4_HOST", interface + target)
+        self.assertNotIn("MCHP_RI4_PORT", interface + target)
+        self.assertIn("libusb_bulk_transfer", native)
+        self.assertIn("RI4_SCRIPT_UPLOAD", native)
+        self.assertFalse((REPO_ROOT / "scripts/start-microchip-ri4-bridge.ps1").exists())
+        self.assertFalse((REPO_ROOT / "scripts/start-microchip-ri4-bridge.sh").exists())
 
     def test_ri4_target_and_flash_drivers_are_registered(self) -> None:
         target_makefile = (REPO_ROOT / "src/target/Makefile.am").read_text(encoding="utf-8")
@@ -234,6 +235,7 @@ class MicrochipLocalIntegrationTests(unittest.TestCase):
         flash_makefile = (REPO_ROOT / "src/flash/nor/Makefile.am").read_text(encoding="utf-8")
         flash_drivers = (REPO_ROOT / "src/flash/nor/drivers.c").read_text(encoding="utf-8")
         self.assertIn("%D%/mchp_ri4_bridge.c", target_makefile)
+        self.assertIn("%D%/mchp_ri4_native.c", target_makefile)
         self.assertIn("mchp_ri4_bridge_target", target_types)
         self.assertIn("%D%/mchp_ri4.c", flash_makefile)
         self.assertIn("&mchp_ri4_flash", flash_drivers)

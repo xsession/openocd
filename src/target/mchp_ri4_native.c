@@ -604,6 +604,31 @@ static bool ri4_has_any(struct mchp_ri4_native *session,
 	return false;
 }
 
+static int ri4_enter_programming(struct mchp_ri4_native *session)
+{
+	static const char *const enter[] = {"EnterTMOD_LV", "EnterTMOD_HV",
+		"EnterTMOD_PE", "EnterProgMode"};
+	if (!ri4_has_any(session, enter, ARRAY_SIZE(enter)))
+		return ERROR_OK;
+	if (ri4_find_script(session, "SetSpeedFromDevice")) {
+		int result = ri4_run(session, "SetSpeedFromDevice", NULL, 0,
+			NULL, 0, RI4_SCRIPT_NO_DATA);
+		if (result != ERROR_OK)
+			return result;
+	}
+	return ri4_run_first(session, enter, ARRAY_SIZE(enter), NULL, 0,
+		NULL, 0, RI4_SCRIPT_NO_DATA);
+}
+
+static int ri4_exit_programming(struct mchp_ri4_native *session)
+{
+	static const char *const exit[] = {"ExitTMOD", "ExitProgMode"};
+	if (!ri4_has_any(session, exit, ARRAY_SIZE(exit)))
+		return ERROR_OK;
+	return ri4_run_first(session, exit, ARRAY_SIZE(exit), NULL, 0,
+		NULL, 0, RI4_SCRIPT_NO_DATA);
+}
+
 static int ri4_open_usb(struct mchp_ri4_native *session,
 	const struct mchp_ri4_native_config *config)
 {
@@ -833,8 +858,12 @@ int mchp_ri4_native_read(struct mchp_ri4_native *session,
 {
 	static const char *const names[] = {"ReadProgmemPE", "ReadProgmem", "ReadProgmemDE", "ReadRAM"};
 	uint32_t params[] = {address, length};
-	return ri4_run_first(session, names, ARRAY_SIZE(names), params, ARRAY_SIZE(params),
+	int result = ri4_enter_programming(session);
+	if (result == ERROR_OK)
+		result = ri4_run_first(session, names, ARRAY_SIZE(names), params, ARRAY_SIZE(params),
 		data, length, RI4_SCRIPT_UPLOAD);
+	int exit_result = ri4_exit_programming(session);
+	return result == ERROR_OK ? exit_result : result;
 }
 
 int mchp_ri4_native_write(struct mchp_ri4_native *session,
@@ -842,31 +871,25 @@ int mchp_ri4_native_write(struct mchp_ri4_native *session,
 {
 	static const char *const names[] = {"WriteProgmemPE", "WriteProgmem", "WriteProgmemDE", "WriteRAM"};
 	uint32_t params[] = {address, length};
-	return ri4_run_first(session, names, ARRAY_SIZE(names), params, ARRAY_SIZE(params),
+	int result = ri4_enter_programming(session);
+	if (result == ERROR_OK)
+		result = ri4_run_first(session, names, ARRAY_SIZE(names), params, ARRAY_SIZE(params),
 		(uint8_t *)data, length, RI4_SCRIPT_DOWNLOAD);
+	int exit_result = ri4_exit_programming(session);
+	return result == ERROR_OK ? exit_result : result;
 }
 
 int mchp_ri4_native_erase(struct mchp_ri4_native *session, unsigned int mode)
 {
-	static const char *const enter[] = {"EnterTMOD_LV", "EnterTMOD_HV", "EnterProgMode"};
 	static const char *const erase[] = {"EraseChip", "EraseProgmemRange"};
-	static const char *const exit[] = {"ExitTMOD", "ExitProgMode"};
-	if (ri4_has_any(session, enter, ARRAY_SIZE(enter))) {
-		int result = ri4_run_first(session, enter, ARRAY_SIZE(enter), NULL, 0,
-			NULL, 0, RI4_SCRIPT_NO_DATA);
-		if (result != ERROR_OK)
-			return result;
-	}
+	int result = ri4_enter_programming(session);
+	if (result != ERROR_OK)
+		return result;
 	uint32_t value = mode;
-	int result = ri4_run_first(session, erase, ARRAY_SIZE(erase),
+	result = ri4_run_first(session, erase, ARRAY_SIZE(erase),
 		mode ? &value : NULL, mode ? 1 : 0, NULL, 0, RI4_SCRIPT_NO_DATA);
-	if (ri4_has_any(session, exit, ARRAY_SIZE(exit))) {
-		int exit_result = ri4_run_first(session, exit, ARRAY_SIZE(exit), NULL, 0,
-			NULL, 0, RI4_SCRIPT_NO_DATA);
-		if (result == ERROR_OK)
-			result = exit_result;
-	}
-	return result;
+	int exit_result = ri4_exit_programming(session);
+	return result == ERROR_OK ? exit_result : result;
 }
 
 int mchp_ri4_native_set_breakpoint(struct mchp_ri4_native *session,
