@@ -1,49 +1,24 @@
-# Binary package builder only. It does not run OpenOCD or access USB devices.
-#
-# Build package images:
-#   docker compose build
-# Export packages to docker/data/dist:
-#   docker compose up --build
-# Optional ARM64 (requires QEMU/binfmt on amd64 hosts):
-#   docker compose --profile arm64 up --build
-
-x-build-args: &build_args
-  JOBS: ${JOBS:-0}
-
 services:
-  linux-amd64:
-    platform: linux/amd64
+  openocd:
     build:
       context: .
-      dockerfile: docker/Dockerfile.linux-package
-      target: package
+      dockerfile: docker/Dockerfile
       args:
-        <<: *build_args
-        CONFIGURE_FLAGS: ${LINUX_CONFIGURE_FLAGS:---enable-ftdi --enable-stlink --enable-cmsis-dap --enable-jlink --enable-jimtcl-maintainer --enable-internal-jimtcl}
+        CONFIGURE_FLAGS: ${CONFIGURE_FLAGS:---enable-ftdi --enable-stlink --enable-cmsis-dap --enable-jlink --enable-jimtcl-maintainer --enable-internal-jimtcl}
+    container_name: openocd
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
     volumes:
-      - ./dist/linux/amd64:/dist
-
-  linux-arm64:
-    profiles: ["arm64"]
-    platform: linux/arm64
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.linux-package
-      target: package
-      args:
-        <<: *build_args
-        CONFIGURE_FLAGS: ${LINUX_CONFIGURE_FLAGS:---enable-ftdi --enable-stlink --enable-cmsis-dap --enable-jlink --enable-jimtcl-maintainer --enable-internal-jimtcl}
-    volumes:
-      - ./dist/linux/arm64:/dist
-
-  windows-x86_64:
-    platform: linux/amd64
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.windows-cross
-      target: package
-      args:
-        <<: *build_args
-        CONFIGURE_FLAGS: ${WINDOWS_CONFIGURE_FLAGS:---enable-ftdi --enable-stlink --enable-cmsis-dap --enable-jlink --enable-internal-libjaylink --enable-jimtcl-maintainer --enable-internal-jimtcl}
-    volumes:
-      - ./dist/windows:/dist
+      - ./docker/data/config:/work/config:ro
+      - ./docker/data/examples:/work/examples:ro
+    ports:
+      - "3333:3333" # GDB
+      - "4444:4444" # Telnet
+      - "6666:6666" # Tcl
+    environment:
+      OPENOCD_BINDTO: 0.0.0.0
+    command:
+      - -f
+      - config/default.cfg

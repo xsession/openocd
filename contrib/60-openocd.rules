@@ -15,6 +15,12 @@ SUBSYSTEM!="usb|tty|hidraw", GOTO="openocd_rules_end"
 # opendous and estick
 ATTRS{idVendor}=="03eb", ATTRS{idProduct}=="204f", MODE="660", GROUP="plugdev", TAG+="uaccess"
 
+# Microchip MPLAB PICkit 4 (CMSIS-DAP/HID)
+ATTRS{idVendor}=="03eb", ATTRS{idProduct}=="2177", MODE="660", GROUP="plugdev", TAG+="uaccess"
+
+# Microchip MPLAB ICD 4 (CMSIS-DAP/HID)
+ATTRS{idVendor}=="03eb", ATTRS{idProduct}=="217c", MODE="660", GROUP="plugdev", TAG+="uaccess"
+
 # Original FT232/FT245 VID:PID
 ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", MODE="660", GROUP="plugdev", TAG+="uaccess"
 
@@ -131,6 +137,12 @@ ATTRS{idVendor}=="04b4", ATTRS{idProduct}=="f139", MODE="660", GROUP="plugdev", 
 
 # Cypress KitProg in CMSIS-DAP mode
 ATTRS{idVendor}=="04b4", ATTRS{idProduct}=="f138", MODE="660", GROUP="plugdev", TAG+="uaccess"
+
+# Microchip PICkit 2 scripting programmer
+ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="0033", MODE="660", GROUP="plugdev", TAG+="uaccess"
+
+# Microchip PICkit 3 scripting programmer
+ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="900a", MODE="660", GROUP="plugdev", TAG+="uaccess"
 
 # Infineon DAP miniWiggler v3
 ATTRS{idVendor}=="058b", ATTRS{idProduct}=="0043", MODE="660", GROUP="plugdev", TAG+="uaccess"

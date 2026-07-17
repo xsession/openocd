@@ -86,7 +86,11 @@ EXTRA_DIST += \
 	tools/logger.pl \
 	tools/rlink_make_speed_table \
 	tools/st7_dtc_as \
-	contrib
+	contrib \
+	docs/programmers/microchip-pickit-icd.md \
+	docs/index.md \
+	MERGE_MANIFEST.md \
+	UNIFIED_VERSION
 
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck

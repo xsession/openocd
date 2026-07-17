@@ -1,65 +1,122 @@
-# OpenOCD: reproducible multi-platform packages
+# xsession OpenOCD unified fork
 
-This repository is an OpenOCD fork with a reviewed packaging layer for Linux, Windows, and macOS. Docker is used to build portable Linux and Windows archives; macOS packages are built natively or in CI.
+**Unified release:** `2026.07.17`
 
-## Build the default packages
+This repository is a single coherent OpenOCD source tree containing the
+cross-platform deployment work and the additional target, adapter, and
+programmer support developed for the `xsession/openocd` fork.
+
+## Included feature sets
+
+### Texas Instruments
+
+- TMS320/C2000 target-family definitions, generated device configurations, and
+  generic scan helpers.
+- C28x target/backend integration carried by the custom fork.
+- Device presets for:
+  - TMS320F28M35x
+  - TMS320F28069
+  - TMS320F280049
+- XDS100v2 and XDS100v3 FTDI adapter configurations.
+- Existing XDS110 support retained.
+- MSPM0C1103 target and board configurations, including XDS110 and CMSIS-DAP
+  launch paths.
+
+See:
+
+- [`docs/targets/ti-tms320-family-support.md`](docs/targets/ti-tms320-family-support.md)
+- [`docs/targets/ti-c2000-support.md`](docs/targets/ti-c2000-support.md)
+- [`docs/targets/ti-mspm0c1103.md`](docs/targets/ti-mspm0c1103.md)
+
+### Microchip programmers
+
+OpenOCD Tcl commands and presets are included for:
+
+- PICkit 2 through `pk2cmd`
+- PICkit 3 through MPLAB IPECMD or legacy `pk2cmd`
+- PICkit 4 through MPLAB IPECMD, with a separate CMSIS-DAP interface preset
+- MPLAB ICD 4 through MPLAB IPECMD, with a separate CMSIS-DAP interface preset
+
+The proprietary PIC/dsPIC ICSP algorithms and device databases are not copied
+into this repository. The integration invokes an installed programming
+backend while presenting one consistent OpenOCD command surface.
+
+See [`docs/programmers/microchip-pickit-icd.md`](docs/programmers/microchip-pickit-icd.md).
+
+### Build and deployment
+
+- Native Linux and macOS build helpers.
+- Docker-based Linux packages.
+- Docker/MinGW Windows cross-packages.
+- Docker Compose runtime support.
+- GitHub Actions workflows.
+- Udev rules covering the added TI and Microchip probes.
+- VS Code and Cortex-Debug examples retained from the custom fork.
+
+See [`docs/index.md`](docs/index.md) for the custom documentation index.
+
+## Clone and bootstrap
 
 ```console
-$ git clone --recursive https://github.com/xsession/openocd.git
-$ cd openocd
-$ docker compose up --build
+git clone --recursive https://github.com/xsession/openocd.git
+cd openocd
+./bootstrap
+./configure --enable-internal-jimtcl --disable-werror
+make -j"$(nproc)"
+make check
 ```
 
-Artifacts:
+Do not use a narrow `--enable-targets=` configuration when the additional
+target backends are required.
 
-```text
-artifacts/linux/amd64/openocd-linux-x86_64.tar.gz
-artifacts/windows/openocd-windows-x86_64.zip
-```
+## Cross-platform package build
 
-Build Linux ARM64 when the Docker engine has ARM64 emulation or runs natively on ARM64:
+The repository-level Docker and script helpers produce Linux and Windows
+archives under `docker/data/dist/`.
 
 ```console
-$ docker compose --profile arm64 up --build
+docker compose up --build
 ```
 
-Build every Docker-supported package with direct local export:
+Or build all configured Docker targets:
 
 ```console
-$ docker buildx bake all
+docker buildx bake all
 ```
 
-## Documentation
-
-The task-oriented guide is under [`docs/`](docs/index.md):
-
-- [Quick start](docs/getting-started/quickstart.md)
-- [Windows package](docs/deployment/windows.md)
-- [Linux packages](docs/deployment/linux.md)
-- [macOS packages](docs/deployment/macos.md)
-- [Build troubleshooting](docs/deployment/troubleshooting.md)
-- [First debug session](docs/usage/first-session.md)
-- [Build-system design](docs/development/build-system.md)
-
-Build the searchable Sphinx site:
+Native macOS packaging is provided by:
 
 ```console
-$ ./build/scripts/build-docs.sh
+./scripts/build-macos-package.sh
 ```
 
-Equivalent commands:
+## Example: TI C2000 with XDS100v2
 
 ```console
-$ docker buildx bake documentation
-$ docker compose --profile docs up --build docs
+openocd   -f interface/ftdi/xds100v2.cfg   -f target/ti/tms320f28069.cfg
 ```
 
-The upstream command reference remains in [`doc/openocd.texi`](doc/openocd.texi), and source API documentation remains configured by [`Doxyfile.in`](Doxyfile.in).
+Use `interface/ftdi/xds100v3.cfg` for an XDS100v3 probe.
 
-## Project status
+## Example: PICkit 4 programming a dsPIC
 
-The packaging flow produces portable archives and keeps platform-specific compatibility fixes isolated in reviewed helper scripts. See [build review](docs/development/build-review.md) for the current build design and [change history](docs/development/change-history.md) for historical fixes.
+```console
+openocd   -f programmer/microchip/pickit4.cfg   -c "microchip device dsPIC33EP128GM604"   -c "microchip executable /opt/microchip/mplabx/mplab_platform/mplab_ipe/ipecmd.sh"   -c "microchip vdd external"   -c "microchip program build/firmware.hex"   -c shutdown
+```
 
-## License
+The PICkit/ICD presets are programming bridges. Full source-level dsPIC
+debugging still requires a dsPIC-capable target backend and GDB server.
 
-OpenOCD is licensed under GNU GPL v2. See [`COPYING`](COPYING) and [`LICENSES/`](LICENSES/).
+## Validation
+
+The unified package is checked for:
+
+- source-tree merge conflicts;
+- missing feature files;
+- Python tests for all Microchip programmer presets;
+- Autotools bootstrap/configuration;
+- OpenOCD compilation when the build environment provides all dependencies;
+- archive checksums.
+
+See [`MERGE_MANIFEST.md`](MERGE_MANIFEST.md) for the exact merge contents and
+validation status.

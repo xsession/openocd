@@ -24,11 +24,12 @@ noinst_LTLIBRARIES += %D%/libtarget.la
 	$(ESIRISC_SRC) \
         $(ARC_SRC) \
 	%D%/avrt.c \
+	%D%/c28x.c \
+	%D%/tms320.c \
 	%D%/dsp563xx.c \
 	%D%/dsp563xx_once.c \
 	%D%/dsp5680xx.c \
 	%D%/hla_target.c \
-	%D%/mchp_ri4_bridge.c \
 	$(ARMV8_SRC) \
 	$(MIPS64_SRC)
 
@@ -195,6 +196,8 @@ ARC_SRC = \
 	%D%/dsp563xx_once.h \
 	%D%/dsp5680xx.h \
 	%D%/breakpoints.h \
+	%D%/c28x.h \
+	%D%/tms320.h \
 	%D%/cortex_m.h \
 	%D%/cortex_a.h \
 	%D%/aarch64.h \

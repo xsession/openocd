@@ -87,6 +87,7 @@ static struct target_type *target_types[] = {
 	&armv8r_target,
 	&avr32_ap7k_target,
 	&avr_target,
+	&c28x_target,
 	&cortexa_target,
 	&cortexm_target,
 	&cortexr4_target,
@@ -102,7 +103,6 @@ static struct target_type *target_types[] = {
 	&hla_target,
 	&ls1_sap_target,
 	&mem_ap_target,
-	&mchp_ri4_bridge_target,
 	&mips_m4k_target,
 	&mips_mips64_target,
 	&or1k_target,
@@ -111,6 +111,7 @@ static struct target_type *target_types[] = {
 	&riscv_target,
 	&stm8_target,
 	&testee_target,
+	&tms320_target,
 	&xscale_target,
 	&xtensa_chip_target,
 };

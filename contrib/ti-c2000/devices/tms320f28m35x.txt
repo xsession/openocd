@@ -1,0 +1,6 @@
+Device family: TMS320F28M35x Concerto
+Cores: Cortex-M3 plus C28x behind an ICEPick router
+Memory: variant dependent
+OpenOCD state in this patch: external ICEPick-C scan and topology discovery
+Required for full support: variant TAP map, Cortex-M3 router integration,
+C28x target backend, dual-subsystem reset control and two flash loaders
