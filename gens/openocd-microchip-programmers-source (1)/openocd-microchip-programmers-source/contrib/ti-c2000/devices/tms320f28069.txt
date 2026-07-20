@@ -1,0 +1,7 @@
+Device: TMS320F28069
+Family: Piccolo F2806x
+Core: C28x with FPU and VCU
+Main flash: 256 KiB
+SRAM: 100 KiB
+OpenOCD state in this patch: ICEPick-C scan and topology discovery only
+Required for full support: C28x target backend plus F2806x flash loader

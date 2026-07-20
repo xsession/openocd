@@ -1,0 +1,17 @@
+id = "tms320f28m35x_c28x"
+name = "TMS320F28M35x_C28x"
+vendor = "Texas Instruments"
+family = "C2000 Concerto F28M35x"
+source = "ccs-targetdb"
+output = "svd/tms320f28m35x_c28x.svd"
+core = "C28X"
+address_unit_bits = 8
+width = 32
+address_scale = 2
+default_register_width = 16
+device_xml_patterns = ["*F28M35*C28*.xml", "*F28M35*.xml", "*f28m35*.xml"]
+include_tokens = ["C28", "CONTROL", "SHARED", "ANALOG"]
+exclude_tokens = ["M3_ONLY"]
+cortex_debug = false
+processor_name = "c28x"
+compatibility_note = "Use the bundled c2000-debug adapter for the Concerto C28x subsystem; launch it together with the Cortex-M3 session for multicore debug."

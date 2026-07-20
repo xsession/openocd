@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach to running Renode C2000",
+      "type": "c2000-debug",
+      "request": "attach",
+      "backend": "renode",
+      "device": "tms320f28069",
+      "renodeLaunch": false,
+      "renodeHost": "127.0.0.1",
+      "renodeMonitorPort": 1234,
+      "renodeCpu": "cpu",
+      "renodeSysbus": "sysbus",
+      "svdPath": "${workspaceFolder}/svd/tms320f28069.svd",
+      "addressScale": 2
+    }
+  ]
+}

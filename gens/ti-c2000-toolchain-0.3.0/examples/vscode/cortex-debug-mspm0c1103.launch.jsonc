@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "MSPM0C1103: OpenOCD",
+      "type": "cortex-debug",
+      "request": "launch",
+      "servertype": "openocd",
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/app.elf",
+      "device": "MSPM0C1103",
+      "svdPath": "${workspaceFolder}/svd/mspm0c1103.svd",
+      "configFiles": [
+        "${workspaceFolder}/openocd/interface.cfg",
+        "${workspaceFolder}/openocd/mspm0c1103.cfg"
+      ],
+      "runToEntryPoint": "main",
+      "showDevDebugOutput": "none"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.war
+*.nar
+*.ear
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+replay_pid*
+
+mchp_mdbcore/__pycache__/
+
+mchp_ipecmd/__pycache__/
+
+mchp_renode_cosim/__pycache__/
+
+mchp_simulator/__pycache__/
+
+tests/__pycache__/

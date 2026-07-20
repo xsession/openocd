@@ -1,0 +1,29 @@
+name: Refresh generated SVDs
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 1 * *"
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e '.[dev]'
+      - run: make update check-generated html mmaps support-pack
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dspic-svd-generated
+          path: |
+            svd/*.svd
+            sources/*
+            metadata/*.json
+            html/*.html
+            mmaps/*.mmap
+            vscode-support/data/*.svd

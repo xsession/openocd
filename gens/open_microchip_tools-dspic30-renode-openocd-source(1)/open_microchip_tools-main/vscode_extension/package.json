@@ -1,0 +1,311 @@
+{
+  "name": "open-microchip-tools",
+  "displayName": "Open Microchip Tools",
+  "description": "Repo-local VS Code commands for PICkit 4/ICD4 probing and firmware simulator debugging.",
+  "version": "0.0.1",
+  "publisher": "local",
+  "license": "MPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xsession/open_microchip_tools.git"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "files": [
+    "out/**",
+    "media/**",
+    "README.md",
+    "LICENSE",
+    "package.json"
+  ],
+  "categories": [
+    "Debuggers",
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "openMicrochipTools.listDevices",
+        "title": "Open Microchip Tools: List Known Devices"
+      },
+      {
+        "command": "openMicrochipTools.probePickit4",
+        "title": "Open Microchip Tools: Probe PICkit 4"
+      },
+      {
+        "command": "openMicrochipTools.probeIcd4",
+        "title": "Open Microchip Tools: Probe ICD4"
+      },
+      {
+        "command": "openMicrochipTools.runZephyrStubDemo",
+        "title": "Open Microchip Tools: Run Zephyr Stub Demo"
+      },
+      {
+        "command": "openMicrochipTools.startHardwareSession",
+        "title": "Open Microchip Tools: Start Hardware Script Session"
+      },
+      {
+        "command": "openMicrochipTools.listHardwareFamilies",
+        "title": "Open Microchip Tools: Browse Hardware Families"
+      },
+      {
+        "command": "openMicrochipTools.showHardwareSessionStatus",
+        "title": "Open Microchip Tools: Show Hardware Session Status",
+        "enablement": "openMicrochipTools.hardwareSessionActive"
+      },
+      {
+        "command": "openMicrochipTools.endHardwareSession",
+        "title": "Open Microchip Tools: End Hardware Script Session",
+        "enablement": "openMicrochipTools.hardwareSessionActive"
+      },
+      {
+        "command": "openMicrochipTools.enterHardwareDebugMode",
+        "title": "Open Microchip Tools: Enter Hardware Debug Mode",
+        "enablement": "openMicrochipTools.hardwareSessionActive"
+      },
+      {
+        "command": "openMicrochipTools.showHardwarePc",
+        "title": "Open Microchip Tools: Show Hardware PC",
+        "enablement": "openMicrochipTools.hardwareSessionActive"
+      },
+      {
+        "command": "openMicrochipTools.setHardwarePc",
+        "title": "Open Microchip Tools: Set Hardware PC",
+        "enablement": "openMicrochipTools.hardwareSessionActive"
+      },
+      {
+        "command": "openMicrochipTools.runHardware",
+        "title": "Open Microchip Tools: Run Hardware Target",
+        "enablement": "openMicrochipTools.hardwareSessionActive"
+      },
+      {
+        "command": "openMicrochipTools.stepHardware",
+        "title": "Open Microchip Tools: Step Hardware Target",
+        "enablement": "openMicrochipTools.hardwareSessionActive"
+      },
+      {
+        "command": "openMicrochipTools.haltHardware",
+        "title": "Open Microchip Tools: Halt Hardware Target",
+        "enablement": "openMicrochipTools.hardwareSessionActive"
+      },
+      {
+        "command": "openMicrochipTools.programHardwareHex",
+        "title": "Open Microchip Tools: Program HEX Over Hardware Session",
+        "enablement": "openMicrochipTools.hardwareSessionActive"
+      },
+      {
+        "command": "openMicrochipTools.startSimulatorSession",
+        "title": "Open Microchip Tools: Start Simulator Session"
+      },
+      {
+        "command": "openMicrochipTools.showSimulatorStatus",
+        "title": "Open Microchip Tools: Show Simulator Status",
+        "enablement": "openMicrochipTools.simulatorSessionActive"
+      },
+      {
+        "command": "openMicrochipTools.stepSimulator",
+        "title": "Open Microchip Tools: Step Simulator",
+        "enablement": "openMicrochipTools.simulatorSessionActive"
+      },
+      {
+        "command": "openMicrochipTools.runSimulator",
+        "title": "Open Microchip Tools: Run Simulator",
+        "enablement": "openMicrochipTools.simulatorSessionActive"
+      },
+      {
+        "command": "openMicrochipTools.haltSimulator",
+        "title": "Open Microchip Tools: Halt Simulator",
+        "enablement": "openMicrochipTools.simulatorSessionActive"
+      },
+      {
+        "command": "openMicrochipTools.addBreakpoint",
+        "title": "Open Microchip Tools: Add Simulator Breakpoint",
+        "enablement": "openMicrochipTools.simulatorSessionActive"
+      },
+      {
+        "command": "openMicrochipTools.refreshViews",
+        "title": "Open Microchip Tools: Refresh Sidebar"
+      },
+      {
+        "command": "openMicrochipTools.showOutputChannel",
+        "title": "Open Microchip Tools: Show Output Channel"
+      },
+      {
+        "command": "openMicrochipTools.clearRecentErrors",
+        "title": "Open Microchip Tools: Clear Recent Errors",
+        "enablement": "openMicrochipTools.hasRecentErrors"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "openMicrochipTools",
+          "title": "Open Microchip Tools",
+          "icon": "media/open-microchip-tools.svg"
+        }
+      ]
+    },
+    "views": {
+      "openMicrochipTools": [
+        {
+          "id": "openMicrochipTools.hardwareView",
+          "name": "Hardware"
+        },
+        {
+          "id": "openMicrochipTools.hardwareControlView",
+          "name": "Hardware Control"
+        },
+        {
+          "id": "openMicrochipTools.simulatorView",
+          "name": "Simulator"
+        },
+        {
+          "id": "openMicrochipTools.toolsView",
+          "name": "Tools"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "openMicrochipTools.refreshViews",
+          "when": "view == openMicrochipTools.hardwareView",
+          "group": "navigation"
+        },
+        {
+          "command": "openMicrochipTools.refreshViews",
+          "when": "view == openMicrochipTools.hardwareControlView",
+          "group": "navigation"
+        },
+        {
+          "command": "openMicrochipTools.refreshViews",
+          "when": "view == openMicrochipTools.simulatorView",
+          "group": "navigation"
+        },
+        {
+          "command": "openMicrochipTools.refreshViews",
+          "when": "view == openMicrochipTools.toolsView",
+          "group": "navigation"
+        },
+        {
+          "command": "openMicrochipTools.showOutputChannel",
+          "when": "view == openMicrochipTools.toolsView",
+          "group": "navigation@2"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Open Microchip Tools",
+      "properties": {
+        "openMicrochipTools.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Python executable used to launch the repo-local backend server."
+        },
+        "openMicrochipTools.pickit4Vid": {
+          "type": "string",
+          "default": "0x04D8",
+          "description": "USB vendor ID used when probing PICkit 4."
+        },
+        "openMicrochipTools.pickit4Pid": {
+          "type": "string",
+          "default": "0x0000",
+          "description": "USB product ID used when probing PICkit 4. Set this to your actual device PID."
+        },
+        "openMicrochipTools.icd4Vid": {
+          "type": "string",
+          "default": "0x04D8",
+          "description": "USB vendor ID used when probing ICD4."
+        },
+        "openMicrochipTools.icd4Pid": {
+          "type": "string",
+          "default": "0x0000",
+          "description": "USB product ID used when probing ICD4. Set this to your actual device PID."
+        },
+        "openMicrochipTools.statusKeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "Commands in progress"
+          ],
+          "description": "RI4 status keys to read from the attached tool."
+        },
+        "openMicrochipTools.hardwareProcessor": {
+          "type": "string",
+          "default": "PIC16F1509",
+          "description": "Processor selector used when loading repo-local scripts.xml content for a hardware session."
+        },
+        "openMicrochipTools.hardwareFamily": {
+          "type": "string",
+          "default": "",
+          "description": "Optional RI4 family hint used to select generated script preferences and capability metadata for hardware sessions."
+        },
+        "openMicrochipTools.hardwareScriptsPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to scripts.xml-compatible content for the selected processor."
+        },
+        "openMicrochipTools.hardwareToolScriptsPath": {
+          "type": "string",
+          "default": "",
+          "description": "Optional path to tool.xml-compatible content for the selected processor."
+        },
+        "openMicrochipTools.hardwareScriptSuffix": {
+          "type": "string",
+          "default": "",
+          "description": "Optional script suffix used when resolving alternate script variants."
+        },
+        "openMicrochipTools.hardwarePcBytes": {
+          "type": "number",
+          "default": 4,
+          "description": "Byte width used when decoding GetPC responses for hardware sessions."
+        },
+        "openMicrochipTools.zephyrStubFamily": {
+          "type": "string",
+          "default": "PIC18",
+          "description": "Default family used by the Zephyr stub demo panel."
+        },
+        "openMicrochipTools.zephyrStubProcessor": {
+          "type": "string",
+          "default": "PIC18F_STUB",
+          "description": "Default processor used by the Zephyr stub demo panel."
+        },
+        "openMicrochipTools.zephyrStubWriteAddress": {
+          "type": "string",
+          "default": "0x10",
+          "description": "Default write address used by the Zephyr stub demo panel."
+        },
+        "openMicrochipTools.zephyrStubWriteHex": {
+          "type": "string",
+          "default": "01020304",
+          "description": "Default hex payload used by the Zephyr stub demo panel."
+        },
+        "openMicrochipTools.defaultDevice": {
+          "type": "string",
+          "default": "PIC16F1509",
+          "description": "Default device for repo-local simulator sessions."
+        },
+        "openMicrochipTools.simulatorMaxSteps": {
+          "type": "number",
+          "default": 10000,
+          "description": "Default instruction budget when running the simulator from the extension."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "npm run compile",
+    "package": "npx --yes @vscode/vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "@types/vscode": "^1.90.0",
+    "typescript": "^5.5.4"
+  }
+}

@@ -1,0 +1,11 @@
+// dsPIC30F5011 custom-core validation platform.
+// The custom Renode core shares the dsPIC33 translator, while Harvard program
+// flash is placed at 0x100000 on the flat sysbus to avoid data-space overlap.
+cpu: CPU.DSPIC33 @ sysbus
+    cpuType: "dspic30f5011"
+
+flash: Memory.MappedMemory @ sysbus 0x100000
+    size: 0x00AC00
+
+ram: Memory.MappedMemory @ sysbus 0x001000
+    size: 0x001000

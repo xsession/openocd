@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="300" viewBox="0 0 760 300">
+  <style>
+    .title { font: 16px sans-serif; fill: #111827; }
+    .text { font: 13px sans-serif; fill: #111827; }
+    .line { stroke: #111827; stroke-width: 2; }
+    .dash { stroke: #6b7280; stroke-width: 2; stroke-dasharray: 6 6; }
+    .arrow { stroke: #111827; stroke-width: 2; marker-end: url(#m); }
+  </style>
+  <defs>
+    <marker id="m" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#111827" />
+    </marker>
+  </defs>
+
+  <text class="title" x="40" y="35">PING round-trip</text>
+
+  <text class="text" x="120" y="70">Client</text>
+  <text class="text" x="520" y="70">Server</text>
+
+  <line class="line" x1="140" y1="80" x2="140" y2="260" />
+  <line class="line" x1="540" y1="80" x2="540" y2="260" />
+
+  <line class="arrow" x1="140" y1="110" x2="540" y2="110" />
+  <text class="text" x="210" y="103">"PING\n"</text>
+
+  <line class="arrow" x1="540" y1="145" x2="140" y2="145" />
+  <text class="text" x="210" y="138">"EVENT:PONG\n"</text>
+
+  <line class="arrow" x1="540" y1="175" x2="140" y2="175" />
+  <text class="text" x="210" y="168">"PONG\n"</text>
+
+  <line class="arrow" x1="540" y1="205" x2="140" y2="205" />
+  <text class="text" x="210" y="198">"Operation Succeeded\n"</text>
+
+  <line class="arrow" x1="540" y1="235" x2="140" y2="235" />
+  <text class="text" x="210" y="228">"ERRORCODE:0\n"</text>
+</svg>

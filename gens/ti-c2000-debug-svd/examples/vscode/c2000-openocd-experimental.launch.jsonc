@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "F28069: existing OpenOCD server",
+      "type": "c2000-debug",
+      "request": "attach",
+      "backend": "openocd",
+      "device": "tms320f28069",
+      "openocdHost": "127.0.0.1",
+      "openocdTelnetPort": 4444,
+      "svdPath": "${workspaceFolder}/svd/tms320f28069.svd",
+      "addressScale": 2,
+      "registerProfile": "c28x-fpu-vcu"
+    }
+  ]
+}

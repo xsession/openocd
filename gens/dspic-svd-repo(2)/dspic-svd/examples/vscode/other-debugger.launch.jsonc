@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "dsPIC with another Debug Adapter Protocol debugger",
+      "type": "replace-with-your-dspic-debug-adapter",
+      "request": "launch",
+      "program": "${workspaceFolder}/firmware.elf",
+      "svdPath": "${workspaceFolder}/svd/dspic33ep128gm604.svd"
+    }
+  ]
+}

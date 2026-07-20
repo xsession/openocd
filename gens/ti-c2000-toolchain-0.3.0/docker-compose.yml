@@ -1,0 +1,7 @@
+services:
+  ti-svd:
+    build: .
+    volumes:
+      - .:/work
+      - ${CCS_TARGETDB:-./sources/raw/ccs-targetdb}:/ccs-targetdb:ro
+    command: ["discover", "--targetdb", "/ccs-targetdb"]

@@ -1,0 +1,9 @@
+OpenOCD XDS100v2/XDS100v3 support bundle
+
+Unless a file states otherwise, this bundle is distributed under the GNU
+General Public License version 2 or, at your option, any later version.
+
+The OpenOCD source patch and OpenOCD Tcl configuration files are intended for
+use with the GPL-licensed OpenOCD project. Texas Instruments, XDS100, C2000,
+and related names are trademarks of their respective owners. This project is
+not affiliated with or endorsed by Texas Instruments.

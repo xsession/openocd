@@ -1,0 +1,44 @@
+{
+  "observedProfile": "PK4_OBSERVED_DUAL_APP_LAYOUT",
+  "architecture": "arm-cortex-m",
+  "firmwareObservationArtifacts": {
+    "observedJson": "docs/pk4_firmware_observed.json",
+    "recoveryProjectJson": "docs/pk4_recovery_project.json"
+  },
+  "slots": {
+    "boot": {
+      "base": 4194304,
+      "windowSize": 49152,
+      "role": "boot strap slot",
+      "identity": "PK4 observed boot image"
+    },
+    "app": {
+      "base": 4243456,
+      "windowSize": 65536,
+      "initialSp": 541365344,
+      "resetVector": 4253869,
+      "role": "RI4 host-facing app slot",
+      "identity": "PK4 observed primary RI4 app"
+    },
+    "app2": {
+      "base": 5242880,
+      "windowSize": 163840,
+      "initialSp": 541108496,
+      "resetVector": 5259657,
+      "role": "CMSIS-DAP control/update slot",
+      "identity": "MPLAB PICkit 4 CMSIS-DAP"
+    }
+  },
+  "sourceModules": {
+    "zephyr": [
+      "src/device_state.c",
+      "src/pk4_recovered_project.c",
+      "src/script_dispatch.c"
+    ],
+    "host": [
+      "pk4_observed_profile.py",
+      "pk4_observed_session.py",
+      "pk4_recovery_project.py"
+    ]
+  }
+}

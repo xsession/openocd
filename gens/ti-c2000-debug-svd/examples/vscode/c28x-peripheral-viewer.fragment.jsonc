@@ -1,0 +1,5 @@
+{
+  // Merge this property into a launch configuration owned by a
+  // C28x-capable debug extension. Do not change its type to cortex-debug.
+  "svdPath": "${workspaceFolder}/svd/tms320f28069.svd"
+}

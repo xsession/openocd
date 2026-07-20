@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "dsPIC33EP128GM604: external GDB server",
+      "type": "cortex-debug",
+      "request": "attach",
+      "servertype": "external",
+      "gdbTarget": "localhost:3333",
+      "gdbPath": "C:/path/to/dspic-capable-gdb.exe",
+      "objdumpPath": "C:/path/to/xc16-objdump.exe",
+      "toolchainPrefix": "xc16",
+      "executable": "${workspaceFolder}/dist/default/production/firmware.X.production.elf",
+      "device": "dsPIC33EP128GM604",
+      "svdFile": "${workspaceFolder}/svd/dspic33ep128gm604.svd",
+      "showDevDebugOutput": "both"
+    }
+  ]
+}

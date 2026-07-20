@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="GPIO">
+  <register name="DIR" offset="0x0" width="16" access="rw" reset="0x0000">
+    <field name="PIN0" lsb="0" width="1">
+      <enum name="INPUT" value="0" />
+      <enum name="OUTPUT" value="1" />
+    </field>
+  </register>
+  <register name="DATA" offset="0x1" width="16" access="rw" />
+</module>

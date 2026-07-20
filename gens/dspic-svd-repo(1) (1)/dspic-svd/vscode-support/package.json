@@ -1,0 +1,42 @@
+{
+  "publisher": "codelayer",
+  "name": "cortex-debug-dp-dspic",
+  "displayName": "Cortex-Debug: Device Support Pack - Microchip dsPIC",
+  "description": "CMSIS-SVD peripheral definitions for selected Microchip dsPIC30F and dsPIC33 devices.",
+  "version": "0.2.0",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Debuggers"
+  ],
+  "keywords": [
+    "Cortex-Debug",
+    "Cortex-Debug Device Support Pack",
+    "dsPIC",
+    "Microchip",
+    "SVD",
+    "embedded"
+  ],
+  "activationEvents": [
+    "onDebugResolve:cortex-debug"
+  ],
+  "main": "./extension.js",
+  "extensionDependencies": [
+    "marus25.cortex-debug"
+  ],
+  "files": [
+    "extension.js",
+    "data/*.svd",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "^3.6.0"
+  },
+  "license": "Apache-2.0"
+}

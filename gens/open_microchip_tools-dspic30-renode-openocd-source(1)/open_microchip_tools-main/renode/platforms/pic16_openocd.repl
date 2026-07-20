@@ -1,0 +1,10 @@
+// PIC16 custom-core validation platform.
+cpu: CPU.PIC16 @ sysbus
+    cpuType: "pic16"
+
+// 8 K words represented as 16 KiB little-endian byte storage.
+flash: Memory.MappedMemory @ sysbus 0x000000
+    size: 0x004000
+
+data: Memory.MappedMemory @ sysbus 0x200000
+    size: 0x000100

@@ -1,0 +1,9 @@
+# Renode custom-cores smoke setup for dsPIC30F5011.
+# Run from a checkout of https://github.com/xsession/renode/tree/custom-cores.
+$bin ?= $CWD/firmware.elf
+$gdb_port ?= 3333
+
+mach create "dspic30f5011"
+machine LoadPlatformDescription @platforms/cpus/microchip/dspic30f5011.repl
+sysbus LoadELF $bin
+machine StartGdbServer $gdb_port true cpu=sysbus.cpu

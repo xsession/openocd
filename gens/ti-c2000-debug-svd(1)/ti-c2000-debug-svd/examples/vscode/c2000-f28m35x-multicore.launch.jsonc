@@ -1,0 +1,34 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "F28M35x: CCS dual-core",
+      "type": "c2000-debug",
+      "request": "launch",
+      "backend": "ccs",
+      "device": "tms320f28m35x",
+      "ccsRoot": "C:/ti/ccs2040",
+      "ccxml": "${workspaceFolder}/targetConfigs/F28M35x_XDS110.ccxml",
+      "cores": [
+        {
+          "name": "C28x control subsystem",
+          "pattern": "C28xx|C28x",
+          "architecture": "c28x",
+          "device": "tms320f28m35x_c28x",
+          "addressScale": 2,
+          "executable": "${workspaceFolder}/Debug/c28x.out"
+        },
+        {
+          "name": "Cortex-M3 communication subsystem",
+          "pattern": "Cortex_M3|CortexM3|M3",
+          "architecture": "cortex-m3",
+          "device": "tms320f28m35x_m3",
+          "addressScale": 1,
+          "executable": "${workspaceFolder}/Debug/m3.out"
+        }
+      ],
+      "svdPath": "${workspaceFolder}/svd/tms320f28m35x_c28x.svd",
+      "runToEntryPoint": "main"
+    }
+  ]
+}

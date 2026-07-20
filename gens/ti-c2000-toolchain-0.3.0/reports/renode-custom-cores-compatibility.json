@@ -1,0 +1,56 @@
+{
+  "source": {
+    "renode_commit": "6eb3f1f97a36f6f0e265455b6291ae1ee958cc68",
+    "infrastructure_commit": "40d3abacd9d183cfbe988a91a25020fb2301ac8a"
+  },
+  "c2000_cpu_present": true,
+  "gdb_architecture": "c2000",
+  "gdb_features_empty": true,
+  "register_mapping": [
+    "ACC",
+    "AH",
+    "AL",
+    "P",
+    "PH",
+    "PL",
+    "XT",
+    "T",
+    "XAR0",
+    "XAR1",
+    "XAR2",
+    "XAR3",
+    "XAR4",
+    "XAR5",
+    "XAR6",
+    "XAR7",
+    "AR0",
+    "AR1",
+    "AR2",
+    "AR3",
+    "AR4",
+    "AR5",
+    "AR6",
+    "AR7",
+    "SP",
+    "PC",
+    "RPC",
+    "ST0",
+    "ST1",
+    "IFR",
+    "IER",
+    "DP"
+  ],
+  "register_mapping_matches_adapter": true,
+  "platforms": {
+    "tms320f28069": true,
+    "tms320f280049": true,
+    "tms320f28m35x": false
+  },
+  "branch_smoke_test": {
+    "completed_marker": true,
+    "core_dump_after_completion": true,
+    "store_instruction_not_implemented_note": true
+  },
+  "recommended_backend": "renode-monitor",
+  "compatible_for_monitor_adapter_tests": true
+}

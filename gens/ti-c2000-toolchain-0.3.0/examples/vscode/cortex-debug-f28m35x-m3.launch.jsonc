@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "F28M35x Cortex-M3: external GDB server",
+      "type": "cortex-debug",
+      "request": "launch",
+      "servertype": "external",
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/m3/app.elf",
+      "device": "TMS320F28M35x_M3",
+      "svdPath": "${workspaceFolder}/svd/tms320f28m35x_m3.svd",
+      "gdbTarget": "localhost:3333",
+      "runToEntryPoint": "main",
+      "showDevDebugOutput": "none"
+    }
+  ]
+}

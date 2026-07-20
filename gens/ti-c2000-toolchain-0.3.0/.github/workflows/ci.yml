@@ -1,0 +1,33 @@
+name: ci
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: sudo apt-get update && sudo apt-get install -y tcl gcc
+      - run: python -m pip install .
+      - run: python -m unittest discover -s tests -v
+      - run: ti-svd list
+      - run: ti-svd compatibility
+      - run: ti-svd vscode-config mspm0c1103 --output build/mspm0c1103.launch.json
+      - run: ti-svd vscode-config tms320f28069 --backend mock --output build/f28069.launch.json
+      - run: ti-svd validate
+      - working-directory: extension
+        run: npm test
+      - working-directory: openocd
+        run: ./tests/run.sh
+      - working-directory: extension
+        run: npm run package
+      - run: test -f extension/c2000-debug-0.3.0.vsix
+      - run: python scripts/make_release.py
+      - run: python scripts/validate_release.py dist/ti-c2000-toolchain-0.3.0.zip

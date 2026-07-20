@@ -1,0 +1,6 @@
+# xsession/renode custom-cores branch
+# The c2000-debug adapter loads the executable after this script is included.
+using sysbus
+mach create "f28069"
+machine LoadPlatformDescription @platforms/cpus/ti/tms320f28069.repl
+pause

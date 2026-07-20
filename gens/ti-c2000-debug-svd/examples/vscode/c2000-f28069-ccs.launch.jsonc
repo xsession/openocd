@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "F28069: CCS/XDS110",
+      "type": "c2000-debug",
+      "request": "launch",
+      "backend": "ccs",
+      "device": "tms320f28069",
+      "ccsRoot": "C:/ti/ccs2040",
+      "ccxml": "${workspaceFolder}/targetConfigs/F28069_XDS110.ccxml",
+      "corePattern": "C28xx|C28x",
+      "executable": "${workspaceFolder}/Debug/app.out",
+      "svdPath": "${workspaceFolder}/svd/tms320f28069.svd",
+      "addressScale": 2,
+      "registerProfile": "c28x-fpu-vcu",
+      "runToEntryPoint": "main",
+      "verifyProgram": false
+    }
+  ]
+}

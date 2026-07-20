@@ -1,0 +1,14 @@
+{
+  "mspm0c1103": {
+    "kind": "cmsis-pack",
+    "vendor": "TexasInstruments",
+    "pack": "MSPM0C110X_DFP",
+    "version": "1.2.0",
+    "url": "https://downloads.ti.com/msp430/esd/MSPM0-CMSIS/MSPM0C110X/latest/exports/TexasInstruments.MSPM0C110X_DFP.1.2.0.pack",
+    "svd_member": "MSPM0C110X.svd"
+  },
+  "c2000": {
+    "kind": "ccs-targetdb",
+    "description": "Generated from the devices and Modules directories in a local TI Code Composer Studio installation"
+  }
+}

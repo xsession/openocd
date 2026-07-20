@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "dsPIC30F5011: Cortex-Debug via Renode",
+      "type": "cortex-debug",
+      "request": "attach",
+      "servertype": "external",
+      "gdbTarget": "localhost:3333",
+      "gdbPath": "C:/path/to/dspic-capable-gdb.exe",
+      "objdumpPath": "C:/path/to/xc16-objdump.exe",
+      "toolchainPrefix": "xc16",
+      "executable": "${workspaceFolder}/firmware.elf",
+      "device": "dsPIC30F5011",
+      "svdFile": "${workspaceFolder}/svd/dspic30f5011.svd",
+      "runToEntryPoint": "main",
+      "showDevDebugOutput": "both"
+    }
+  ]
+}

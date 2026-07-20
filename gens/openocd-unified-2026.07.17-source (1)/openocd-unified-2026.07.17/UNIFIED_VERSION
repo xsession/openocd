@@ -1,0 +1,8 @@
+xsession-openocd-unified 2026.07.17
+
+Feature baseline:
+- TI TMS320/C2000 and C28x custom support
+- XDS100v2/XDS100v3 and existing XDS110 support
+- TI MSPM0C1103 support
+- PICkit 2/3/4 and MPLAB ICD 4 programming integration
+- Cross-platform packaging and documentation

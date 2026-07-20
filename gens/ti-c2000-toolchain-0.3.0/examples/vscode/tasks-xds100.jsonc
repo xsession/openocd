@@ -1,0 +1,45 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "OpenOCD: F28069 XDS100v2",
+      "type": "process",
+      "command": "${config:c2000.openocdPath}",
+      "args": [
+        "-f", "interface/ftdi/xds100v2.cfg",
+        "-f", "target/ti/tms320f28069.cfg",
+        "-c", "adapter speed 1000"
+      ],
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "openocd",
+        "pattern": [{ "regexp": "^(.*)$", "message": 1 }],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*Open On-Chip Debugger.*",
+          "endsPattern": ".*Listening on port 4444 for telnet connections.*"
+        }
+      }
+    },
+    {
+      "label": "OpenOCD: F280049 XDS100v3",
+      "type": "process",
+      "command": "${config:c2000.openocdPath}",
+      "args": [
+        "-f", "interface/ftdi/xds100v3.cfg",
+        "-f", "target/ti/tms320f280049.cfg",
+        "-c", "adapter speed 1000"
+      ],
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "openocd",
+        "pattern": [{ "regexp": "^(.*)$", "message": 1 }],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*Open On-Chip Debugger.*",
+          "endsPattern": ".*Listening on port 4444 for telnet connections.*"
+        }
+      }
+    }
+  ]
+}

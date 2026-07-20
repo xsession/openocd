@@ -1,0 +1,31 @@
+name: Microchip programmer bridge
+
+on:
+  push:
+    paths:
+      - 'tcl/programmer/microchip/**'
+      - 'tcl/interface/microchip/**'
+      - 'testing/microchip_programmer/**'
+      - 'contrib/60-openocd.rules'
+      - '.github/workflows/microchip-programmers.yml'
+  pull_request:
+    paths:
+      - 'tcl/programmer/microchip/**'
+      - 'tcl/interface/microchip/**'
+      - 'testing/microchip_programmer/**'
+      - 'contrib/60-openocd.rules'
+      - '.github/workflows/microchip-programmers.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  command-generation-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Tcl
+        run: sudo apt-get update && sudo apt-get install -y tcl
+      - name: Run programmer bridge tests
+        run: python3 testing/microchip_programmer/test_microchip_programmer.py

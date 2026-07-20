@@ -1,0 +1,602 @@
+{
+  "app": {
+    "bannerOffsets": {
+      "MPLAB PICkit 4 CMSIS-DAP": 480992
+    },
+    "chunkCount": 30257,
+    "endAddress": "0x00600000",
+    "inferredArchitecture": {
+      "confidence": "high",
+      "name": "arm-cortex-m",
+      "reason": "initial SP is in SRAM-like range and reset vector has Thumb bit set"
+    },
+    "keywordOffsets": {
+      "CMSIS": 481007,
+      "Microchip": 330292,
+      "PICkit 4": 288748,
+      "WINUSB": 329602
+    },
+    "path": "vendor\\mplabx\\tool_firmware\\pk4\\app.hex",
+    "sampleStrings": [
+      "ZC I`D",
+      "#aca#xZ",
+      "bii8>iiiiiii[",
+      "GvKxJH",
+      "+N!%+H,K",
+      ")O+K8x",
+      "(F#K$M",
+      "K Jyx8x",
+      "%y+K(Ff",
+      "ZC  ZC ",
+      "@$ZC 0",
+      "@!CAe0",
+      "pd#CL|$",
+      "dpGAdpG",
+      "p!C`Ch",
+      "`pG@ipGCi",
+      "rKrNsLsIZ",
+      "##`!`*K",
+      "@ \\tD ",
+      "# p Fap",
+      " p Fcp",
+      "#(p(F!F",
+      "zs`CSC",
+      "F\"K%F\"O",
+      "##`5N3yqy",
+      "@ ,[C ",
+      "ppG,[C ",
+      "K`G F]",
+      "`*JZ`*J",
+      "a*JZa*J",
+      "b*JZb*J",
+      "c*JZc*J",
+      "d*JZd*J",
+      "e*JZg*J",
+      "`(JZ`(J",
+      "a(JZa(JZe(J",
+      "f(JZf(J",
+      "g(JZgpG",
+      "@ X[C ",
+      "%H!F6hCp",
+      "H!F7hCp",
+      "(H)FCp",
+      "\"Cp!F#",
+      "{{UJ0;",
+      "p;|M+ ",
+      "zphC:K",
+      "\\[C M%A",
+      "G\\[C U",
+      "ffffff",
+      "!L\"K\"N'F",
+      "`&`ecea",
+      "$L@\"$Nbc",
+      "K@\" FZc",
+      "$tI8[C ",
+      "'KiF'H",
+      "G #k` H K",
+      "1N1O3x",
+      "G@#/H{`/K",
+      "\"!K!HZ`!K",
+      "Ov #cO",
+      "!p +c&c&a",
+      "![ +cO",
+      "!o c`ca",
+      "0#` #kcka"
+    ],
+    "segments": [
+      {
+        "bannerOffsets": {
+          "MPLAB PICkit 4 CMSIS-DAP": null
+        },
+        "end": "0x0045DA78",
+        "firstBytes": "60944420ade8400091e9400091e94000",
+        "keywordOffsets": {
+          "CMSIS": null,
+          "Microchip": 330292,
+          "PICkit 4": 288748,
+          "WINUSB": 329602
+        },
+        "sampleStrings": [
+          "ZC I`D",
+          "#aca#xZ",
+          "bii8>iiiiiii[",
+          "GvKxJH",
+          "+N!%+H,K",
+          ")O+K8x",
+          "(F#K$M",
+          "K Jyx8x",
+          "%y+K(Ff",
+          "ZC  ZC ",
+          "@$ZC 0",
+          "@!CAe0"
+        ],
+        "size": "0x51A78",
+        "start": "0x0040C000",
+        "vectorWords": [
+          "0x20449460",
+          "0x0040E8AD",
+          "0x0040E991",
+          "0x0040E991"
+        ],
+        "wordReferences": {
+          "0x0040C000": [
+            "0x0040E970",
+            "0x00447D40",
+            "0x0044843C"
+          ],
+          "0x0040E8AD": [
+            "0x0040C004"
+          ],
+          "0x00500000": [
+            "0x00456864"
+          ],
+          "0x00504189": [],
+          "0xE000ED00": [
+            "0x0040CE48",
+            "0x0040E974",
+            "0x0040E9D4",
+            "0x00414608",
+            "0x00414CD8",
+            "0x00414D0C",
+            "0x00434720",
+            "0x00434788",
+            "0x0043F608",
+            "0x0043F65C",
+            "0x00446174",
+            "0x00446A98",
+            "0x00447140",
+            "0x004473D0",
+            "0x00447E18",
+            "0x00447E80",
+            "0x004484C0",
+            "0x00448528"
+          ]
+        }
+      },
+      {
+        "bannerOffsets": {
+          "MPLAB PICkit 4 CMSIS-DAP": 146536
+        },
+        "end": "0x00524878",
+        "firstBytes": "10a94020894150008541500085415000",
+        "keywordOffsets": {
+          "CMSIS": 146551,
+          "Microchip": 146500,
+          "PICkit 4": 146542,
+          "WINUSB": null
+        },
+        "sampleStrings": [
+          "06p #xC",
+          "04[ #xC",
+          "Mv #xaxC",
+          "F M!K(p",
+          "K@! \"Y`Z`",
+          "\"p 'O#xaxC",
+          "bhJDz`",
+          "x03asa",
+          "M0`PY@",
+          " pG,}D",
+          " hkF\"y",
+          "@<@5@6"
+        ],
+        "size": "0x24878",
+        "start": "0x00500000",
+        "vectorWords": [
+          "0x2040A910",
+          "0x00504189",
+          "0x00504185",
+          "0x00504185"
+        ],
+        "wordReferences": {
+          "0x0040C000": [],
+          "0x0040E8AD": [],
+          "0x00500000": [
+            "0x005041F0"
+          ],
+          "0x00504189": [
+            "0x00500004"
+          ],
+          "0xE000ED00": [
+            "0x005041F4",
+            "0x0051EA04",
+            "0x005228BC"
+          ]
+        }
+      },
+      {
+        "bannerOffsets": {
+          "MPLAB PICkit 4 CMSIS-DAP": null
+        },
+        "end": "0x00600000",
+        "firstBytes": "29eb00001505020088fc58a3",
+        "keywordOffsets": {
+          "CMSIS": null,
+          "Microchip": null,
+          "PICkit 4": null,
+          "WINUSB": null
+        },
+        "sampleStrings": [],
+        "size": "0xC",
+        "start": "0x005FFFF4",
+        "vectorWords": [
+          "0x0000EB29",
+          "0x00020515",
+          "0xA358FC88"
+        ],
+        "wordReferences": {
+          "0x0040C000": [],
+          "0x0040E8AD": [],
+          "0x00500000": [],
+          "0x00504189": [],
+          "0xE000ED00": []
+        }
+      }
+    ],
+    "startAddress": "0x0040C000",
+    "stringFlags": {
+      "cmsis": true,
+      "microchip": true,
+      "pickit4": true,
+      "winusb": true
+    },
+    "tailRecord": {
+      "address": "0x005FFFF4",
+      "prefix": "0x0000EB29",
+      "rawHex": "29eb00001505020088fc58a3",
+      "suffix": "0xA358FC88",
+      "versionWord": "0x00020515"
+    },
+    "vectorWords": [
+      "0x20449460",
+      "0x0040E8AD",
+      "0x0040E991",
+      "0x0040E991"
+    ],
+    "wordReferences": {
+      "0x0040C000": [
+        "0x0040E970",
+        "0x00447D40",
+        "0x0044843C"
+      ],
+      "0x0040E8AD": [
+        "0x0040C004"
+      ],
+      "0x00500000": [
+        "0x00456864",
+        "0x005041F0"
+      ],
+      "0x00504189": [
+        "0x00500004"
+      ],
+      "0xE000ED00": [
+        "0x0040CE48",
+        "0x0040E974",
+        "0x0040E9D4",
+        "0x00414608",
+        "0x00414CD8",
+        "0x00414D0C",
+        "0x00434720",
+        "0x00434788",
+        "0x0043F608",
+        "0x0043F65C",
+        "0x00446174",
+        "0x00446A98",
+        "0x00447140",
+        "0x004473D0",
+        "0x00447E18",
+        "0x00447E80",
+        "0x004484C0",
+        "0x00448528",
+        "0x005041F4",
+        "0x0051EA04",
+        "0x005228BC"
+      ]
+    }
+  },
+  "boot": {
+    "bannerOffsets": {
+      "MPLAB PICkit 4 CMSIS-DAP": null
+    },
+    "chunkCount": 2226,
+    "endAddress": "0x0040C000",
+    "inferredArchitecture": {
+      "confidence": "high",
+      "name": "arm-cortex-m",
+      "reason": "initial SP is in SRAM-like range and reset vector has Thumb bit set"
+    },
+    "keywordOffsets": {
+      "CMSIS": null,
+      "Microchip": 34136,
+      "PICkit 4": 34179,
+      "WINUSB": 33922
+    },
+    "path": "vendor\\mplabx\\tool_firmware\\pk4\\boot.hex",
+    "sampleStrings": [
+      "  lL!FlK",
+      "[KXhbL!F",
+      "70fL h",
+      "2F)F F",
+      "p2F)F F",
+      "@pGpGpGpG",
+      "$%F<N)F F",
+      "$'N[hS",
+      "vJwKwH",
+      "\"F1F(F",
+      "# @!#JB",
+      "taa\"IQ",
+      "5F hah",
+      " h(`#y+q",
+      "*FiF F",
+      ";FBF1F(F",
+      ";F\"F1F(F",
+      ";F2FiF",
+      "dWJ=0#",
+      "bZcZiB",
+      "RZaZiB",
+      "\"ZcZiB",
+      "#ccciC",
+      "cccciC",
+      "ScaciC",
+      "FtK[xC",
+      "pG@hpG",
+      "KXxpGF",
+      "`Z`pGL",
+      "p+F!FQ",
+      "p`FpGp",
+      "MTIxxxxxxxxx",
+      "Qkkbal",
+      "WINUSB",
+      "Microchip Technology Incorporated",
+      " PICkit 4"
+    ],
+    "segments": [
+      {
+        "bannerOffsets": {
+          "MPLAB PICkit 4 CMSIS-DAP": null
+        },
+        "end": "0x00408B10",
+        "firstBytes": "08dc4020ad0140002902400029024000",
+        "keywordOffsets": {
+          "CMSIS": null,
+          "Microchip": 34136,
+          "PICkit 4": 34179,
+          "WINUSB": 33922
+        },
+        "sampleStrings": [
+          "  lL!FlK",
+          "[KXhbL!F",
+          "70fL h",
+          "2F)F F",
+          "p2F)F F",
+          "@pGpGpGpG",
+          "$%F<N)F F",
+          "$'N[hS",
+          "vJwKwH",
+          "\"F1F(F",
+          "# @!#JB",
+          "taa\"IQ"
+        ],
+        "size": "0x8B10",
+        "start": "0x00400000",
+        "vectorWords": [
+          "0x2040DC08",
+          "0x004001AD",
+          "0x00400229",
+          "0x00400229"
+        ],
+        "wordReferences": {
+          "0x0040C000": [
+            "0x00400160",
+            "0x0040019C",
+            "0x00401050",
+            "0x004050F0",
+            "0x00405288",
+            "0x004052C8",
+            "0x004058E8",
+            "0x00405C14",
+            "0x00405C34",
+            "0x004083C4"
+          ],
+          "0x0040E8AD": [],
+          "0x00500000": [],
+          "0x00504189": [],
+          "0xE000ED00": [
+            "0x00400220",
+            "0x0040026C",
+            "0x004004F4",
+            "0x00400B7C",
+            "0x00401044",
+            "0x00402540",
+            "0x004025AC",
+            "0x00402928",
+            "0x004054C8",
+            "0x004056B4",
+            "0x004058BC",
+            "0x00405C10",
+            "0x004063E0",
+            "0x004068A0",
+            "0x00406BC4",
+            "0x00406C04",
+            "0x00406D18",
+            "0x004081B0",
+            "0x00408398"
+          ]
+        }
+      },
+      {
+        "bannerOffsets": {
+          "MPLAB PICkit 4 CMSIS-DAP": null
+        },
+        "end": "0x0040C000",
+        "firstBytes": "29eb00000000010012a7c502",
+        "keywordOffsets": {
+          "CMSIS": null,
+          "Microchip": null,
+          "PICkit 4": null,
+          "WINUSB": null
+        },
+        "sampleStrings": [],
+        "size": "0xC",
+        "start": "0x0040BFF4",
+        "vectorWords": [
+          "0x0000EB29",
+          "0x00010000",
+          "0x02C5A712"
+        ],
+        "wordReferences": {
+          "0x0040C000": [],
+          "0x0040E8AD": [],
+          "0x00500000": [],
+          "0x00504189": [],
+          "0xE000ED00": []
+        }
+      }
+    ],
+    "startAddress": "0x00400000",
+    "stringFlags": {
+      "cmsis": false,
+      "microchip": true,
+      "pickit4": true,
+      "winusb": true
+    },
+    "tailRecord": {
+      "address": "0x0040BFF4",
+      "prefix": "0x0000EB29",
+      "rawHex": "29eb00000000010012a7c502",
+      "suffix": "0x02C5A712",
+      "versionWord": "0x00010000"
+    },
+    "vectorWords": [
+      "0x2040DC08",
+      "0x004001AD",
+      "0x00400229",
+      "0x00400229"
+    ],
+    "wordReferences": {
+      "0x0040C000": [
+        "0x00400160",
+        "0x0040019C",
+        "0x00401050",
+        "0x004050F0",
+        "0x00405288",
+        "0x004052C8",
+        "0x004058E8",
+        "0x00405C14",
+        "0x00405C34",
+        "0x004083C4"
+      ],
+      "0x0040E8AD": [],
+      "0x00500000": [],
+      "0x00504189": [],
+      "0xE000ED00": [
+        "0x00400220",
+        "0x0040026C",
+        "0x004004F4",
+        "0x00400B7C",
+        "0x00401044",
+        "0x00402540",
+        "0x004025AC",
+        "0x00402928",
+        "0x004054C8",
+        "0x004056B4",
+        "0x004058BC",
+        "0x00405C10",
+        "0x004063E0",
+        "0x004068A0",
+        "0x00406BC4",
+        "0x00406C04",
+        "0x00406D18",
+        "0x004081B0",
+        "0x00408398"
+      ]
+    }
+  },
+  "jam": {
+    "files": [
+      {
+        "name": "boot.hex",
+        "value": "010000"
+      },
+      {
+        "name": "scripts.xml",
+        "value": "001008"
+      }
+    ],
+    "path": "vendor\\mplabx\\tool_firmware\\pk4\\PK4FW_001000.jam",
+    "slots": [
+      {
+        "address": "0x0040C000",
+        "slot": "app1",
+        "version": "020515"
+      },
+      {
+        "address": "0x00500000",
+        "slot": "app2",
+        "version": "1.15.20"
+      },
+      {
+        "address": "0xFFFFFFFF",
+        "slot": "app3",
+        "version": "000000"
+      },
+      {
+        "address": "0xFFFFFFFF",
+        "slot": "app4",
+        "version": "000000"
+      },
+      {
+        "address": "0xFFFFFFFF",
+        "slot": "app5",
+        "version": "000000"
+      },
+      {
+        "address": "0xFFFFFFFF",
+        "slot": "app6",
+        "version": "000000"
+      },
+      {
+        "address": "0xFFFFFFFF",
+        "slot": "app7",
+        "version": "000000"
+      },
+      {
+        "address": "0xFFFFFFFF",
+        "slot": "app8",
+        "version": "000000"
+      }
+    ]
+  },
+  "observations": {
+    "appReferencesBothSlots": true,
+    "bootBeforeApp": true,
+    "bootReferencesPrimaryApp": true,
+    "bootReferencesSecondaryApp": false,
+    "cmsisPresentInSecondaryApp": true,
+    "hasSecondaryAppCandidate": true,
+    "likelyMigrationTarget": "arm-cortex-m-zephyr",
+    "notes": [
+      "Boot and app both start with Cortex-M-like vector tables.",
+      "Observed RAM top values are in the 0x2040_0000 range, which matches SAM E70-class SRAM mapping more closely than the current nRF52 scaffold target.",
+      "Strings confirm Microchip, WINUSB, and PICkit 4 branding inside the application image.",
+      "The JAM manifest describes app1 at 0x0040C000 and app2 at 0x00500000, and the app HEX contains real segments at both bases.",
+      "Both boot.hex and app.hex end with 12-byte trailer records; the version word inside each trailer matches the packaged boot/app1 version in the JAM manifest.",
+      "Boot contains direct references to the primary app base but no observed direct references to the secondary app base, while the app package references both slot bases.",
+      "Within app.hex, the primary segment references the secondary slot base, while the secondary segment only self-references and carries CMSIS but no observed WINUSB string.",
+      "The secondary segment also carries an 'MPLAB PICkit 4 CMSIS-DAP' banner and aligned references to 0xE000ED00, consistent with Cortex-M system-control interaction inside that image."
+    ],
+    "primaryAppReferencesSecondarySlot": true,
+    "secondaryAppCarriesCmsisDapBanner": true,
+    "secondaryAppReferencesPrimarySlot": false,
+    "secondaryAppSelfReferences": true,
+    "secondaryAppSystemControlRefs": [
+      "0x005041F4",
+      "0x0051EA04",
+      "0x005228BC"
+    ],
+    "sharedArchitecture": true,
+    "tailRecordMatchesBootVersion": true,
+    "tailRecordMatchesPrimaryAppVersion": true,
+    "winusbOnlyInPrimaryApp": true
+  },
+  "tool": "PK4"
+}

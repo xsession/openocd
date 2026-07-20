@@ -5,5 +5,9 @@
     "C_Cpp.default.cppStandard": "gnu++17",
     "C_Cpp.errorSquiggles": "enabled",
     "files.eol": "\n",
-    "terminal.integrated.stickyScroll.enabled": false
+    "terminal.integrated.stickyScroll.enabled": false,
+    "files.associations": {
+        ".fantomasignore": "ignore",
+        "mchp_ri4_bridge.h": "c"
+    }
 }

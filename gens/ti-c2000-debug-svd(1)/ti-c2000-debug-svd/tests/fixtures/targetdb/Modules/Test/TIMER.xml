@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="TIMER">
+  <register name="CTRL" offset="0x0" width="16" access="rw">
+    <field name="ENABLE" bits="0:0" />
+    <field name="MODE" bits="2:1" />
+  </register>
+  <register name="COUNT" offset="0x2" width="32" access="ro" />
+</module>

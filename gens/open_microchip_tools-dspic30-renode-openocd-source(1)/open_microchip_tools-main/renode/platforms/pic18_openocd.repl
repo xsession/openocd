@@ -1,0 +1,9 @@
+// PIC18 custom-core validation platform.
+cpu: CPU.PIC18 @ sysbus
+    cpuType: "pic18"
+
+flash: Memory.MappedMemory @ sysbus 0x000000
+    size: 0x020000
+
+data: Memory.MappedMemory @ sysbus 0xA00000
+    size: 0x001000

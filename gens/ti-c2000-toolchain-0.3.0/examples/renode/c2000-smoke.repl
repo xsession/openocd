@@ -1,0 +1,6 @@
+# Minimal platform for debugger transport tests on xsession/renode custom-cores.
+cpu: CPU.C2000 @ sysbus
+    cpuType: "c2000"
+
+memory: Memory.MappedMemory @ sysbus 0x000000
+    size: 0x040000

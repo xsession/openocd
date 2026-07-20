@@ -1,0 +1,8 @@
+using sysbus
+mach create "pic16-openocd"
+machine LoadPlatformDescription @pic16_openocd.repl
+cpu PC 0x000000
+# The Python bridge sends 'monitor start' after attaching, so leave autostart off
+# and keep blank flash from executing before programming begins.
+machine StartGdbServer 3333
+log ">>> pic16: Renode GDB server ready on port 3333 <<<"

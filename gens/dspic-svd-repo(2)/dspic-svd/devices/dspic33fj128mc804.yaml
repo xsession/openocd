@@ -1,0 +1,4 @@
+device: dsPIC33FJ128MC804
+# Keep source conversion deterministic. Add reviewed corrections here.
+rename_registers: {}
+registers: {}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edc:Device xmlns:edc="http://crownking/edc" xmlns:ltx="http://example/ltx" edc:cname="dsPICTest">
+  <edc:DataSpace>
+    <edc:SFRDataSector>
+      <edc:SFRDef edc:_addr="0x0100" edc:access="rw" edc:cname="T1CON" edc:desc="Timer 1 Control" edc:nzwidth="16" edc:por="0000000000000000">
+        <edc:SFRModeList>
+          <edc:SFRMode edc:id="DS.0">
+            <edc:SFRFieldDef edc:cname="TON" edc:desc="Timer enable" edc:mask="0x8000" edc:nzwidth="1">
+              <edc:SFRFieldSemantic edc:cname="OFF" edc:value="0"/>
+              <edc:SFRFieldSemantic edc:cname="ON" edc:value="1"/>
+            </edc:SFRFieldDef>
+            <edc:SFRFieldDef edc:cname="TCS" edc:desc="Clock source" edc:mask="0x0002" edc:nzwidth="1"/>
+          </edc:SFRMode>
+        </edc:SFRModeList>
+      </edc:SFRDef>
+      <edc:SFRDef edc:_addr="0x0102" edc:access="rw" edc:cname="TMR1" edc:desc="Timer counter" edc:nzwidth="16" edc:por="----------------"/>
+    </edc:SFRDataSector>
+  </edc:DataSpace>
+</edc:Device>

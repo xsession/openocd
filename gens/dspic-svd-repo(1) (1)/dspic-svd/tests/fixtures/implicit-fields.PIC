@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edc:Device xmlns:edc="http://crownking/edc" edc:cname="ImplicitTest">
+  <edc:SFRDataSector>
+    <edc:SFRDef edc:_addr="0x20" edc:access="nnnnnnnn" edc:cname="CTRL" edc:nzwidth="0x8" edc:por="00000000">
+      <edc:SFRModeList>
+        <edc:SFRMode edc:id="DS.0">
+          <edc:AdjustPoint edc:offset="0x2"/>
+          <edc:SFRFieldDef edc:cname="MODE" edc:nzwidth="0x2">
+            <edc:SFRFieldSemantic edc:cname="MODE_A" edc:when="(field &amp; 0x3) == 0x00"/>
+            <edc:SFRFieldSemantic edc:cname="MODE_B" edc:when="(field &amp; 0x3) == 0x02"/>
+          </edc:SFRFieldDef>
+          <edc:AdjustPoint edc:offset="0x1"/>
+          <edc:SFRFieldDef edc:cname="ENABLE" edc:nzwidth="1"/>
+        </edc:SFRMode>
+      </edc:SFRModeList>
+    </edc:SFRDef>
+  </edc:SFRDataSector>
+</edc:Device>
