@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mchp-ipecmd"
+version = "0.1.0"
+description = "Clean-room Python reimplementation of MPLAB IPECMD socket protocol surface"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = []
+
+[project.scripts]
+mchp-renode-cosim-agent = "mchp_renode_cosim.socket_agent:main"
+mchp-renode-validate = "mchp_renode_cosim.validation:main"
+mchp-pk4-program = "mchp_ipecmd.programmer_cli:main"
+mchp-openocd-bridge = "mchp_openocd.bridge_server:main"
+mchp-openocd-query = "mchp_openocd.query_bridge:main"
+mchp-openocd-integrate = "mchp_openocd.integrate:main"
+mchp-ri4-java-knowledge = "mchp_ri4.java_knowledge:main"
+mchp-pk4-power-target = "mchp_ri4.power_cli:main"
+mchp-ri4-read-writeback = "mchp_ri4.hardware_roundtrip_cli:main"
+mchp-ri4-collect-assets = "mchp_ri4.asset_collector:main"
+mchp-ri4-asset-storage = "mchp_ri4.asset_storage:main"
+mchp-ri4-tool-firmware = "mchp_ri4.firmware_update:main"
+mchp-zephyr-pic18-demo = "zephyr_pickit4_replacement.demo:main"
+mchp-zephyr-pk4-status = "zephyr_pickit4_replacement.tools.exercise_pk4_status:main"
+
+[project.optional-dependencies]
+usb = ["pyusb>=1.2", "libusb-package>=1.0.26.3"]
+elf = ["pyelftools>=0.30"]
+gui = ["reflex>=0.5.0"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mchp_ipecmd*", "mchp_mdbcore*", "mchp_gdbrsp*", "mchp_ri4*", "mchp_simulator*", "mchp_renode_cosim*", "mchp_vscode*", "mchp_openocd*", "zephyr_pickit4_replacement*", "com*"]

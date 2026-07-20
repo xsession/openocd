@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "F280049: CCS/XDS110",
+      "type": "c2000-debug",
+      "request": "launch",
+      "backend": "ccs",
+      "device": "tms320f280049",
+      "ccsRoot": "C:/ti/ccs2040",
+      "ccxml": "${workspaceFolder}/targetConfigs/F280049_XDS110.ccxml",
+      "corePattern": "C28xx|C28x",
+      "executable": "${workspaceFolder}/Debug/app.out",
+      "svdPath": "${workspaceFolder}/svd/tms320f280049.svd",
+      "addressScale": 2,
+      "registerProfile": "c28x-fpu-tmu-vcu",
+      "runToEntryPoint": "main"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+id = "tms320f28m35x_m3"
+name = "TMS320F28M35x_M3"
+vendor = "Texas Instruments"
+family = "C2000 Concerto F28M35x"
+source = "ccs-targetdb"
+output = "svd/tms320f28m35x_m3.svd"
+core = "CM3"
+address_unit_bits = 8
+width = 32
+address_scale = 1
+default_register_width = 32
+device_xml_patterns = ["*F28M35*M3*.xml", "*F28M35*.xml", "*f28m35*.xml"]
+include_tokens = ["M3", "CORTEX", "MASTER", "SHARED", "ANALOG"]
+exclude_tokens = ["C28_ONLY"]
+cortex_debug = true
+processor_name = "cm3"
+compatibility_note = "Cortex-Debug applies only to the Concerto Cortex-M3 subsystem, not its C28x subsystem."

@@ -1,0 +1,33 @@
+{
+  "name": "pk4_cleanroom_recovery_project",
+  "source_profile": "PK4_OBSERVED_DUAL_APP_LAYOUT",
+  "target_family": "ARM_MPU",
+  "architecture": "arm-cortex-m",
+  "boot": {
+    "name": "boot",
+    "role": "boot strap slot",
+    "identity": "PK4 observed boot image",
+    "base": 4194304,
+    "window_size": 49152,
+    "initial_sp": 0,
+    "reset_vector": 0
+  },
+  "primary_app": {
+    "name": "app",
+    "role": "RI4 host-facing app slot",
+    "identity": "PK4 observed primary RI4 app",
+    "base": 4243456,
+    "window_size": 65536,
+    "initial_sp": 541365344,
+    "reset_vector": 4253869
+  },
+  "secondary_app": {
+    "name": "app2",
+    "role": "CMSIS-DAP control/update slot",
+    "identity": "MPLAB PICkit 4 CMSIS-DAP",
+    "base": 5242880,
+    "window_size": 163840,
+    "initial_sp": 541108496,
+    "reset_vector": 5259657
+  }
+}

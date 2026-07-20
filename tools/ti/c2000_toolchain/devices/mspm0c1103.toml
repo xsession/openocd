@@ -1,0 +1,16 @@
+id = "mspm0c1103"
+name = "MSPM0C1103"
+vendor = "Texas Instruments"
+family = "MSPM0C110X"
+source = "cmsis-pack"
+output = "svd/mspm0c1103.svd"
+source_svd = "MSPM0C110X.svd"
+core = "CM0PLUS"
+address_unit_bits = 8
+width = 32
+address_scale = 1
+flash_bytes = 8192
+ram_bytes = 1024
+cortex_debug = true
+processor_name = "cm0plus"
+compatibility_note = "Full Cortex-Debug SVD compatibility; debug transport still requires an MSPM0-capable GDB server."

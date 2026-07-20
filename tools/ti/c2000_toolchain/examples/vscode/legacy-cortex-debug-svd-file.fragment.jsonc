@@ -1,0 +1,5 @@
+{
+  // Only use this key with an older Cortex-Debug/Peripheral Viewer release
+  // that has not adopted the current svdPath configuration property.
+  "svdFile": "${workspaceFolder}/svd/mspm0c1103.svd"
+}

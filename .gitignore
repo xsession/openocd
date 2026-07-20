@@ -4,6 +4,9 @@
 .libs
 .deps
 .dirstamp
+__pycache__/
+*.pyc
+*.pyo
 *.o
 *.o.??????
 *.a
@@ -118,3 +121,15 @@ compile_commands.json
 build-vscode/
 
 dist/
+
+# generated/import staging and local vendor snapshots
+gens/
+tools/microchip/open_microchip_tools/vendor/
+tools/microchip/open_microchip_tools/vscode_extension/out/
+tools/microchip/open_microchip_tools/vscode_extension/*.vsix
+tools/ti/c2000_toolchain/.venv/
+tools/ti/c2000_toolchain/sources/
+tools/ti/c2000_toolchain/svd/
+tools/ti/c2000_toolchain/extension/out/
+tools/ti/c2000_toolchain/extension/node_modules/
+tools/ti/c2000_toolchain/extension/*.vsix

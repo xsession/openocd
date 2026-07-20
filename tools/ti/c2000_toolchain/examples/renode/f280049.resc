@@ -1,0 +1,6 @@
+# xsession/renode custom-cores branch
+# Note: the branch names the platform file tms320f280049c.repl.
+using sysbus
+mach create "f280049"
+machine LoadPlatformDescription @platforms/cpus/ti/tms320f280049c.repl
+pause

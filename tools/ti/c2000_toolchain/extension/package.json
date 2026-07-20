@@ -1,0 +1,461 @@
+{
+  "name": "c2000-debug",
+  "displayName": "TI C2000 Debug",
+  "description": "VS Code Debug Adapter for TI C2000 C28x devices using CCS Scripting, Renode, or OpenOCD, with integrated XDS100v2/v3 support.",
+  "version": "0.3.0",
+  "publisher": "codelayer",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Debuggers"
+  ],
+  "keywords": [
+    "C2000",
+    "C28x",
+    "TMS320F28069",
+    "TMS320F280049",
+    "F28M35x",
+    "CCS",
+    "XDS110",
+    "Renode",
+    "OpenOCD",
+    "XDS100v2",
+    "XDS100v3"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onDebug:c2000-debug"
+  ],
+  "contributes": {
+    "debuggers": [
+      {
+        "type": "c2000-debug",
+        "label": "TI C2000 Debug",
+        "runtime": "node",
+        "program": "./dist/adapter.js",
+        "languages": [
+          "c",
+          "cpp",
+          "asm"
+        ],
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "backend",
+              "device"
+            ],
+            "properties": {
+              "backend": {
+                "type": "string",
+                "enum": [
+                  "ccs",
+                  "renode",
+                  "openocd",
+                  "mock"
+                ],
+                "description": "Debugger transport. CCS is for physical targets; Renode controls the xsession custom C2000 core through its Monitor; mock is for CI."
+              },
+              "device": {
+                "type": "string",
+                "enum": [
+                  "tms320f28069",
+                  "tms320f280049",
+                  "tms320f28m35x_c28x",
+                  "tms320f28m35x_m3"
+                ]
+              },
+              "request": {
+                "type": "string",
+                "enum": [
+                  "launch",
+                  "attach"
+                ]
+              },
+              "executable": {
+                "type": "string",
+                "description": "TI ELF/COFF .out file to load."
+              },
+              "ccsRoot": {
+                "type": "string",
+                "description": "Code Composer Studio installation root, for example C:/ti/ccs2040."
+              },
+              "ccxml": {
+                "type": "string",
+                "description": "Working TI target configuration file."
+              },
+              "corePattern": {
+                "type": "string",
+                "description": "Exact or regular-expression core selector passed to CCS Scripting openSession()."
+              },
+              "cores": {
+                "type": "array",
+                "description": "Optional multi-core session definitions. Each core becomes a DAP thread.",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "name",
+                    "pattern",
+                    "architecture"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "pattern": {
+                      "type": "string"
+                    },
+                    "architecture": {
+                      "type": "string",
+                      "enum": [
+                        "c28x",
+                        "cortex-m3"
+                      ]
+                    },
+                    "device": {
+                      "type": "string"
+                    },
+                    "executable": {
+                      "type": "string"
+                    },
+                    "loadProgram": {
+                      "type": "boolean",
+                      "default": true
+                    },
+                    "addressScale": {
+                      "type": "integer",
+                      "enum": [
+                        1,
+                        2
+                      ]
+                    }
+                  }
+                }
+              },
+              "svdPath": {
+                "type": "string",
+                "description": "Byte-addressed CMSIS-SVD consumed by MCU Peripheral Viewer."
+              },
+              "addressScale": {
+                "type": "integer",
+                "enum": [
+                  1,
+                  2
+                ],
+                "default": 2,
+                "description": "Bytes per target address unit. Use 2 for C28x and 1 for Cortex-M."
+              },
+              "runToEntryPoint": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "default": "main"
+              },
+              "stopOnEntry": {
+                "type": "boolean",
+                "default": false
+              },
+              "resetOnLaunch": {
+                "type": "boolean",
+                "default": false
+              },
+              "verifyProgram": {
+                "type": "boolean",
+                "default": false
+              },
+              "bridgeScript": {
+                "type": "string",
+                "description": "Override the bundled CCS JSON bridge script."
+              },
+              "bridgeCommand": {
+                "type": "string",
+                "description": "Optional executable used instead of CCS scripting run.bat/run.sh."
+              },
+              "bridgeArgs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "openocdHost": {
+                "type": "string",
+                "default": "127.0.0.1"
+              },
+              "openocdTelnetPort": {
+                "type": "integer",
+                "default": 4444
+              },
+              "registerProfile": {
+                "type": "string",
+                "enum": [
+                  "auto",
+                  "c28x",
+                  "c28x-fpu-vcu",
+                  "c28x-fpu-tmu-vcu",
+                  "cortex-m3",
+                  "renode-c2000"
+                ],
+                "default": "auto"
+              },
+              "trace": {
+                "type": "boolean",
+                "default": false
+              },
+              "renodePath": {
+                "type": "string",
+                "description": "Renode executable. Required when the adapter launches Renode."
+              },
+              "renodeScript": {
+                "type": "string",
+                "description": "Renode .resc script that creates the C2000 machine."
+              },
+              "renodeHost": {
+                "type": "string",
+                "default": "127.0.0.1"
+              },
+              "renodeMonitorPort": {
+                "type": "integer",
+                "default": 1234
+              },
+              "renodeLaunch": {
+                "type": "boolean",
+                "description": "Launch Renode automatically. Defaults to true for launch and false for attach."
+              },
+              "renodeArgs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "renodeCpu": {
+                "type": "string",
+                "default": "cpu"
+              },
+              "renodeSysbus": {
+                "type": "string",
+                "default": "sysbus"
+              },
+              "renodeMachine": {
+                "type": "string"
+              },
+              "renodeStartupTimeoutMs": {
+                "type": "integer",
+                "default": 15000
+              },
+              "renodeStopPollIntervalMs": {
+                "type": "integer",
+                "default": 100
+              },
+              "renodeLoadExecutable": {
+                "type": "boolean",
+                "default": true
+              },
+              "renodeBinaryLoadAddress": {
+                "type": [
+                  "string",
+                  "integer"
+                ],
+                "default": "0x0"
+              },
+              "renodeEntryAddress": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "renodeResetCommand": {
+                "type": "string",
+                "default": "machine Reset"
+              }
+            }
+          },
+          "attach": {
+            "required": [
+              "backend",
+              "device"
+            ],
+            "properties": {
+              "backend": {
+                "type": "string",
+                "enum": [
+                  "ccs",
+                  "renode",
+                  "openocd",
+                  "mock"
+                ]
+              },
+              "device": {
+                "type": "string"
+              },
+              "ccsRoot": {
+                "type": "string"
+              },
+              "ccxml": {
+                "type": "string"
+              },
+              "corePattern": {
+                "type": "string"
+              },
+              "svdPath": {
+                "type": "string"
+              },
+              "addressScale": {
+                "type": "integer",
+                "enum": [
+                  1,
+                  2
+                ]
+              },
+              "trace": {
+                "type": "boolean",
+                "default": false
+              },
+              "renodePath": {
+                "type": "string",
+                "description": "Renode executable. Required when the adapter launches Renode."
+              },
+              "renodeScript": {
+                "type": "string",
+                "description": "Renode .resc script that creates the C2000 machine."
+              },
+              "renodeHost": {
+                "type": "string",
+                "default": "127.0.0.1"
+              },
+              "renodeMonitorPort": {
+                "type": "integer",
+                "default": 1234
+              },
+              "renodeLaunch": {
+                "type": "boolean",
+                "description": "Launch Renode automatically. Defaults to true for launch and false for attach."
+              },
+              "renodeArgs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "renodeCpu": {
+                "type": "string",
+                "default": "cpu"
+              },
+              "renodeSysbus": {
+                "type": "string",
+                "default": "sysbus"
+              },
+              "renodeMachine": {
+                "type": "string"
+              },
+              "renodeStartupTimeoutMs": {
+                "type": "integer",
+                "default": 15000
+              },
+              "renodeStopPollIntervalMs": {
+                "type": "integer",
+                "default": 100
+              },
+              "renodeLoadExecutable": {
+                "type": "boolean",
+                "default": true
+              },
+              "renodeBinaryLoadAddress": {
+                "type": [
+                  "string",
+                  "integer"
+                ],
+                "default": "0x0"
+              },
+              "renodeEntryAddress": {
+                "type": [
+                  "string",
+                  "integer"
+                ]
+              },
+              "renodeResetCommand": {
+                "type": "string",
+                "default": "machine Reset"
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "name": "C2000: CCS launch",
+            "type": "c2000-debug",
+            "request": "launch",
+            "backend": "ccs",
+            "device": "tms320f28069",
+            "ccsRoot": "C:/ti/ccs2040",
+            "ccxml": "${workspaceFolder}/targetConfigs/F28069_XDS110.ccxml",
+            "corePattern": "C28xx",
+            "executable": "${workspaceFolder}/Debug/app.out",
+            "svdPath": "${workspaceFolder}/svd/tms320f28069.svd",
+            "addressScale": 2,
+            "runToEntryPoint": "main"
+          },
+          {
+            "name": "C2000: Renode custom-cores",
+            "type": "c2000-debug",
+            "request": "launch",
+            "backend": "renode",
+            "device": "tms320f28069",
+            "renodePath": "${config:renode.renodePath}",
+            "renodeScript": "${workspaceFolder}/renode/f28069.resc",
+            "executable": "${workspaceFolder}/Debug/app.out",
+            "svdPath": "${workspaceFolder}/svd/tms320f28069.svd",
+            "addressScale": 2,
+            "renodeCpu": "cpu",
+            "renodeSysbus": "sysbus"
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "C2000: CCS launch",
+            "description": "Launch a C28x target through TI CCS Scripting.",
+            "body": {
+              "name": "C2000: CCS ${1:device}",
+              "type": "c2000-debug",
+              "request": "launch",
+              "backend": "ccs",
+              "device": "${1:tms320f28069}",
+              "ccsRoot": "${2:C:/ti/ccs2040}",
+              "ccxml": "${workspaceFolder}/${3:targetConfigs/device.ccxml}",
+              "corePattern": "${4:C28xx}",
+              "executable": "${workspaceFolder}/${5:Debug/app.out}",
+              "svdPath": "${workspaceFolder}/svd/${1:tms320f28069}.svd",
+              "addressScale": 2,
+              "runToEntryPoint": "main"
+            }
+          },
+          {
+            "label": "C2000: Renode custom-cores",
+            "description": "Launch a C28x target in the xsession Renode custom-cores branch.",
+            "body": {
+              "name": "C2000: Renode ${1:device}",
+              "type": "c2000-debug",
+              "request": "launch",
+              "backend": "renode",
+              "device": "${1:tms320f28069}",
+              "renodePath": "${2:C:/tools/renode/renode.exe}",
+              "renodeScript": "${workspaceFolder}/${3:renode/f28069.resc}",
+              "executable": "${workspaceFolder}/${4:Debug/app.out}",
+              "svdPath": "${workspaceFolder}/svd/${1:tms320f28069}.svd",
+              "addressScale": 2,
+              "renodeCpu": "cpu",
+              "renodeSysbus": "sysbus"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "clean": "node scripts/clean.js",
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test test/*.test.js",
+    "package": "npm run build && node scripts/package-vsix.js"
+  }
+}

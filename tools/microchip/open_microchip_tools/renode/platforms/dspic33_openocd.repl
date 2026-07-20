@@ -1,0 +1,6 @@
+// dsPIC33 custom-core validation platform.
+cpu: CPU.dsPIC33 @ sysbus
+    cpuType: "dspic33"
+
+mem: Memory.MappedMemory @ sysbus 0x000000
+    size: 0x040000

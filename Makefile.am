@@ -84,10 +84,14 @@ EXTRA_DIST += \
 	LICENSES/stand-alone/Apache-2.0 \
 	LICENSES/stand-alone/GPL-3.0 \
 	tools/logger.pl \
+	tools/microchip \
+	tools/ti \
 	tools/rlink_make_speed_table \
 	tools/st7_dtc_as \
 	contrib \
 	svd \
+	docs/development/microchip-feature-base.md \
+	docs/development/source-catalog.md \
 	docs/programmers/microchip-pickit-icd.md \
 	docs/index.md \
 	MERGE_MANIFEST.md \
@@ -138,6 +142,16 @@ dist-hook:
 		| sed 's/[[:space:]]*$$//' > $(distdir)/ChangeLog.tmp && \
 		mv $(distdir)/ChangeLog.tmp $(distdir)/ChangeLog; \
 	fi
+	rm -rf \
+		$(distdir)/tools/microchip/open_microchip_tools/vendor \
+		$(distdir)/tools/microchip/open_microchip_tools/vscode_extension/out \
+		$(distdir)/tools/microchip/open_microchip_tools/vscode_extension/*.vsix \
+		$(distdir)/tools/ti/c2000_toolchain/svd \
+		$(distdir)/tools/ti/c2000_toolchain/sources \
+		$(distdir)/tools/ti/c2000_toolchain/extension/out \
+		$(distdir)/tools/ti/c2000_toolchain/extension/node_modules \
+		$(distdir)/tools/ti/c2000_toolchain/extension/*.vsix \
+		$(distdir)/tools/ti/c2000_toolchain/.venv
 	for i in $$($(TCL_FILES)); do \
 		j="$(distdir)/$(TCL_PATH)/$$i" && \
 		mkdir -p "$$(dirname $$j)" && \

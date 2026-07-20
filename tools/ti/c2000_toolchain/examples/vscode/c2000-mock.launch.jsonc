@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C2000 debug adapter self-test",
+      "type": "c2000-debug",
+      "request": "launch",
+      "backend": "mock",
+      "device": "tms320f28069",
+      "addressScale": 2,
+      "svdPath": "${workspaceFolder}/svd/tms320f28069.svd"
+    }
+  ]
+}

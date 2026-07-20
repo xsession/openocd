@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "TMS320F28069 in Renode custom-cores",
+      "type": "c2000-debug",
+      "request": "launch",
+      "backend": "renode",
+      "device": "tms320f28069",
+
+      "renodePath": "C:/tools/renode/renode.exe",
+      "renodeScript": "${workspaceFolder}/examples/renode/f28069.resc",
+      "renodeMonitorPort": 1234,
+      "renodeCpu": "cpu",
+      "renodeSysbus": "sysbus",
+
+      "executable": "${workspaceFolder}/build/application.out",
+      "svdPath": "${workspaceFolder}/svd/tms320f28069.svd",
+      "addressScale": 2,
+      "renodeLoadExecutable": true,
+      "trace": false
+    }
+  ]
+}

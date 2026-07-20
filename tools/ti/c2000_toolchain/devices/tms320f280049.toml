@@ -1,0 +1,15 @@
+id = "tms320f280049"
+name = "TMS320F280049"
+vendor = "Texas Instruments"
+family = "C2000 F28004x"
+source = "ccs-targetdb"
+output = "svd/tms320f280049.svd"
+core = "C28X"
+address_unit_bits = 8
+width = 32
+address_scale = 2
+default_register_width = 32
+device_xml_patterns = ["TMS320F280049.xml", "*F280049*.xml", "*F28004*.xml", "*f280049*.xml"]
+cortex_debug = false
+processor_name = "c28x"
+compatibility_note = "Use the bundled c2000-debug adapter with CCS Scripting for C28x debug and MCU Peripheral Viewer for the generated SVD."

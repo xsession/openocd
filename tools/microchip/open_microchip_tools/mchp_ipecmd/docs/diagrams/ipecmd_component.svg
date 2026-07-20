@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="240" viewBox="0 0 760 240">
+  <style>
+    .box { fill: #ffffff; stroke: #111827; stroke-width: 2; }
+    .title { font: 16px sans-serif; fill: #111827; }
+    .text { font: 13px sans-serif; fill: #111827; }
+    .arrow { stroke: #111827; stroke-width: 2; marker-end: url(#m); }
+  </style>
+  <defs>
+    <marker id="m" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#111827" />
+    </marker>
+  </defs>
+
+  <rect class="box" x="40" y="60" width="260" height="120" rx="10" />
+  <text class="title" x="60" y="90">Client</text>
+  <text class="text" x="60" y="115">mchp_ipecmd.client.IpecmdClient</text>
+  <text class="text" x="60" y="140">or com.microchip...ipecmdboost.Client</text>
+
+  <rect class="box" x="460" y="60" width="260" height="120" rx="10" />
+  <text class="title" x="480" y="90">Server</text>
+  <text class="text" x="480" y="115">mchp_ipecmd.server.IpecmdServer</text>
+  <text class="text" x="480" y="140">backend: StubBackend (default)</text>
+
+  <line class="arrow" x1="300" y1="120" x2="460" y2="120" />
+  <text class="text" x="330" y="105">TCP (line protocol)</text>
+</svg>
