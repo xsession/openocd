@@ -18,6 +18,8 @@ param(
 
   [int]$ReadSize = 16,
 
+  [string]$Tclk = '',
+
   [int]$TimeoutSeconds = 10
 )
 
@@ -142,7 +144,9 @@ function New-Xds100v2Ccxml {
     [Parameter(Mandatory = $true)]
     [string]$Path,
 
-    [string]$ProbeSerial = ''
+    [string]$ProbeSerial = '',
+
+    [string]$TclkFrequency = ''
   )
 
   $devicePath = Join-Path $targetDb "devices\$Device.xml"
@@ -152,6 +156,7 @@ function New-Xds100v2Ccxml {
 
   $deviceXml = [xml](Get-Content -LiteralPath $devicePath -Raw)
   $deviceNode = $deviceXml.DocumentElement
+  $hasRouter = $null -ne $deviceNode.SelectSingleNode('./router')
   $partNumber = $deviceNode.partnum
   if (-not $partNumber) {
     $partNumber = $Device
@@ -162,11 +167,38 @@ function New-Xds100v2Ccxml {
   $serialChoice = ''
   if ($ProbeSerial) {
     $serialChoice = @"
-            <property Type="choicelist" Value="0" id="Emulator Selection">
+            <property Type="choicelist" Value="1" id="Emulator Selection">
                 <choice Name="Select by serial number" value="0">
                     <property Type="stringfield" Value="$ProbeSerial" id="-- Enter the serial number"/>
                 </choice>
             </property>
+"@
+  }
+
+  $tclkChoice = ''
+  if ($TclkFrequency) {
+    $tclkChoice = @"
+            <property Type="choicelist" Value="2" id="The JTAG TCLK Frequency (MHz)">
+                <choice Name="Fixed with user specified slower value" value="SPECIFIC">
+                    <property Type="stringfield" Value="$TclkFrequency" id="-- Enter a value from 488Hz to 1.0MHz"/>
+                </choice>
+            </property>
+"@
+  }
+
+  $driverInstances = if ($hasRouter) {
+@"
+            <instance XML_version="1.2" href="drivers\tixds100v2icepick_c.xml" id="drivers" xml="tixds100v2icepick_c.xml" xmlpath="drivers"/>
+            <instance XML_version="1.2" href="drivers\tixds100v2cs_dap.xml" id="drivers" xml="tixds100v2cs_dap.xml" xmlpath="drivers"/>
+            <instance XML_version="1.2" href="drivers\tixds100v2cortexM.xml" id="drivers" xml="tixds100v2cortexM.xml" xmlpath="drivers"/>
+            <instance XML_version="1.2" href="drivers\tixds100v2cs_child.xml" id="drivers" xml="tixds100v2cs_child.xml" xmlpath="drivers"/>
+            <instance XML_version="1.2" href="drivers\tixds100v2c28x.xml" id="drivers" xml="tixds100v2c28x.xml" xmlpath="drivers"/>
+            <instance XML_version="1.2" href="drivers\tixds100v2cla.xml" id="drivers" xml="tixds100v2cla.xml" xmlpath="drivers"/>
+"@
+  } else {
+@"
+            <instance XML_version="1.2" href="drivers\tixds100v2c28x.xml" id="drivers" xml="tixds100v2c28x.xml" xmlpath="drivers"/>
+            <instance XML_version="1.2" href="drivers\tixds100v2cla.xml" id="drivers" xml="tixds100v2cla.xml" xmlpath="drivers"/>
 "@
   }
 
@@ -176,13 +208,8 @@ function New-Xds100v2Ccxml {
     <configuration XML_version="1.2" id="Texas Instruments XDS100v2 USB Emulator_0">
         <instance XML_version="1.2" desc="Texas Instruments XDS100v2 USB Emulator_0" href="connections\TIXDS100v2_Connection.xml" id="Texas Instruments XDS100v2 USB Emulator_0" xml="TIXDS100v2_Connection.xml" xmlpath="connections"/>
         <connection XML_version="1.2" id="Texas Instruments XDS100v2 USB Emulator_0">
-            <instance XML_version="1.2" href="drivers\tixds100v2icepick_c.xml" id="drivers" xml="tixds100v2icepick_c.xml" xmlpath="drivers"/>
-            <instance XML_version="1.2" href="drivers\tixds100v2cs_dap.xml" id="drivers" xml="tixds100v2cs_dap.xml" xmlpath="drivers"/>
-            <instance XML_version="1.2" href="drivers\tixds100v2cortexM.xml" id="drivers" xml="tixds100v2cortexM.xml" xmlpath="drivers"/>
-            <instance XML_version="1.2" href="drivers\tixds100v2cs_child.xml" id="drivers" xml="tixds100v2cs_child.xml" xmlpath="drivers"/>
-            <instance XML_version="1.2" href="drivers\tixds100v2c28x.xml" id="drivers" xml="tixds100v2c28x.xml" xmlpath="drivers"/>
-            <instance XML_version="1.2" href="drivers\tixds100v2cla.xml" id="drivers" xml="tixds100v2cla.xml" xmlpath="drivers"/>
-$serialChoice            <platform XML_version="1.2" id="platform_0">
+$driverInstances
+$serialChoice$tclkChoice            <platform XML_version="1.2" id="platform_0">
                 <instance XML_version="1.2" desc="$deviceInstanceId" href="devices\$Device.xml" id="$deviceInstanceId" xml="$Device.xml" xmlpath="devices"/>
 $deviceBody
             </platform>
@@ -201,7 +228,7 @@ $results = foreach ($candidate in $Candidates) {
   $memoryDump = Join-Path $OutDir "$safeName.bin"
 
   Write-Host "Testing $candidate through TI DSLite memory read..." -ForegroundColor Cyan
-  New-Xds100v2Ccxml -Device $candidate -Path $ccxml -ProbeSerial $Serial
+  New-Xds100v2Ccxml -Device $candidate -Path $ccxml -ProbeSerial $Serial -TclkFrequency $Tclk
 
   $env:TI_APPDATA_DIR = (Resolve-Path -LiteralPath $OutDir).Path
   $previousErrorActionPreference = $ErrorActionPreference
@@ -238,4 +265,15 @@ if ($match) {
 Write-Host ""
 Write-Host "No candidate passed the XDS100v2 DSLite target-read checks." -ForegroundColor Yellow
 Write-Host "Inspect the per-candidate logs in: $OutDir" -ForegroundColor Yellow
+$error1135 = $results | Where-Object {
+  (Test-Path -LiteralPath $_.Log) -and
+  ((Get-Content -LiteralPath $_.Log -Raw) -match 'Error -1135')
+} | Select-Object -First 1
+if ($error1135) {
+  Write-Host ""
+  Write-Host "CCS reported Error -1135. On LAUNCHXL-F28069M, first check:" -ForegroundColor Yellow
+  Write-Host "  - S1 switch 3 / TRST is ON/up so JTAG is enabled." -ForegroundColor Yellow
+  Write-Host "  - JP1 and JP2 are populated so both isolated power domains are powered from USB." -ForegroundColor Yellow
+  Write-Host "  - The board was unplugged/replugged after changing boot/reset switches." -ForegroundColor Yellow
+}
 exit 1

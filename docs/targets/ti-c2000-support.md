@@ -14,9 +14,10 @@ target/ti/tms320f280049.cfg
 target/ti/tms320f28m35x.cfg
 ```
 
-Convenience XDS110 board files are also provided:
+Convenience board files are also provided:
 
 ```text
+board/ti/launchxl-f28069m-xds100v2.cfg
 board/ti/tms320f28069-xds110.cfg
 board/ti/tms320f280049-xds110.cfg
 board/ti/tms320f28m35x-xds110.cfg

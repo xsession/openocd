@@ -1,0 +1,7 @@
+{
+  "device": "tms320f280049",
+  "rename_peripherals": {},
+  "rename_registers": {},
+  "delete_peripherals": [],
+  "overrides": []
+}

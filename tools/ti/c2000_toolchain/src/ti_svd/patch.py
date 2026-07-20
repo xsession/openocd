@@ -19,6 +19,25 @@ def _find_named(parent: ET.Element, node_type: str, name: str) -> list[ET.Elemen
     return result
 
 
+def _child_text(parent: ET.Element, child_name: str) -> str:
+    child_name = child_name.lower()
+    for child in parent:
+        if local_name(child.tag) == child_name:
+            return child.text or ""
+    return ""
+
+
+def _same_address(left: str, right: str) -> bool:
+    try:
+        return int(left, 0) == int(right, 0)
+    except ValueError:
+        return left.lower() == right.lower()
+
+
+def _peripherals_root(root: ET.Element) -> ET.Element | None:
+    return next((e for e in root.iter() if local_name(e.tag) == "peripherals"), None)
+
+
 def apply_patch(svd_path: Path, patch_path: Path) -> None:
     if not patch_path.exists():
         return
@@ -31,10 +50,21 @@ def apply_patch(svd_path: Path, patch_path: Path) -> None:
                 if local_name(child.tag) == "name":
                     child.text = new
     for peripheral_name in patch.get("delete_peripherals", []):
-        peripherals = next((e for e in root.iter() if local_name(e.tag) == "peripherals"), None)
+        peripherals = _peripherals_root(root)
         if peripherals is not None:
             for peripheral in list(peripherals):
                 names = [c.text for c in peripheral if local_name(c.tag) == "name"]
                 if peripheral_name in names:
                     peripherals.remove(peripheral)
+    for delete in patch.get("delete_peripherals_by_address", []):
+        peripherals = _peripherals_root(root)
+        if peripherals is None:
+            continue
+        name = delete["name"]
+        base_address = delete["baseAddress"]
+        for peripheral in list(peripherals):
+            if _child_text(peripheral, "name") != name:
+                continue
+            if _same_address(_child_text(peripheral, "baseAddress"), base_address):
+                peripherals.remove(peripheral)
     tree.write(svd_path, encoding="utf-8", xml_declaration=True)

@@ -1,0 +1,25 @@
+{
+  "device": "tms320f28m35x_c28x",
+  "rename_peripherals": {},
+  "rename_registers": {},
+  "delete_peripherals": [],
+  "delete_peripherals_by_address": [
+    {
+      "name": "ADC1RESULT",
+      "baseAddress": "0xA0002C00"
+    },
+    {
+      "name": "ADC2RESULT",
+      "baseAddress": "0xA0002C80"
+    },
+    {
+      "name": "IPC",
+      "baseAddress": "0x801F6E00"
+    },
+    {
+      "name": "NMI",
+      "baseAddress": "0x801F7400"
+    }
+  ],
+  "overrides": []
+}

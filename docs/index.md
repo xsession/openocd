@@ -21,3 +21,8 @@ fork in addition to OpenOCD's standard manual under `doc/`.
 - [Source catalog](development/source-catalog.md)
 - [Repository layout](development/repository-layout.md)
 - [Unified feature manifest](../MERGE_MANIFEST.md)
+
+## Development records
+
+- [OpenOCD integration chat record - 2026-07-17](development/chat-record-2026-07-17.md)
+- [XDS100v2 / LAUNCHXL-F28069M chat record - 2026-07-21](development/chat-record-2026-07-21.md)

@@ -1,0 +1,7 @@
+{
+  "device": "mspm0c1103",
+  "rename_peripherals": {},
+  "rename_registers": {},
+  "delete_peripherals": [],
+  "overrides": []
+}

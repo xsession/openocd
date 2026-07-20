@@ -81,6 +81,8 @@ NOTES
 # coexist with quilt
 patches
 *.patch
+!tools/ti/c2000_toolchain/patches/
+!tools/ti/c2000_toolchain/patches/*.json
 
 # Eclipse stuff
 .project
