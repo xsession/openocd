@@ -188,7 +188,7 @@ FTDI, GPIO, and JTAG transport layer.
 Start OpenOCD first:
 
 ```console
-openocd -f interface/ftdi/xds100v2.cfg \
+openocd -f interface/ti/xds100v2.cfg \
   -f target/ti/tms320f28069.cfg
 ```
 

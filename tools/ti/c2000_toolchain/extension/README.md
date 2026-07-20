@@ -93,7 +93,7 @@ probe and flash verification must be run on the intended board and `.ccxml`.
 
 Release 0.3.0 includes the OpenOCD XDS100v2/v3 overlay under `../openocd`.
 Apply it to the `xsession/openocd` checkout, start OpenOCD with the appropriate
-`interface/ftdi/xds100v2.cfg` or `xds100v3.cfg`, then select the `openocd`
+`interface/ti/xds100v2.cfg` or `xds100v3.cfg`, then select the `openocd`
 backend in this extension. Ready-made launch and task files are under
 `../examples/vscode`.
 

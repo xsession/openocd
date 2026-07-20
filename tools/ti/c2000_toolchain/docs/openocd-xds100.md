@@ -21,9 +21,9 @@ edit, and installs Tcl files, examples, documentation, and udev rules.
 ## Probe configurations
 
 ```text
-interface/ftdi/xds100v2.cfg
-interface/ftdi/xds100v3.cfg
-interface/ftdi/xds100.cfg
+interface/ti/xds100v2.cfg
+interface/ti/xds100v3.cfg
+interface/ti/xds100.cfg
 ```
 
 The auto configuration accepts v2, v3, and generic embedded FT2232H identities.

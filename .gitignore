@@ -123,6 +123,7 @@ build-vscode/
 dist/
 
 # generated/import staging and local vendor snapshots
+artifacts/
 gens/
 tools/microchip/open_microchip_tools/vendor/
 tools/microchip/open_microchip_tools/vscode_extension/out/

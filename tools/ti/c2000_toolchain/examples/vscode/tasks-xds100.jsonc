@@ -6,7 +6,7 @@
       "type": "process",
       "command": "${config:c2000.openocdPath}",
       "args": [
-        "-f", "interface/ftdi/xds100v2.cfg",
+        "-f", "interface/ti/xds100v2.cfg",
         "-f", "target/ti/tms320f28069.cfg",
         "-c", "adapter speed 1000"
       ],
@@ -26,7 +26,7 @@
       "type": "process",
       "command": "${config:c2000.openocdPath}",
       "args": [
-        "-f", "interface/ftdi/xds100v3.cfg",
+        "-f", "interface/ti/xds100v3.cfg",
         "-f", "target/ti/tms320f280049.cfg",
         "-c", "adapter speed 1000"
       ],

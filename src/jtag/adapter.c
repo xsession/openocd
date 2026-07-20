@@ -446,6 +446,104 @@ COMMAND_HANDLER(handle_adapter_list_command)
 	return CALL_COMMAND_HANDLER(dump_adapter_driver_list);
 }
 
+struct ti_adapter_support {
+	const char *probe;
+	const char *backend;
+	bool built;
+	const char *transport;
+	const char *config;
+	const char *notes;
+};
+
+static const struct ti_adapter_support ti_adapter_support[] = {
+	{
+		.probe = "XDS100v2",
+		.backend = "ftdi",
+#if BUILD_FTDI == 1
+		.built = true,
+#else
+		.built = false,
+#endif
+		.transport = "jtag",
+		.config = "interface/ti/xds100v2.cfg",
+		.notes = "FT2232H/MPSSE; requires libusb-compatible FTDI driver",
+	},
+	{
+		.probe = "XDS100v3",
+		.backend = "ftdi",
+#if BUILD_FTDI == 1
+		.built = true,
+#else
+		.built = false,
+#endif
+		.transport = "jtag",
+		.config = "interface/ti/xds100v3.cfg",
+		.notes = "FT2232H/MPSSE; same CPLD protocol as XDS100v2",
+	},
+	{
+		.probe = "XDS110",
+		.backend = "xds110",
+#if BUILD_XDS110 == 1
+		.built = true,
+#else
+		.built = false,
+#endif
+		.transport = "jtag/swd/cjtag",
+		.config = "interface/ti/xds110.cfg",
+		.notes = "native OpenOCD USB protocol",
+	},
+	{
+		.probe = "TI ICDI",
+		.backend = "hla ti-icdi",
+#if BUILD_HLADAPTER_ICDI == 1
+		.built = true,
+#else
+		.built = false,
+#endif
+		.transport = "hla_jtag/hla_swd",
+		.config = "interface/ti/ti-icdi.cfg",
+		.notes = "Tiva/Stellaris on-board ICDI",
+	},
+	{
+		.probe = "TI CMSIS-DAP",
+		.backend = "cmsis-dap",
+#if BUILD_CMSIS_DAP_USB == 1 || BUILD_CMSIS_DAP_HID == 1
+		.built = true,
+#else
+		.built = false,
+#endif
+		.transport = "swd/jtag",
+		.config = "interface/ti/cmsis-dap.cfg",
+		.notes = "MSPM0 and other CMSIS-DAP compliant TI probes",
+	},
+	{
+		.probe = "XDS200/XDS560/MSP-FET",
+		.backend = "unsupported",
+		.built = false,
+		.transport = "-",
+		.config = "interface/ti/xds200.cfg, xds560.cfg, msp-fet.cfg",
+		.notes = "requires TI proprietary USCIF/DebugServer protocol",
+	},
+};
+
+COMMAND_HANDLER(handle_adapter_ti_list_command)
+{
+	if (CMD_ARGC)
+		return ERROR_COMMAND_SYNTAX_ERROR;
+
+	command_print(CMD, "Texas Instruments debug adapter support:");
+	for (unsigned int i = 0; i < ARRAY_SIZE(ti_adapter_support); i++) {
+		const struct ti_adapter_support *probe = &ti_adapter_support[i];
+
+		command_print(CMD, "%-22s backend=%-13s built=%-3s transport=%-15s config=%s",
+			probe->probe, probe->backend, probe->built ? "yes" : "no",
+			probe->transport, probe->config);
+		command_print(CMD, "  %s", probe->notes);
+	}
+
+	return ERROR_OK;
+}
+
 COMMAND_HANDLER(handle_adapter_driver_command)
 {
 	int retval;
@@ -1211,6 +1309,17 @@ static const struct command_registration adapter_srst_command_handlers[] = {
 	COMMAND_REGISTRATION_DONE
 };
 
+static const struct command_registration adapter_ti_command_handlers[] = {
+	{
+		.name = "list",
+		.handler = handle_adapter_ti_list_command,
+		.mode = COMMAND_ANY,
+		.help = "List Texas Instruments debug adapter support",
+		.usage = "",
+	},
+	COMMAND_REGISTRATION_DONE
+};
+
 static const struct command_registration adapter_command_handlers[] = {
 	{
 		.name = "driver",
@@ -1264,6 +1373,13 @@ static const struct command_registration adapter_command_handlers[] = {
 		.help = "usb adapter command group",
 		.usage = "",
 		.chain = adapter_usb_command_handlers,
+	},
+	{
+		.name = "ti",
+		.mode = COMMAND_ANY,
+		.help = "Texas Instruments adapter support command group",
+		.usage = "",
+		.chain = adapter_ti_command_handlers,
 	},
 	{
 		.name = "assert",
