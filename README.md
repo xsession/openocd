@@ -72,22 +72,22 @@ target backends are required.
 ## Cross-platform package build
 
 The repository-level Docker and script helpers produce Linux and Windows
-archives under `docker/data/dist/`.
+archives under `artifacts/`.
 
 ```console
-docker compose up --build
+docker compose -f docker/compose.yaml up --build
 ```
 
 Or build all configured Docker targets:
 
 ```console
-docker buildx bake all
+docker buildx bake -f docker/docker-bake.hcl all
 ```
 
 Native macOS packaging is provided by:
 
 ```console
-./scripts/build-macos-package.sh
+./docker/scripts/build-macos-package.sh
 ```
 
 ## Example: TI C2000 with XDS100v2

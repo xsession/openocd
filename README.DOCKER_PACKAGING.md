@@ -8,69 +8,71 @@ not use Docker Compose to run OpenOCD against USB/JTAG hardware.
 Packages are written under:
 
 ```text
-docker/data/dist/linux/amd64/openocd-linux-x86_64.tar.gz
-docker/data/dist/linux/arm64/openocd-linux-aarch64.tar.gz
-docker/data/dist/windows/openocd-windows-x86_64.zip
-docker/data/dist/macos/openocd-macos-x86_64.tar.gz
-docker/data/dist/macos/openocd-macos-arm64.tar.gz
+artifacts/linux/amd64/openocd-linux-x86_64.tar.gz
+artifacts/linux/arm64/openocd-linux-aarch64.tar.gz
+artifacts/windows/openocd-windows-x86_64.zip
+artifacts/macos/openocd-macos-x86_64.tar.gz
+artifacts/macos/openocd-macos-arm64.tar.gz
 ```
 
 ## Recommended commands
 
-Build and export the default Docker-supported packages with Compose:
+### Build only one operating system
 
-```sh
-docker compose up --build
-```
+Use these commands from the repository root when you only need one deployable
+package. On Windows, run the shell scripts from Git Bash or WSL.
 
-Default Compose builds `linux/amd64` and `windows/x86_64`. It intentionally skips `linux/arm64` on Windows/amd64 hosts because ARM64 containers need QEMU/binfmt emulation.
+| Target package | Command | Output |
+| --- | --- | --- |
+| Linux x86-64 | `docker/scripts/build-linux-package.sh` | `artifacts/linux/amd64/openocd-linux-x86_64.tar.gz` |
+| Linux ARM64 | `BUILD_ARM64=1 docker/scripts/build-linux-package.sh` | `artifacts/linux/arm64/openocd-linux-aarch64.tar.gz` |
+| Windows x86-64 | `docker/scripts/build-windows-cross.sh` | `artifacts/windows/openocd-windows-x86_64.zip` |
+| macOS current host architecture | `docker/scripts/build-macos-package.sh` | `artifacts/macos/openocd-macos-<arch>.tar.gz` |
 
-Build ARM64 too after enabling emulation:
+Linux ARM64 builds on x86-64 hosts require QEMU/binfmt support first:
 
 ```sh
 docker run --privileged --rm tonistiigi/binfmt --install arm64
-docker compose --profile arm64 up --build
 ```
 
-`docker compose build` is also valid, but it only builds the package images.
-The artifacts are copied to `docker/data/dist` when the containers run, so use
-`docker compose up --build` for a full package export.
+macOS packages should be built on macOS. Linux containers cannot produce fully
+supported native, signed macOS binaries because Apple SDKs and tooling are not
+redistributable in a normal Docker image.
+
+### Build the default Docker set
+
+Build and export the default Docker-supported packages with Compose:
+
+```sh
+docker compose -f docker/compose.yaml up --build
+```
+
+Default Compose builds `linux/amd64` and `windows/x86_64`. It intentionally
+skips `linux/arm64` on Windows/amd64 hosts because ARM64 containers need
+QEMU/binfmt emulation.
+
+Build ARM64 too after enabling QEMU/binfmt emulation:
+
+```sh
+docker run --privileged --rm tonistiigi/binfmt --install arm64
+docker compose -f docker/compose.yaml --profile arm64 up --build
+```
+
+`docker compose -f docker/compose.yaml build` is also valid, but it only builds the package images.
+The artifacts are copied to `artifacts/` when the containers run, so use
+`docker compose -f docker/compose.yaml up --build` for a full package export.
 
 Build and export the default Buildx Bake targets:
 
 ```sh
-docker buildx bake
+docker buildx bake -f docker/docker-bake.hcl
 ```
 
 Build every Docker-supported target, including linux/arm64:
 
 ```sh
 docker run --privileged --rm tonistiigi/binfmt --install arm64
-docker buildx bake all
-```
-
-Build Linux amd64 package only:
-
-```sh
-scripts/build-linux-package.sh
-```
-
-Build Linux amd64 + arm64 after enabling emulation:
-
-```sh
-BUILD_ARM64=1 scripts/build-linux-package.sh
-```
-
-Build Windows package only:
-
-```sh
-scripts/build-windows-cross.sh
-```
-
-Build macOS packages on macOS:
-
-```sh
-scripts/build-macos-package.sh
+docker buildx bake -f docker/docker-bake.hcl all
 ```
 
 ## Why Compose has no `outputs:` key
@@ -80,8 +82,8 @@ Compose file therefore builds Dockerfile target `package`, mounts `/dist`, and
 runs a tiny copy command that transfers `/out` from the image into the mounted
 host output directory.
 
-For direct local export using `--output type=local`, use `docker buildx bake` or
-the scripts in `scripts/`.
+For direct local export using `--output type=local`, use `docker buildx bake -f docker/docker-bake.hcl` or
+the scripts in `docker/scripts/`.
 
 
 ### Windows checkout bootstrap fix

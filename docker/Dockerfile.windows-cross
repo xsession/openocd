@@ -3,7 +3,7 @@
 #
 # Direct export:
 #   docker buildx build -f docker/Dockerfile.windows-cross \
-#     --target export --output type=local,dest=docker/data/dist/windows .
+#     --target export --output type=local,dest=artifacts/windows .
 
 ARG ALPINE_VERSION=3.20
 FROM alpine:${ALPINE_VERSION} AS build
@@ -114,8 +114,8 @@ RUN set -eux; \
 
 WORKDIR /src/openocd
 COPY . .
-COPY docker/prepare-openocd-source.sh /usr/local/bin/prepare-openocd-source
-COPY docker/patch-jimtcl-mingw-aio.py /usr/local/bin/patch-jimtcl-mingw-aio
+COPY docker/scripts/prepare-openocd-source.sh /usr/local/bin/prepare-openocd-source
+COPY docker/scripts/patch-jimtcl-mingw-aio.py /usr/local/bin/patch-jimtcl-mingw-aio
 RUN chmod +x /usr/local/bin/prepare-openocd-source /usr/local/bin/patch-jimtcl-mingw-aio
 
 RUN set -eux; \

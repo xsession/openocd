@@ -27,7 +27,7 @@ sphinx-build -W --keep-going -b html docs docs\_build\html
 ## Docker build
 
 ```console
-$ docker build -f build/containers/docs.Dockerfile --target export \
+$ docker build -f docker/Dockerfile.docs --target export \
   --output type=local,dest=docs/_build/export .
 ```
 

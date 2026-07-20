@@ -3,6 +3,8 @@
 .github
 build
 build-*
+artifacts
+docker/data/dist
 *.o
 *.a
 *.so

@@ -12,8 +12,8 @@ The Compose file previously mounted `./docker/data/config` to `/work/config`, bu
 
 Fixes:
 
-- `compose.yaml` mounts `./config:/work/config:ro`.
-- `scripts/openocd-entrypoint.sh` adds `-s /work` before runtime config arguments.
+- `docker/compose.runtime.yaml` mounts `./data/config:/work/config:ro`.
+- `docker/scripts/openocd-entrypoint.sh` adds `-s /work` before runtime config arguments.
 - Compose keeps `command: ["-f", "config/default.cfg"]`, which now resolves to `/work/config/default.cfg`.
 
 ## Alpine and Werror fix
@@ -24,8 +24,8 @@ The Linux Dockerfiles use Alpine and force `--disable-werror` directly in the co
 
 Added:
 
-- `build/containers/windows-cross.Dockerfile`
-- `build/scripts/build-windows-cross.sh`
+- `docker/Dockerfile.windows-cross`
+- `docker/scripts/build-windows-cross.sh`
 - `make package-windows`
 
 The Windows artifact is exported to:
@@ -50,7 +50,7 @@ or on Windows PowerShell:
 
 ```powershell
 $env:OUT_DIR="artifacts/windows"
-sh build/scripts/build-windows-cross.sh
+sh docker/scripts/build-windows-cross.sh
 ```
 
 ## 2026-07-09 Windows cross-build JOBS=0 fix
@@ -73,10 +73,10 @@ cmake --build ... --parallel "$(docker-jobs)"
 `JOBS=0` and empty `JOBS` now both mean "use all available CPUs". A positive integer still limits parallelism, for example:
 
 ```sh
-docker buildx build -f build/containers/windows-cross.Dockerfile --build-arg JOBS=4 --target export --output type=local,dest=artifacts/windows .
+docker buildx build -f docker/Dockerfile.windows-cross --build-arg JOBS=4 --target export --output type=local,dest=artifacts/windows .
 ```
 
-Do not use `build/containers/windows-cross.Dockerfile` as the runtime service Dockerfile in `compose.yaml`. It is a package/export Dockerfile with a `scratch` export stage. Use:
+Do not use `docker/Dockerfile.windows-cross` as the runtime service Dockerfile in `docker/compose.runtime.yaml`. It is a package/export Dockerfile with a `scratch` export stage. Use:
 
 ```sh
 make package-windows
@@ -85,7 +85,7 @@ make package-windows
 or:
 
 ```sh
-sh build/scripts/build-windows-cross.sh
+sh docker/scripts/build-windows-cross.sh
 ```
 
 The expected package output remains:
@@ -99,4 +99,4 @@ artifacts/windows/openocd-windows-x86_64.zip
 - Stopped excluding the enterprise `build/` directory from `.dockerignore`.
 - Kept generated `build-*` trees excluded.
 - Excluded generated package artifacts and rendered documentation from the Docker context.
-- The migration installer removes the obsolete `docker-compose.yml` so Compose uses only `compose.yaml`.
+- The Docker files now live under `docker/`; use `docker/compose.yaml` for packaging and `docker/compose.runtime.yaml` for the runtime container.

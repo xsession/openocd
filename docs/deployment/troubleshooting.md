@@ -5,10 +5,10 @@
 Confirm the Docker context is the repository root and `.dockerignore` does not exclude `bootstrap`, `configure.ac`, `jimtcl`, or `src`.
 
 ```console
-$ docker buildx build --no-cache --progress=plain -f build/containers/linux-package.Dockerfile .
+$ docker buildx build --no-cache --progress=plain -f docker/Dockerfile.linux-package .
 ```
 
-The helper `build/scripts/prepare-openocd-source.sh` supports source files at the context root and one nested `openocd/` directory.
+The helper `docker/scripts/prepare-openocd-source.sh` supports source files at the context root and one nested `openocd/` directory.
 
 ## Autotools errors on Windows checkouts
 
@@ -44,18 +44,18 @@ Retry the build. Downloads use retry flags, but proxies and TLS inspection can s
 
 ## Windows Jim Tcl AIO errors
 
-The reviewed Windows build uses the OpenOCD-pinned Jim Tcl revision and applies `build/scripts/patch-jimtcl-mingw-aio.py`. Do not replace the submodule with arbitrary Jim Tcl `HEAD`, because its MinGW feature detection may differ.
+The reviewed Windows build uses the OpenOCD-pinned Jim Tcl revision and applies `docker/scripts/patch-jimtcl-mingw-aio.py`. Do not replace the submodule with arbitrary Jim Tcl `HEAD`, because its MinGW feature detection may differ.
 
 ## Compose builds but no artifacts appear
 
-`docker compose build` only creates images. Export artifacts by running:
+`docker compose -f docker/compose.yaml build` only creates images. Export artifacts by running:
 
 ```console
-$ docker compose up
+$ docker compose -f docker/compose.yaml up
 ```
 
 or use:
 
 ```console
-$ docker buildx bake
+$ docker buildx bake -f docker/docker-bake.hcl
 ```

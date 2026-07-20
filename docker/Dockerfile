@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 # Build OpenOCD from the current repository checkout.
 # Intended usage from repo root:
-#   docker build -f deploy/docker/Dockerfile -t xsession/openocd:local .
+#   docker build -f docker/Dockerfile -t xsession/openocd:local .
 
 ARG DEBIAN_VERSION=bookworm
 FROM debian:${DEBIAN_VERSION} AS build
@@ -43,7 +43,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /opt/openocd /opt/openocd
-COPY scripts/openocd-entrypoint.sh /usr/local/bin/openocd-entrypoint.sh
+COPY docker/scripts/openocd-entrypoint.sh /usr/local/bin/openocd-entrypoint.sh
 RUN chmod +x /usr/local/bin/openocd-entrypoint.sh
 
 ENV PATH="/opt/openocd/bin:${PATH}" \

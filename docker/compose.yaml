@@ -1,0 +1,72 @@
+# Binary package builder only. It does not run OpenOCD or access USB devices.
+#
+# Build package images:
+#   docker compose -f docker/compose.yaml build
+# Export packages to artifacts:
+#   docker compose -f docker/compose.yaml up --build
+# Optional ARM64 (requires QEMU/binfmt on amd64 hosts):
+#   docker compose -f docker/compose.yaml --profile arm64 up --build
+
+name: openocd
+
+x-build-args: &build_args
+  JOBS: ${JOBS:-0}
+
+services:
+  linux-amd64:
+    image: openocd-package-linux-amd64
+    platform: linux/amd64
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.linux-package
+      target: package
+      args:
+        <<: *build_args
+        CONFIGURE_FLAGS: ${LINUX_CONFIGURE_FLAGS:---enable-ftdi --enable-stlink --enable-cmsis-dap --enable-jlink --enable-jimtcl-maintainer --enable-internal-jimtcl}
+    volumes:
+      - ../artifacts/linux/amd64:/dist
+
+  linux-arm64:
+    profiles: ["arm64"]
+    image: openocd-package-linux-arm64
+    platform: linux/arm64
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.linux-package
+      target: package
+      args:
+        <<: *build_args
+        CONFIGURE_FLAGS: ${LINUX_CONFIGURE_FLAGS:---enable-ftdi --enable-stlink --enable-cmsis-dap --enable-jlink --enable-jimtcl-maintainer --enable-internal-jimtcl}
+    volumes:
+      - ../artifacts/linux/arm64:/dist
+
+  windows-x86_64:
+    image: openocd-package-windows-x86_64
+    platform: linux/amd64
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.windows-cross
+      target: package
+      args:
+        <<: *build_args
+        CONFIGURE_FLAGS: ${WINDOWS_CONFIGURE_FLAGS:---enable-ftdi --enable-stlink --enable-cmsis-dap --enable-jlink --enable-internal-libjaylink --enable-jimtcl-maintainer --enable-internal-jimtcl}
+    volumes:
+      - ../artifacts/windows:/dist
+
+  docs:
+    profiles: ["docs"]
+    image: openocd-documentation
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.docs
+      target: build
+    volumes:
+      - ../docs/_build/html:/dist
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -eu
+        rm -rf /dist/*
+        cp -a /src/docs/_build/html/. /dist/
+        find /dist -maxdepth 2 -type f | sort

@@ -18,19 +18,19 @@
 ## Commands
 
 ```powershell
-docker compose build --no-cache
-docker compose up
+docker compose -f docker/compose.yaml build --no-cache
+docker compose -f docker/compose.yaml up
 ```
 
 Direct export:
 
 ```powershell
-docker buildx bake
+docker buildx bake -f docker/docker-bake.hcl
 ```
 
 Optional ARM64:
 
 ```powershell
 docker run --privileged --rm tonistiigi/binfmt --install arm64
-docker buildx bake all
+docker buildx bake -f docker/docker-bake.hcl all
 ```

@@ -5,7 +5,7 @@ The default build produces Linux x86-64 and Windows x86-64 packages.
 ## Build package images
 
 ```console
-$ docker compose build
+$ docker compose -f docker/compose.yaml build
 ```
 
 This validates and builds the package images but does not copy artifacts to the host.
@@ -13,13 +13,13 @@ This validates and builds the package images but does not copy artifacts to the 
 ## Export packages
 
 ```console
-$ docker compose up
+$ docker compose -f docker/compose.yaml up
 ```
 
 To rebuild and export in one command:
 
 ```console
-$ docker compose up --build
+$ docker compose -f docker/compose.yaml up --build
 ```
 
 Expected files:
@@ -34,13 +34,13 @@ artifacts/windows/openocd-windows-x86_64.zip
 Bake writes artifacts directly and is usually the cleanest CI interface:
 
 ```console
-$ docker buildx bake
+$ docker buildx bake -f docker/docker-bake.hcl
 ```
 
 Build every Docker-supported target, including Linux ARM64:
 
 ```console
-$ docker buildx bake all
+$ docker buildx bake -f docker/docker-bake.hcl all
 ```
 
 See {doc}`../deployment/troubleshooting` before enabling ARM64 emulation on an x86-64 Windows host.

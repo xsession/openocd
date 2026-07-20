@@ -32,7 +32,7 @@ ENV JIMTCL_COMMIT=${JIMTCL_COMMIT} \
 
 WORKDIR /src/openocd
 COPY . .
-COPY docker/prepare-openocd-source.sh /usr/local/bin/prepare-openocd-source
+COPY docker/scripts/prepare-openocd-source.sh /usr/local/bin/prepare-openocd-source
 RUN chmod +x /usr/local/bin/prepare-openocd-source
 
 RUN set -eux; \

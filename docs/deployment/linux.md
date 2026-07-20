@@ -3,7 +3,7 @@
 ## Linux x86-64
 
 ```console
-$ ./build/scripts/build-linux-package.sh
+$ ./docker/scripts/build-linux-package.sh
 ```
 
 The default output is:
@@ -18,13 +18,13 @@ On an ARM64 host, build directly. On an x86-64 host, install QEMU/binfmt support
 
 ```console
 $ docker run --privileged --rm tonistiigi/binfmt --install arm64
-$ docker compose --profile arm64 up --build
+$ docker compose -f docker/compose.yaml --profile arm64 up --build
 ```
 
 Or with the helper script:
 
 ```console
-$ BUILD_ARM64=1 ./build/scripts/build-linux-package.sh
+$ BUILD_ARM64=1 ./docker/scripts/build-linux-package.sh
 ```
 
 ```{warning}

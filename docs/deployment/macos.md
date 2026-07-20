@@ -14,7 +14,7 @@ $ brew install autoconf automake libtool pkg-config libusb hidapi libftdi libjay
 Then run:
 
 ```console
-$ ./build/scripts/build-macos-package.sh
+$ ./docker/scripts/build-macos-package.sh
 ```
 
 The script selects the package architecture from the host and writes to:

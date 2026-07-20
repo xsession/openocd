@@ -7,14 +7,14 @@ The Windows package is cross-compiled in an Alpine container with MinGW-w64. It 
 From PowerShell, using Compose:
 
 ```powershell
-docker compose build windows-x86_64
-docker compose run --rm windows-x86_64
+docker compose -f docker/compose.yaml build windows-x86_64
+docker compose -f docker/compose.yaml run --rm windows-x86_64
 ```
 
 Using the helper script from Git Bash or WSL:
 
 ```console
-$ ./build/scripts/build-windows-cross.sh
+$ ./docker/scripts/build-windows-cross.sh
 ```
 
 Using Buildx directly:
@@ -22,7 +22,7 @@ Using Buildx directly:
 ```powershell
 docker buildx build `
   --platform linux/amd64 `
-  -f build/containers/windows-cross.Dockerfile `
+  -f docker/Dockerfile.windows-cross `
   --target export `
   --output type=local,dest=artifacts/windows `
   .
