@@ -61,6 +61,19 @@ interface (`MI_00`) to a WinUSB/libusb-compatible driver before using OpenOCD
 with `interface/ti/xds100v2.cfg`. The auxiliary serial interface can remain on
 the TI/FTDI serial driver.
 
+The Docker-built Windows package includes source-built libwdi tools for this:
+
+```powershell
+Set-Location .\artifacts\windows\openocd-windows-x86_64\tools\windows\usb-driver
+Start-Process powershell -Verb RunAs -ArgumentList '-ExecutionPolicy Bypass -File .\install-xds100v2-winusb-mi00.ps1'
+```
+
+That installer uses `wdi-simple.exe` to bind only `VID_0403&PID_A6D0&MI_00` to
+WinUSB. If you prefer the GUI, run the packaged
+`bin\x64\zadig.exe`, enable **Options > List All Devices**, choose
+`XDS100 Class Debug Port` / `MI_00`, and install `WinUSB`. Do not change
+`XDS100 Class Auxiliary Port` / `MI_01`; that is the LaunchPad serial port.
+
 The CCS-based fallback test is:
 
 ```powershell
@@ -97,7 +110,6 @@ For this specific LaunchPad, check the hardware before changing software:
 - After changing switches or jumpers, unplug/replug USB before rerunning CCS or
   OpenOCD.
 
-The local packaged OpenOCD binary in `dist/windows` is useful for FTDI/JTAG
-probing, but it does not include the project-local `c28x` target type yet. A
-new build is required before `board/ti/launchxl-f28069m-xds100v2.cfg` can create
-the C28x target; otherwise OpenOCD will stop with `Unknown target type c28x`.
+The fresh Docker-built OpenOCD binary in `artifacts/windows` includes the
+project-local `c28x` target type needed by
+`board/ti/launchxl-f28069m-xds100v2.cfg`.

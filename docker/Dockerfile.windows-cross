@@ -6,6 +6,41 @@
 #     --target export --output type=local,dest=artifacts/windows .
 
 ARG ALPINE_VERSION=3.20
+FROM debian:bookworm-slim AS libwdi
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG LIBWDI_REF=v1.5.1
+ARG WDK_URL=https://go.microsoft.com/fwlink/p/?LinkID=253170
+ARG LIBUSB0_URL=https://github.com/mcuee/libusb-win32/releases/download/release_1.4.0.0/libusb-win32-bin-1.4.0.0.zip
+ARG LIBUSBK_URL=https://github.com/mcuee/libusbk/releases/download/V3.1.0.0/libusbK-3.1.0.0-bin.7z
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      autoconf automake ca-certificates curl file gcc git libtool make \
+      mingw-w64 msitools p7zip-full unzip zip \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN set -eux; \
+    mkdir -p /opt/libwdi-input /tmp/downloads; \
+    curl --fail --location --retry 3 "${WDK_URL}" -o /tmp/downloads/wdk-redist.msi; \
+    curl --fail --location --retry 3 "${LIBUSB0_URL}" -o /tmp/downloads/libusb0.zip; \
+    curl --fail --location --retry 3 "${LIBUSBK_URL}" -o /tmp/downloads/libusbk.7z; \
+    mkdir -p /opt/libwdi-input/wdk /opt/libwdi-input/libusb0 /opt/libwdi-input/libusbk; \
+    msiextract --directory /opt/libwdi-input/wdk /tmp/downloads/wdk-redist.msi; \
+    unzip -q /tmp/downloads/libusb0.zip -d /tmp/downloads/libusb0; \
+    7z x -bd -y -o/tmp/downloads/libusbk /tmp/downloads/libusbk.7z >/dev/null; \
+    cp -a /tmp/downloads/libusb0/libusb-win32-*/. /opt/libwdi-input/libusb0/; \
+    cp -a /tmp/downloads/libusbk/libusbK-*/bin/. /opt/libwdi-input/libusbk/; \
+    test -f "/opt/libwdi-input/wdk/Program Files/Windows Kits/8.0/redist/wdf/x86/WdfCoInstaller01011.dll"; \
+    test -f /opt/libwdi-input/libusb0/bin/x86/libusb0.sys; \
+    test -f /opt/libwdi-input/libusbk/sys/x86/libusbK.sys; \
+    rm -rf /tmp/downloads
+
+RUN git clone --depth 1 --branch "${LIBWDI_REF}" https://github.com/pbatard/libwdi.git /src/libwdi
+COPY docker/scripts/build-libwdi-windows.sh /usr/local/bin/build-libwdi-windows
+RUN chmod +x /usr/local/bin/build-libwdi-windows
+RUN LIBWDI_ARCH=x64 SOURCE_DIR=/src/libwdi OUTPUT_DIR=/out build-libwdi-windows
+
 FROM alpine:${ALPINE_VERSION} AS build
 
 ARG TARGET=x86_64-w64-mingw32
@@ -116,6 +151,11 @@ WORKDIR /src/openocd
 COPY . .
 COPY docker/scripts/prepare-openocd-source.sh /usr/local/bin/prepare-openocd-source
 COPY docker/scripts/patch-jimtcl-mingw-aio.py /usr/local/bin/patch-jimtcl-mingw-aio
+COPY --from=libwdi /work/x64/package/libwdi-x64/bin/zadig.exe /usr/local/share/openocd-windows-tools/bin/x64/zadig.exe
+COPY --from=libwdi /work/x64/package/libwdi-x64/bin/wdi-simple.exe /usr/local/share/openocd-windows-tools/bin/x64/wdi-simple.exe
+COPY --from=libwdi /work/x64/package/libwdi-x64/COPYING /usr/local/share/openocd-windows-tools/libwdi/COPYING
+COPY --from=libwdi /work/x64/package/libwdi-x64/COPYING-LGPL /usr/local/share/openocd-windows-tools/libwdi/COPYING-LGPL
+COPY --from=libwdi /work/x64/package/libwdi-x64/README.md /usr/local/share/openocd-windows-tools/libwdi/README.md
 RUN chmod +x /usr/local/bin/prepare-openocd-source /usr/local/bin/patch-jimtcl-mingw-aio
 
 RUN set -eux; \
@@ -140,6 +180,10 @@ RUN set -eux; \
     pkg=openocd-windows-x86_64; \
     mkdir -p "/out/${pkg}"; \
     cp -a "${PREFIX}/bin" "${PREFIX}/share" "/out/${pkg}/"; \
+    mkdir -p "/out/${pkg}/tools/windows/usb-driver/bin"; \
+    cp -a /usr/local/share/openocd-windows-tools/bin/x64 "/out/${pkg}/tools/windows/usb-driver/bin/"; \
+    cp -a /usr/local/share/openocd-windows-tools/libwdi "/out/${pkg}/tools/windows/usb-driver/"; \
+    cp -a tools/ti/windows/. "/out/${pkg}/tools/windows/usb-driver/"; \
     cp -a README* COPYING* LICENSE* "/out/${pkg}/" 2>/dev/null || true; \
     printf '@echo off\r\n%%~dp0bin\\openocd.exe %%*\r\n' > "/out/${pkg}/openocd.cmd"; \
     cd /out; \

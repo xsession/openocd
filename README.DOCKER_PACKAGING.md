@@ -112,3 +112,19 @@ For the Windows package, libconfuse is still built so libftdi can include `ftdi_
 ### libjaylink fetch fallback
 
 The Windows cross-build fetches libjaylink through a fallback chain because repo.or.cz snapshot downloads can fail with TLS EOF errors in Docker builds. The builder first tries the upstream GitLab repository, then a GitHub mirror, then repo.or.cz with curl retries.
+
+### Windows Zadig / libwdi helper
+
+The Windows cross-build also compiles `pbatard/libwdi` from source, using the
+same Docker pattern as the openFPGALoader Windows driver workflow. The generated
+package includes:
+
+```text
+tools/windows/usb-driver/bin/x64/zadig.exe
+tools/windows/usb-driver/bin/x64/wdi-simple.exe
+tools/windows/usb-driver/install-xds100v2-winusb-mi00.ps1
+```
+
+Use `zadig.exe` for manual driver binding, or run the PowerShell installer as
+Administrator to bind only the XDS100v2 debug interface (`MI_00`) to WinUSB.
+The auxiliary serial interface (`MI_01`) remains on the Windows COM-port driver.
