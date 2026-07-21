@@ -329,6 +329,32 @@ error:
 	return false;
 }
 
+static void mpsse_log_xds100_driver_hint(const uint16_t vids[], const uint16_t pids[])
+{
+	bool xds100v2 = false;
+	bool xds100v3 = false;
+
+	for (unsigned int i = 0; vids[i]; i++) {
+		if (vids[i] != 0x0403)
+			continue;
+
+		if (pids[i] == 0xa6d0)
+			xds100v2 = true;
+		else if (pids[i] == 0xa6d1)
+			xds100v3 = true;
+	}
+
+	if (!xds100v2 && !xds100v3)
+		return;
+
+	LOG_ERROR("TI XDS100 on Windows needs a libusb-compatible driver on FTDI interface MI_00 only.");
+	if (xds100v2)
+		LOG_ERROR("For XDS100v2, bind VID_0403&PID_A6D0&MI_00 to WinUSB; packaged helper: openocd-xds100v2.cmd");
+	if (xds100v3)
+		LOG_ERROR("For XDS100v3, bind VID_0403&PID_A6D1&MI_00 to WinUSB; packaged helper: openocd-xds100v3.cmd");
+	LOG_ERROR("Leave MI_01 on the vendor/VCP driver if you use the probe's UART channel.");
+}
+
 struct mpsse_ctx *mpsse_open(const uint16_t vids[], const uint16_t pids[], const char *description,
 	const char *serial, const char *location, int channel)
 {
@@ -371,6 +397,7 @@ struct mpsse_ctx *mpsse_open(const uint16_t vids[], const uint16_t pids[], const
 				description ? description : "*",
 				serial ? serial : "*",
 				location ? location : "*");
+		mpsse_log_xds100_driver_hint(vids, pids);
 		ctx->usb_dev = NULL;
 		goto error;
 	}

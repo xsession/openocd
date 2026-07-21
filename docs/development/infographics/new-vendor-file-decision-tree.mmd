@@ -1,0 +1,20 @@
+flowchart TD
+  Start["New support request"] --> ProbeQ{"Is the programmer already supported?"}
+  ProbeQ -- "yes" --> InterfaceReuse["reuse or add small tcl/interface config"]
+  ProbeQ -- "no" --> AdapterCode["add src/jtag/drivers adapter code"]
+
+  InterfaceReuse --> TargetQ{"Is the CPU architecture already supported?"}
+  AdapterCode --> TargetQ
+
+  TargetQ -- "yes" --> TargetScript["add tcl/target/vendor/mcu.cfg"]
+  TargetQ -- "no" --> TargetBackend["add src/target backend code"]
+
+  TargetScript --> FlashQ{"Need internal flash write/erase?"}
+  TargetBackend --> FlashQ
+
+  FlashQ -- "yes" --> FlashDriver["add src/flash/nor/vendor_flash.c"]
+  FlashQ -- "no" --> BoardScript["add tcl/board/vendor/board.cfg"]
+
+  FlashDriver --> BoardScript
+  BoardScript --> Docs["add docs and examples"]
+  Docs --> Tests["build and hardware validation"]

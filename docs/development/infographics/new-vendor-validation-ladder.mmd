@@ -1,0 +1,15 @@
+flowchart TD
+  A["Build succeeds"] --> B["OpenOCD starts with interface config"]
+  B --> C["Probe opens and reports speed"]
+  C --> D["scan_chain or dap info returns expected ID"]
+  D --> E["target is created"]
+  E --> F["halt and resume work"]
+  F --> G["registers and memory read work"]
+  G --> H["breakpoints and stepping work"]
+  H --> I["flash probe works"]
+  I --> J["erase, write, verify work"]
+  J --> K["documented as supported"]
+
+  D --> DFail["If ID is wrong, stop and fix wiring, transport, reset, or expected ID"]
+  F --> FFail["If halt fails, stop before adding flash"]
+  I --> IFail["If flash probe fails, do not add board programming examples yet"]

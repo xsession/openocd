@@ -1,0 +1,6 @@
+flowchart LR
+  Configure["configure.ac option"] --> Header["driver header declaration"]
+  Header --> Makefile["Makefile.am source list"]
+  Makefile --> Registry["driver registry table"]
+  Registry --> Command["OpenOCD command visible"]
+  Command --> Config["Tcl config uses command"]

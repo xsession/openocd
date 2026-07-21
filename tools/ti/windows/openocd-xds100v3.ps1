@@ -13,5 +13,5 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $script = Join-Path $PSScriptRoot 'openocd-xds100.ps1'
-& $script -ProbeVersion v2 -OpenOcd $OpenOcd -Scripts $Scripts -Serial $Serial -NoAutoInstall:$NoAutoInstall @OpenOcdArgs
+& $script -ProbeVersion v3 -OpenOcd $OpenOcd -Scripts $Scripts -Serial $Serial -NoAutoInstall:$NoAutoInstall @OpenOcdArgs
 exit $LASTEXITCODE

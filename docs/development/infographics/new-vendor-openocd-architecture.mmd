@@ -1,0 +1,34 @@
+flowchart LR
+  User["User command"] --> OpenOCD["OpenOCD core"]
+
+  subgraph Host["PC side"]
+    Usb["USB or TCP transport"]
+    AdapterDriver["adapter driver"]
+    InterfaceCfg["tcl/interface/vendor/probe.cfg"]
+  end
+
+  subgraph TargetSide["Board side"]
+    Probe["programmer/debug probe"]
+    DebugPort["JTAG or SWD pins"]
+    McuDebug["MCU debug module"]
+    Cpu["CPU target"]
+    Flash["on-chip flash"]
+  end
+
+  subgraph Scripts["Tcl scripts"]
+    TargetCfg["tcl/target/vendor/mcu.cfg"]
+    BoardCfg["tcl/board/vendor/board.cfg"]
+  end
+
+  OpenOCD --> AdapterDriver
+  InterfaceCfg --> AdapterDriver
+  AdapterDriver --> Usb
+  Usb --> Probe
+  Probe --> DebugPort
+  DebugPort --> McuDebug
+  McuDebug --> Cpu
+  Cpu --> Flash
+  TargetCfg --> McuDebug
+  TargetCfg --> Flash
+  BoardCfg --> InterfaceCfg
+  BoardCfg --> TargetCfg

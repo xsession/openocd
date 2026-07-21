@@ -106,6 +106,9 @@ The script writes `artifacts/vendor-audit/openocd-vendor-file-delta.csv`. Review
 that CSV one ecosystem at a time, then import small Tcl/config changes first and
 C source changes only after a focused code review.
 
+For a beginner-friendly phase checklist based on this audit, see
+[`vendor-audit-phased-checklist.md`](vendor-audit-phased-checklist.md).
+
 ## Audit Snapshot: 2026-07-21
 
 The first expanded GitHub audit cloned 10 source ecosystems and wrote 8,259

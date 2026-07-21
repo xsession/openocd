@@ -1,0 +1,20 @@
+sequenceDiagram
+  participant User as User
+  participant OpenOCD as OpenOCD
+  participant Target as MCU target
+  participant Flash as Flash controller
+  participant Loader as RAM flash loader
+
+  User->>OpenOCD: flash write_image firmware.elf
+  OpenOCD->>Target: halt and prepare work area
+  OpenOCD->>Flash: read flash ID and status
+  OpenOCD->>Flash: erase needed sectors
+  alt small or simple flash
+    OpenOCD->>Flash: program words directly
+  else faster programming
+    OpenOCD->>Target: upload loader into SRAM
+    OpenOCD->>Loader: stream data blocks
+    Loader->>Flash: program flash controller
+  end
+  OpenOCD->>Flash: verify contents
+  OpenOCD-->>User: success or clear error

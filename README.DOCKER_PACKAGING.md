@@ -122,9 +122,13 @@ package includes:
 ```text
 tools/windows/usb-driver/bin/x64/zadig.exe
 tools/windows/usb-driver/bin/x64/wdi-simple.exe
+tools/windows/usb-driver/install-xds100-winusb-mi00.ps1
 tools/windows/usb-driver/install-xds100v2-winusb-mi00.ps1
+tools/windows/usb-driver/install-xds100v3-winusb-mi00.ps1
+tools/windows/usb-driver/openocd-xds100v2.ps1
+tools/windows/usb-driver/openocd-xds100v3.ps1
 ```
 
 Use `zadig.exe` for manual driver binding, or run the PowerShell installer as
-Administrator to bind only the XDS100v2 debug interface (`MI_00`) to WinUSB.
+Administrator to bind only the XDS100v2 or XDS100v3 debug interface (`MI_00`) to WinUSB.
 The auxiliary serial interface (`MI_01`) remains on the Windows COM-port driver.

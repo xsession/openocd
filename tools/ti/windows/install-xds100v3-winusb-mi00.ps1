@@ -10,5 +10,5 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $script = Join-Path $PSScriptRoot 'install-xds100-winusb-mi00.ps1'
-& $script -ProbeVersion v2 -Installer $Installer -DriverDirectory $DriverDirectory -Silent:$Silent
+& $script -ProbeVersion v3 -Installer $Installer -DriverDirectory $DriverDirectory -Silent:$Silent
 exit $LASTEXITCODE

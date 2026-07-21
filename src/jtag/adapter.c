@@ -466,7 +466,7 @@ static const struct ti_adapter_support ti_adapter_support[] = {
 #endif
 		.transport = "jtag",
 		.config = "interface/ti/xds100v2.cfg",
-		.notes = "FT2232H/MPSSE; requires libusb-compatible FTDI driver",
+		.notes = "FT2232H/MPSSE; Windows helper: openocd-xds100v2.cmd",
 	},
 	{
 		.probe = "XDS100v3",
@@ -478,7 +478,7 @@ static const struct ti_adapter_support ti_adapter_support[] = {
 #endif
 		.transport = "jtag",
 		.config = "interface/ti/xds100v3.cfg",
-		.notes = "FT2232H/MPSSE; same CPLD protocol as XDS100v2",
+		.notes = "FT2232H/MPSSE; Windows helper: openocd-xds100v3.cmd",
 	},
 	{
 		.probe = "XDS110",
