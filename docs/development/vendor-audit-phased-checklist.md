@@ -229,34 +229,31 @@ Phase 8 result:
 | Index | `docs/index.md` updated. |
 | Vendor audit | TI lane marked as integrated through documentation/status, with hardware/flash gates remaining. |
 
-## Phase 9: Current Audit Queue
+## Phase 9: AVRDUDE And Zephyr-Style Support Index
+
+- [x] Pin the AVRDUDE upstream source, license, tag, and commit.
+- [x] Inventory the AVRDUDE MCU and programmer catalog.
+- [x] Add a delegated OpenOCD command bridge for AVRDUDE-supported MCUs and
+  programmers.
+- [x] Document the native OpenOCD support boundary for AVRDUDE protocol
+  families.
+- [x] Add Zephyr-style metadata roots for boards, SoCs, programmers, modules,
+  and vendors.
+- [x] Index the C2000/XDS100/XDS110 lane in the new `support/` metadata tree.
+- [x] Validate AVRDUDE bridge command loading and dry-run command generation.
+- [x] Validate that `support/` metadata references existing runtime and docs
+  paths.
 
 - [x] AVRDUDE bridge: pin upstream, inventory MCU/programmer support, add a
   delegated OpenOCD command bridge, and document the native-port boundary.
 - [x] Zephyr-style organization: add `support/` metadata roots for boards,
   SoCs, programmers, modules, and vendors without moving OpenOCD runtime files.
-- [ ] TI hardware path: run real XDS100v2/XDS100v3/XDS110 attach flow and C28x
-  target operation tests on powered recoverable hardware.
-- [ ] Espressif backend batch: import ESP32-C5, ESP32-C61, ESP32-P4, H21, H4,
-  or S31 only with their required C target and flash backend changes.
-- [ ] WCH backend batch: import CH32 support only with WCH adapter, transport,
-  target, and flash code together.
-- [ ] Nuvoton backend batch: update `numicro.c` flash-region handling before
-  adding M23 and M23_NS target aliases.
-- [ ] Zephyr SDK deferred targets: handle `rv32m1` or `nds32` only after
-  deciding whether their target backends belong in this fork.
-- [ ] RISC-V collaboration: review core RISC-V behavior after MCU-specific
-  imports, because regressions affect many targets.
-- [ ] Arduino OpenOCD: import only after deciding whether old NDS32/package flow
-  files are still useful.
-- [ ] Microchip, ST, Nordic, NXP, Silicon Labs, GigaDevice, and Raspberry Pi:
-  leave as covered unless a newer source adds a self-contained, tested file.
 
 Phase 9 AVRDUDE result:
 
 | Field | Decision |
 | --- | --- |
-| Result note | `docs/development/avrdude-integration-audit.md` |
+| Result note | `docs/development/vendor-audit-phase9-avrdude-support-index.md` |
 | Source | `https://github.com/avrdudes/avrdude.git` |
 | Audited commit | `7154723b9efa8bad989b2b339c303aa9d12014e2` |
 | Latest checked tag | `v8.2` at `65dd419fdde8a018f718a07351c674121edba2cd` |
@@ -276,3 +273,65 @@ Phase 9 organization result:
 | Programmer pattern | `support/programmers/<vendor>/<programmer>/programmer.yml` |
 | Module pattern | `support/modules/<source>/module.yml` |
 | Runtime compatibility | Existing `tcl/`, `src/`, `contrib/`, and `docs/` paths remain in place. |
+
+## Phase 10: Backend And Hardware Queue Closure
+
+- [x] Classify the TI hardware path as blocked on real powered recoverable
+  hardware rather than config-only work.
+- [x] Classify Espressif newer-chip support as a full backend batch.
+- [x] Classify WCH CH32/WCH-Link support as a full adapter, transport, target,
+  and flash backend batch.
+- [x] Classify Nuvoton M23/M23_NS support as blocked on `numicro.c`
+  flash-region review.
+- [x] Classify Zephyr SDK `rv32m1` and `nds32` as target-backend decisions.
+- [x] Classify RISC-V collaboration changes as core backend work requiring
+  broad regression coverage.
+- [x] Classify Arduino OpenOCD deltas as deferred unless NDS32 is restored.
+- [x] Record ecosystems already covered locally and leave them unchanged.
+- [x] Add `support/modules/*` metadata entries for deferred or blocked backend
+  queues.
+- [x] Record exact acceptance gates for each future backend/hardware batch.
+- [x] Validate that no broken Tcl-only imports were added.
+
+Phase 10 result:
+
+| Field | Decision |
+| --- | --- |
+| Result note | `docs/development/vendor-audit-phase10-backend-hardware-queue.md` |
+| Runtime imports | None. Remaining candidates require paired C backend or real hardware validation. |
+| Metadata added | TI hardware validation, Espressif, WCH, Nuvoton, Zephyr SDK targets, RISC-V collaboration, and Arduino OpenOCD module records. |
+| TI hardware status | Blocked on real XDS100/XDS110 plus recoverable C2000 hardware. |
+| Backend status | Deferred to focused Phase 11 batches. |
+| Covered ecosystems | Microchip, ST, Nordic, NXP, Silicon Labs, GigaDevice, Raspberry Pi, and TI native SWD remain covered locally. |
+
+## Phase 11: Support Validation Tooling
+
+- [x] Pick a local implementation batch that does not require unsafe hardware
+  or unvalidated backend imports.
+- [x] Add a dependency-free PowerShell validator for the Zephyr-style
+  `support/` metadata tree.
+- [x] Validate support metadata status values against the repository support
+  vocabulary.
+- [x] Validate support metadata references to `tcl/`, `docs/`, `examples/`,
+  `tools/`, and `support/` paths.
+- [x] Record the implementation decision and validation command.
+- [x] Move real hardware and native backend implementation work into Phase 12.
+
+Phase 11 result:
+
+| Field | Decision |
+| --- | --- |
+| Result note | `docs/development/vendor-audit-phase11-support-validation-tooling.md` |
+| Implementation | `tools/support/validate-support-metadata.ps1` |
+| Hardware/backend imports | None; no matching hardware or simulator validation is available in this workspace. |
+| Validation | Support metadata path and status validation passed with `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\support\validate-support-metadata.ps1`. |
+
+## Phase 12: Hardware And Native Backend Implementation Queue
+
+- [ ] Run TI hardware attach and C28x operation tests when real hardware is
+  available.
+- [ ] Pick one deferred backend family and import it as a complete C/Tcl/test
+  batch.
+- [ ] Start with Espressif, WCH, Nuvoton, RISC-V, Arduino/NDS32, or native
+  AVRDUDE protocol ports only when matching validation hardware or simulator
+  coverage is available.

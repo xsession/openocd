@@ -1,0 +1,272 @@
+diff --git a/README.md b/README.md
+index 4fc1736..433678e 100644
+--- a/README.md
++++ b/README.md
+@@ -63,6 +63,34 @@ Requirements:
+ 
+ See https://github.com/Marus/cortex-debug/wiki for usage information. This needs some help from the community. See https://github.com/Marus/cortex-debug/blob/master/debug_attributes.md for a summary of all properties that are available in your `launch.json`
+ 
++### Non-Cortex and C2000 targets
++
++Set `"targetCore": "c2000"` or `"targetCore": "custom"` when the GDB server is OpenOCD or an externally managed server but the core is not ARM Cortex-M. In this mode Cortex-Debug does not guess `arm-none-eabi-gdb`, and it does not send Cortex-M-oriented OpenOCD defaults such as `monitor reset halt` or `monitor halt`. Provide the target-specific GDB explicitly with `gdbPath`, or provide a matching `toolchainPrefix`.
++
++Example for attaching to a TI C2000/C28x core exposed by an already running OpenOCD instance:
++
++```json
++{
++    "name": "F28M35x C28x via OpenOCD",
++    "type": "cortex-debug",
++    "request": "attach",
++    "servertype": "external",
++    "targetCore": "c2000",
++    "cwd": "${workspaceFolder}",
++    "executable": "${workspaceFolder}/build/c28x.out",
++    "gdbPath": "C:/ti/ccs/tools/compiler/ti-cgt-c2000/bin/c28x-gdb.exe",
++    "gdbTarget": "localhost:3334",
++    "postAttachCommands": [
++        "interpreter-exec console \"monitor halt\""
++    ],
++    "overrideResetCommands": [
++        "interpreter-exec console \"monitor reset halt\""
++    ]
++}
++```
++
++For a heterogeneous MCU such as an ARM Cortex-M3 plus a TI C28x, create two VS Code debug configurations and launch them as parallel or chained sessions. Use `"targetCore": "cortex-m"` with an ARM GDB for the Cortex-M side, and `"targetCore": "c2000"` with a C2000-capable GDB for the C28x side. Each session should connect to the GDB port that OpenOCD assigned to that specific core.
++
+ ## How to Build from sources
+ 
+ Make sure you have git, NodeJS and typescript installed on your PC before you begin. See: https://code.visualstudio.com/docs/setup/additional-components
+diff --git a/debug_attributes.md b/debug_attributes.md
+index e6a326e..f9df700 100644
+--- a/debug_attributes.md
++++ b/debug_attributes.md
+@@ -8,6 +8,7 @@ If the type is marked as `{...}` it means that it is a complex item can have mul
+ | Attribute | Type | Launch/ Attach | Description |
+ | --------- | ---- | ---------------- | ----------- |
+ | BMPGDBSerialPort | string | Both | The serial port for the Black Magic Probe GDB Server. On Windows this will be "COM<num>", on Linux this will be something similar to /dev/ttyACM0, on OS X something like /dev/cu.usbmodemE2C0C4C6 (do not use tty versions on OS X) |
++| allowCortexOnlyFeatures | boolean | Both | Allow Cortex-M-only helpers such as SWO to remain enabled for a non-Cortex `targetCore`. This is intended for experimental custom targets. |
+ | armToolchainPath | string | Both | This setting can be used to override the armToolchainPath user setting for a particular launch configuration. This should be the path where arm-none-eabi-gdb, arm-none-eabi-objdump and arm-none-eabi-nm are located. |
+ | boardId | string | Both | PyOCD Board Identifier. Needed if multiple compatible boards are connected. |
+ | breakAfterReset | boolean | Both | Applies to Restart/Reset/Launch, halt debugger after a reset. Ignored if `runToEntryPoint` is used. |
+@@ -100,6 +101,7 @@ If the type is marked as `{...}` it means that it is a complex item can have mul
+ | swoConfig<br>.swoPath | string | Both | Path name when source is "file" or "serial", device name regex match when source is "probe" for BMP. Typically a /path-name or a serial-port-name |
+ | swoConfig<br>.swoPort | string | Both | When server is "external" && source is "socket", port to connect to. Format [host:]port. For BMP, specifies the regex match of the USB interface containing raw SWO data. |
+ | symbolFiles | object[] | Both | Array of ELF files to load symbols from instead of the executable file. Each item in the array can be a string or an object. Program information is ignored (see `loadFiles`). Can be an empty list to specify none. If this property does not exist, then the executable is used for symbols |
++| targetCore | string | Both | Core architecture profile. Default `cortex-m` preserves existing ARM Cortex-M behavior. Use `c2000` for TI C2000/C28x-style GDB sessions, or `custom` for other non-Cortex cores. Non-Cortex profiles require `gdbPath` or `toolchainPrefix` and skip Cortex-M reset/halt defaults for OpenOCD/external servers. |
+ | targetId | string &#124; number | Both | On BMP this is the ID number that should be passed to the attach command (defaults to 1); for PyOCD this is the target identifier (only needed for custom hardware) |
+ | targetProcessor | number | Both | The processor you want to debug. Zero based integer index. Must be less than 'numberOfProcessors' |
+ | toolchainPrefix | string | Both | This setting can be used to override the toolchainPrefix user setting for a particular launch configuration. Default = "arm-none-eabi" |
+diff --git a/package.json b/package.json
+index 531e6e3..02f9ca4 100644
+--- a/package.json
++++ b/package.json
+@@ -634,6 +634,21 @@
+                                 "type": "string",
+                                 "default": null
+                             },
++                            "targetCore": {
++                                "default": "cortex-m",
++                                "type": "string",
++                                "description": "Core architecture profile. Use cortex-m for existing ARM Cortex-M behavior, c2000 for TI C2000/C28x-style GDB sessions, or custom for other non-Cortex cores.",
++                                "enum": [
++                                    "cortex-m",
++                                    "c2000",
++                                    "custom"
++                                ]
++                            },
++                            "allowCortexOnlyFeatures": {
++                                "default": false,
++                                "type": "boolean",
++                                "description": "Allow Cortex-M-only helpers such as SWO to remain enabled for a non-Cortex targetCore. This is intended for experimental custom targets."
++                            },
+                             "cpu": {
+                                 "default": "cortex-m3",
+                                 "type": "string",
+@@ -1809,6 +1824,21 @@
+                                 "type": "string",
+                                 "default": null
+                             },
++                            "targetCore": {
++                                "default": "cortex-m",
++                                "type": "string",
++                                "description": "Core architecture profile. Use cortex-m for existing ARM Cortex-M behavior, c2000 for TI C2000/C28x-style GDB sessions, or custom for other non-Cortex cores.",
++                                "enum": [
++                                    "cortex-m",
++                                    "c2000",
++                                    "custom"
++                                ]
++                            },
++                            "allowCortexOnlyFeatures": {
++                                "default": false,
++                                "type": "boolean",
++                                "description": "Allow Cortex-M-only helpers such as SWO to remain enabled for a non-Cortex targetCore. This is intended for experimental custom targets."
++                            },
+                             "cpu": {
+                                 "default": "cortex-m3",
+                                 "type": "string",
+diff --git a/src/common.ts b/src/common.ts
+index 86043f0..4f6978e 100644
+--- a/src/common.ts
++++ b/src/common.ts
+@@ -262,11 +262,15 @@ export interface HWWatchpointInfo {
+     limit?: number;
+ }
+ 
++export type TargetCore = 'cortex-m' | 'c2000' | 'custom';
++
+ export interface ConfigurationArguments extends DebugProtocol.LaunchRequestArguments {
+     name: string;
+     request: string;
+     toolchainPath: string;
+     toolchainPrefix: string;
++    targetCore: TargetCore;
++    allowCortexOnlyFeatures: boolean;
+     executable: string;
+     servertype: string;
+     serverpath: string;
+diff --git a/src/external.ts b/src/external.ts
+index b4d4526..2206b5c 100644
+--- a/src/external.ts
++++ b/src/external.ts
+@@ -42,7 +42,15 @@ export class ExternalServerController extends EventEmitter implements GDBServerC
+         ];
+     }
+ 
++    private isCortexMTarget(): boolean {
++        return !this.args.targetCore || this.args.targetCore === 'cortex-m';
++    }
++
+     public launchCommands(): string[] {
++        if (!this.isCortexMTarget()) {
++            return genDownloadCommands(this.args, []);
++        }
++
+         const commands = [
+             ...genDownloadCommands(this.args, ['interpreter-exec console "monitor reset halt"']),
+             'interpreter-exec console "monitor reset halt"'
+@@ -52,6 +60,10 @@ export class ExternalServerController extends EventEmitter implements GDBServerC
+     }
+ 
+     public attachCommands(): string[] {
++        if (!this.isCortexMTarget()) {
++            return [];
++        }
++
+         const commands = [
+             'interpreter-exec console "monitor halt"'
+         ];
+@@ -64,6 +76,10 @@ export class ExternalServerController extends EventEmitter implements GDBServerC
+     }
+ 
+     public resetCommands(): string[] {
++        if (!this.isCortexMTarget()) {
++            return [];
++        }
++
+         const commands: string[] = [
+             'interpreter-exec console "monitor reset halt"'
+         ];
+diff --git a/src/frontend/configprovider.ts b/src/frontend/configprovider.ts
+index 61503f2..d81b6bd 100644
+--- a/src/frontend/configprovider.ts
++++ b/src/frontend/configprovider.ts
+@@ -28,6 +28,7 @@ const OPENOCD_VALID_RTOS: string[] = [
+     'Zephyr'
+ ];
+ const JLINK_VALID_RTOS: string[] = ['Azure', 'ChibiOS', 'embOS', 'FreeRTOS', 'NuttX', 'Zephyr'];
++const VALID_TARGET_CORES: string[] = ['cortex-m', 'c2000', 'custom'];
+ 
+ export class CortexDebugConfigurationProvider implements vscode.DebugConfigurationProvider {
+     constructor(private context: vscode.ExtensionContext) {}
+@@ -215,12 +216,28 @@ export class CortexDebugConfigurationProvider implements vscode.DebugConfigurati
+             }
+         }
+ 
+-        if (!config.toolchainPrefix) {
++        if (!config.targetCore) {
++            config.targetCore = 'cortex-m';
++        } else if (!VALID_TARGET_CORES.includes(config.targetCore)) {
++            validationResponse = `Invalid targetCore "${config.targetCore}". Supported values are ${VALID_TARGET_CORES.map((s) => `"${s}"`).join(', ')}`;
++        }
++        const isCortexMTarget = config.targetCore === 'cortex-m';
++
++        if (!config.toolchainPrefix && isCortexMTarget) {
+             config.toolchainPrefix = configuration.armToolchainPrefix || 'arm-none-eabi';
+         }
+ 
+         this.setOsSpecficConfigSetting(config, 'gdbPath');
+         this.setOsSpecficConfigSetting(config, 'objdumpPath');
++        if (!validationResponse && !isCortexMTarget && !config.gdbPath && !config.toolchainPrefix) {
++            validationResponse = `targetCore "${config.targetCore}" requires "gdbPath" or "toolchainPrefix"; Cortex-Debug will not assume arm-none-eabi tools for non-Cortex targets.`;
++        }
++        if (!isCortexMTarget && config.swoConfig?.enabled && !config.allowCortexOnlyFeatures) {
++            config.swoConfig.enabled = false;
++            vscode.window.showInformationMessage(
++                `launch.json: SWO was disabled because targetCore "${config.targetCore}" is not Cortex-M. `
++                + 'Set "allowCortexOnlyFeatures": true to keep it enabled.');
++        }
+         config.extensionPath = this.context.extensionPath;
+         if (os.platform() === 'win32') {
+             config.extensionPath = config.extensionPath.replace(/\\/g, '/'); // GDB doesn't interpret the path correctly with backslashes.
+diff --git a/src/gdb.ts b/src/gdb.ts
+index 5a06b57..c40c7dd 100755
+--- a/src/gdb.ts
++++ b/src/gdb.ts
+@@ -1015,7 +1015,7 @@ export class GDBDebugSession extends LoggingDebugSession {
+             gdbExePath = path.normalize(path.join(this.args.toolchainPath, gdbExePath));
+         }
+         const gdbMissingMsg = `GDB executable "${gdbExePath}" was not found.\n`
+-            + 'Please configure "cortex-debug.armToolchainPath" or "cortex-debug.gdbPath" correctly.';
++            + 'Please configure "cortex-debug.armToolchainPath", "toolchainPrefix", or "gdbPath" correctly.';
+ 
+         if (this.args.gdbPath) {
+             gdbExePath = this.args.gdbPath;
+diff --git a/src/openocd.ts b/src/openocd.ts
+index f970d33..de841c9 100644
+--- a/src/openocd.ts
++++ b/src/openocd.ts
+@@ -87,6 +87,10 @@ export class OpenOCDServerController extends EventEmitter implements GDBServerCo
+         return this.initCommands();
+     }
+ 
++    private isCortexMTarget(): boolean {
++        return !this.args.targetCore || this.args.targetCore === 'cortex-m';
++    }
++
+     // ST/OpenOCD HACK: There are two problems.
+     // ST with their release on Dec 31 2021, released their FW/SW where it no longer works
+     // when any configuring is done after reset. It is more than likely something that
+@@ -101,6 +105,10 @@ export class OpenOCDServerController extends EventEmitter implements GDBServerCo
+     // by a 'stepi' which doesn't really do a stepi but can emulate a break due to a step that
+     // gdb expects
+     public launchCommands(): string[] {
++        if (!this.isCortexMTarget()) {
++            return genDownloadCommands(this.args, []);
++        }
++
+         const commands = [
+             ...genDownloadCommands(this.args, ['interpreter-exec console "monitor reset halt"']),
+             'interpreter-exec console "monitor reset halt"'
+@@ -109,6 +117,10 @@ export class OpenOCDServerController extends EventEmitter implements GDBServerCo
+     }
+ 
+     public attachCommands(): string[] {
++        if (!this.isCortexMTarget()) {
++            return [];
++        }
++
+         const commands = [
+             'interpreter-exec console "monitor halt"'
+         ];
+@@ -116,6 +128,10 @@ export class OpenOCDServerController extends EventEmitter implements GDBServerCo
+     }
+ 
+     public resetCommands(): string[] {
++        if (!this.isCortexMTarget()) {
++            return [];
++        }
++
+         const commands: string[] = [
+             'interpreter-exec console "monitor reset halt"'
+         ];

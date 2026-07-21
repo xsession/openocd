@@ -1,0 +1,16 @@
+name: ti-hardware-validation
+status: blocked
+source: local-ti-c2000-lane
+reason: requires real powered recoverable TI C2000 hardware and XDS100/XDS110 probes
+docs:
+  - docs/development/vendor-audit-phase10-backend-hardware-queue.md
+  - docs/targets/ti-c2000-support.md
+acceptance_gates:
+  - scan_chain returns expected TAPs
+  - targets lists expected C28x target
+  - halt_resume_step_register_memory_checks_pass
+  - flash_probe_erase_write_verify_protect_pass_on_recoverable_hardware
+runtime_files:
+  boards:
+    - tcl/board/ti/tms320f28m35x-xds100v2.cfg
+    - tcl/board/ti/tms320f28m35x-xds100v3.cfg

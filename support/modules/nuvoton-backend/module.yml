@@ -1,0 +1,11 @@
+name: nuvoton-backend
+status: deferred
+source: https://github.com/OpenNuvoton/OpenOCD-Nuvoton
+reason: M23 and M23_NS target aliases require newer numicro flash-region handling first
+docs:
+  - docs/development/vendor-audit-phase10-backend-hardware-queue.md
+required_batch:
+  - review numicro.c flash region changes
+  - import compatible flash backend changes
+  - add M23 and M23_NS target aliases
+  - build and config-load validation

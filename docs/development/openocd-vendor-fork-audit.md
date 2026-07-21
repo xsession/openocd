@@ -352,3 +352,46 @@ Result:
 - maintainer audit and native-port queue in
   `docs/development/avrdude-integration-audit.md`;
 - no native OpenOCD AVR protocol backend is claimed by this batch.
+
+## Zephyr-Style Support Index Batch: 2026-07-21
+
+Added a `support/` metadata tree to organize support like Zephyr does, while
+leaving OpenOCD runtime files in their existing install-safe locations:
+
+- `support/boards/<vendor>/<board>/board.yml`
+- `support/soc/<vendor>/<soc>/soc.yml`
+- `support/programmers/<vendor>/<programmer>/programmer.yml`
+- `support/modules/<source>/module.yml`
+- `support/vendors/<vendor>/vendor.yml`
+
+The first indexed lane covers TI C2000/XDS100/XDS110 and the AVRDUDE external
+bridge. The Phase 9 close-out is recorded in
+`docs/development/vendor-audit-phase9-avrdude-support-index.md`.
+
+## Backend And Hardware Queue Batch: 2026-07-21
+
+Phase 10 closed the remaining audit queue by recording why the remaining items
+are not Tcl-only imports:
+
+- TI C2000 real attach and flash checks require recoverable hardware.
+- Espressif newer-chip support requires matching target and flash backend code.
+- WCH support requires adapter, transport, target, and flash code together.
+- Nuvoton M23/M23_NS depends on newer `numicro.c` flash-region handling.
+- Zephyr SDK `rv32m1` and `nds32` require target-backend ownership decisions.
+- RISC-V collaboration changes are core backend changes with broad regression
+  risk.
+- Arduino OpenOCD deltas are deferred unless NDS32 is intentionally restored.
+
+The queue is now represented under `support/modules/`, and the Phase 10
+close-out is recorded in
+`docs/development/vendor-audit-phase10-backend-hardware-queue.md`.
+
+## Support Validation Tooling Batch: 2026-07-21
+
+Phase 11 added `tools/support/validate-support-metadata.ps1`, a lightweight
+PowerShell validator for the Zephyr-style `support/` metadata tree. It checks
+status vocabulary and repository-relative path references without requiring an
+external YAML parser.
+
+The Phase 11 close-out is recorded in
+`docs/development/vendor-audit-phase11-support-validation-tooling.md`.

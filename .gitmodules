@@ -4,3 +4,6 @@
 [submodule "src/jtag/drivers/libjaylink"]
 	path = src/jtag/drivers/libjaylink
 	url = https://gitlab.zapb.de/libjaylink/libjaylink.git
+[submodule "tools/vscode/cortex-debug"]
+	path = tools/vscode/cortex-debug
+	url = https://github.com/xsession/cortex-debug.git

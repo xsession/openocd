@@ -92,8 +92,19 @@ EXTRA_DIST += \
 	svd \
 	docs/development/microchip-feature-base.md \
 	docs/development/source-catalog.md \
+	docs/development/avrdude-integration-audit.md \
+	docs/development/vendor-audit-phase9-avrdude-support-index.md \
+	docs/development/vendor-audit-phase10-backend-hardware-queue.md \
+	docs/development/vendor-audit-phase11-support-validation-tooling.md \
+	docs/development/zephyr-style-support-organization.md \
 	docs/programmers/microchip-pickit-icd.md \
+	docs/programmers/avrdude.md \
+	docs/programmers/ti-xds100.md \
+	docs/usage/vscode-f28m35x-dual-core.md \
+	docs/openocd-course \
 	docs/index.md \
+	support \
+	tools/support \
 	MERGE_MANIFEST.md \
 	UNIFIED_VERSION
 

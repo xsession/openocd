@@ -1,0 +1,9 @@
+name: arduino-openocd
+status: deferred
+source: https://github.com/arduino/OpenOCD
+reason: useful deltas are mostly old NDS32/package-flow files
+docs:
+  - docs/development/vendor-audit-phase10-backend-hardware-queue.md
+required_decisions:
+  - decide whether NDS32 should be restored
+  - import package-flow files only if they still match current packaging goals

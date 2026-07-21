@@ -1,0 +1,14 @@
+name: espressif-backend
+status: deferred
+source: https://github.com/espressif/openocd-esp32
+reason: newer ESP32-C5/C61/P4/H21/H4/S31 scripts require matching C target and flash backends
+docs:
+  - docs/development/vendor-audit-phase10-backend-hardware-queue.md
+required_batch:
+  - src/target/espressif backend review
+  - flash helper review
+  - target and board Tcl import
+  - native build
+  - Windows package build
+  - config-load tests
+  - hardware or simulator validation

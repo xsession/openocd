@@ -1,0 +1,12 @@
+name: wch-backend
+status: deferred
+source: https://github.com/jnk0le/openocd-wch
+reason: CH32 support depends on WCH adapter, transport, target, and flash code together
+docs:
+  - docs/development/vendor-audit-phase10-backend-hardware-queue.md
+required_batch:
+  - wlinke adapter
+  - sdi transport
+  - wch_riscv and wcharm target support
+  - wchriscv flash support
+  - hardware validation

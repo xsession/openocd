@@ -568,26 +568,50 @@ Phase 3 result:
 - [ ] Update `docs/index.md` if the page is user-facing.
 - [ ] Update the vendor audit page with the integration decision.
 
-### Phase 9: Current Audit Queue
+### Phase 9: External Tools And Support Index
+
+- [ ] If an external tool already supports the requested MCU or programmer,
+  decide whether to add a delegated bridge before native backend work.
+- [ ] Pin the external source, license, tag, and commit.
+- [ ] Inventory the external MCU and programmer catalog.
+- [ ] Document which support is delegated and which support is native OpenOCD.
+- [ ] Add metadata under `support/boards`, `support/soc`,
+  `support/programmers`, `support/modules`, and `support/vendors`.
+- [ ] Validate delegated command construction without touching hardware.
+- [ ] Validate that metadata references point to real runtime and docs files.
+
+### Phase 10: Backend And Hardware Queue Closure
 
 Use the latest audit snapshot to choose the next batch:
 
-- [ ] TI hardware path: finish XDS100v2/XDS100v3/XDS110 packaging, attach flow,
-  and C28x target creation tests.
-- [ ] Espressif backend batch: import ESP32-C5, ESP32-C61, ESP32-P4, H21, H4,
-  or S31 only with their required C target and flash backend changes.
-- [ ] WCH backend batch: import CH32 support only with WCH adapter, transport,
-  target, and flash code together.
-- [ ] Nuvoton backend batch: update `numicro.c` flash-region handling before
-  adding M23 and M23_NS target aliases.
-- [ ] Zephyr SDK deferred targets: handle `rv32m1` or `nds32` only after
-  deciding whether their target backends belong in this fork.
-- [ ] RISC-V collaboration: review core RISC-V behavior after MCU-specific
-  imports, because regressions affect many targets.
-- [ ] Arduino OpenOCD: import only after deciding whether old NDS32/package flow
-  files are still useful.
-- [ ] Microchip, ST, Nordic, NXP, Silicon Labs, GigaDevice, and Raspberry Pi:
-  leave as covered unless a newer source adds a self-contained, tested file.
+- [ ] Classify hardware-only tasks separately from source-import tasks.
+- [ ] Classify every candidate as config-only, full backend batch, duplicate,
+  deferred, or blocked.
+- [ ] Add metadata entries for deferred or blocked backend queues.
+- [ ] Record exact acceptance gates before importing any backend code.
+- [ ] Avoid Tcl-only imports that reference missing target, adapter, transport,
+  or flash drivers.
+- [ ] Move the first real implementation batch into the next phase.
+
+### Phase 11: Support Validation Tooling
+
+- [ ] Add or run tooling that validates support metadata and documentation
+  references.
+- [ ] Validate status values such as `integrated`, `delegated`,
+  `experimental`, `deferred`, and `blocked`.
+- [ ] Validate that metadata references point to real files.
+- [ ] Record the validation command and result.
+- [ ] Move hardware-only or backend-only implementation work to the next phase
+  if no safe validation platform is available.
+
+### Phase 12: Hardware And Native Backend Implementation Queue
+
+- [ ] Run hardware attach and target operation tests when real hardware is
+  available.
+- [ ] Pick one deferred backend family and import it as a complete C/Tcl/test
+  batch.
+- [ ] Run native build, package build, config-load tests, and hardware or
+  simulator validation before marking the batch integrated.
 
 ## What Full Support Means
 

@@ -11,6 +11,7 @@ fork in addition to OpenOCD's standard manual under `doc/`.
 - [TI XDS100 programmer support](programmers/ti-xds100.md)
 - [TI debug adapter support](development/ti-debug-adapters.md)
 - [TI XDS110 usage](usage/xds110.md)
+- [VS Code dual-core F28M35x debugging](usage/vscode-f28m35x-dual-core.md)
 - [TI C2000 toolchain source](development/source-catalog.md)
 
 ## Microchip programmers
@@ -21,6 +22,7 @@ fork in addition to OpenOCD's standard manual under `doc/`.
 
 ## Repository merge
 
+- [OpenOCD university course](openocd-course/README.md)
 - [Source catalog](development/source-catalog.md)
 - [Repository layout](development/repository-layout.md)
 - [Adding a new vendor, MCU, and programmer](development/adding-new-vendor-mcu-programmer.md)
@@ -34,6 +36,9 @@ fork in addition to OpenOCD's standard manual under `doc/`.
 - [TI vendor audit phase 6 board examples result](development/vendor-audit-phase6-ti-board-examples.md)
 - [TI vendor audit phase 7 build regression result](development/vendor-audit-phase7-ti-build-regression.md)
 - [TI vendor audit phase 8 documentation status](development/vendor-audit-phase8-ti-documentation-status.md)
+- [Vendor audit phase 9 AVRDUDE and support index](development/vendor-audit-phase9-avrdude-support-index.md)
+- [Vendor audit phase 10 backend and hardware queue](development/vendor-audit-phase10-backend-hardware-queue.md)
+- [Vendor audit phase 11 support validation tooling](development/vendor-audit-phase11-support-validation-tooling.md)
 - [AVRDUDE integration audit](development/avrdude-integration-audit.md)
 - [OpenOCD vendor fork audit](development/openocd-vendor-fork-audit.md)
 - [Unified feature manifest](../MERGE_MANIFEST.md)

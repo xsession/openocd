@@ -1,0 +1,10 @@
+name: zephyr-sdk-targets
+status: deferred
+source: https://github.com/zephyrproject-rtos/openocd
+reason: rv32m1 and nds32 depend on target backend decisions, not standalone board-file imports
+docs:
+  - docs/development/vendor-audit-phase10-backend-hardware-queue.md
+required_decisions:
+  - decide whether rv32m1 belongs in this fork
+  - decide whether nds32 should be restored
+  - avoid board-only imports

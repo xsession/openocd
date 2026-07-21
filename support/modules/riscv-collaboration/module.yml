@@ -1,0 +1,10 @@
+name: riscv-collaboration
+status: deferred
+source: https://github.com/riscv-collab/riscv-openocd
+reason: core RISC-V backend behavior affects many targets and needs broad regression coverage
+docs:
+  - docs/development/vendor-audit-phase10-backend-hardware-queue.md
+required_batch:
+  - source diff against local src/target/riscv
+  - simulator or hardware validation
+  - broad target regression checks
