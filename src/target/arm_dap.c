@@ -184,6 +184,7 @@ enum dap_cfg_param {
 	CFG_INSTANCE_ID,
 	CFG_ADIV6,
 	CFG_ADIV5,
+	CFG_SWITCH_THRU_DORMANT,
 };
 
 static const struct jim_nvp nvp_config_opts[] = {
@@ -193,6 +194,7 @@ static const struct jim_nvp nvp_config_opts[] = {
 	{ .name = "-instance-id",        .value = CFG_INSTANCE_ID },
 	{ .name = "-adiv6",              .value = CFG_ADIV6 },
 	{ .name = "-adiv5",              .value = CFG_ADIV5 },
+	{ .name = "-switch-thru-dormant", .value = CFG_SWITCH_THRU_DORMANT },
 	{ .name = NULL, .value = -1 }
 };
 
@@ -277,6 +279,9 @@ static int dap_configure(struct jim_getopt_info *goi, struct arm_dap_object *dap
 			break;
 		case CFG_ADIV5:
 			dap->dap.adi_version = 5;
+			break;
+		case CFG_SWITCH_THRU_DORMANT:
+			dap->dap.switch_through_dormant = true;
 			break;
 		default:
 			break;

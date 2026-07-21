@@ -9,6 +9,7 @@ noinst_LTLIBRARIES += %D%/libocdflashnor.la
 	$(NORHEADERS)
 
 NOR_DRIVERS = \
+	%D%/am13e230x.c \
 	%D%/aduc702x.c \
 	%D%/aducm360.c \
 	%D%/ambiqmicro.c \
@@ -24,8 +25,12 @@ NOR_DRIVERS = \
 	%D%/avrf.c \
 	%D%/bl602.c \
 	%D%/bluenrg-x.c \
-	%D%/cc3220sf.c \
+	%D%/cc23xx.c \
 	%D%/cc26xx.c \
+	%D%/cc27xx.c \
+	%D%/cc3220sf.c \
+	%D%/cc_lpf3_base.c \
+	%D%/cc_lpf3_flash.c \
 	%D%/cfi.c \
 	%D%/dsp5680xx_flash.c \
 	%D%/dw-spi.c \
@@ -47,9 +52,10 @@ NOR_DRIVERS = \
 	%D%/max32xxx.c \
 	%D%/mdr.c \
 	%D%/mchp_ri4.c \
+	%D%/mrvlqspi.c \
 	%D%/msp432.c \
 	%D%/mspm0.c \
-	%D%/mrvlqspi.c \
+	%D%/mspm33.c \
 	%D%/niietcm4.c \
 	%D%/non_cfi.c \
 	%D%/npcx.c \
@@ -91,11 +97,16 @@ NOR_DRIVERS = \
 	%D%/hpm_xpi.c
 
 NORHEADERS = \
+	%D%/am13e230x.h \
 	%D%/artery.h \
 	%D%/core.h \
+	%D%/cc23xx.h \
 	%D%/cc3220sf.h \
 	%D%/bluenrg-x.h \
 	%D%/cc26xx.h \
+	%D%/cc27xx.h \
+	%D%/cc_lpf3_base.h \
+	%D%/cc_lpf3_flash.h \
 	%D%/cfi.h \
 	%D%/driver.h \
 	%D%/dw-spi-helper.h \
