@@ -1,8 +1,8 @@
 # AVRDUDE Programmer Bridge
 
-This OpenOCD fork includes a Tcl bridge for using AVRDUDE from an OpenOCD
-session. It is intended for AVR programming workflows where AVRDUDE already
-supports the MCU and programmer.
+This OpenOCD fork includes a source-level AVRDUDE catalog import and a Tcl
+bridge for using AVRDUDE from an OpenOCD session. It is intended for AVR
+programming workflows where AVRDUDE already supports the MCU and programmer.
 
 The bridge does not turn AVRDUDE protocols into native OpenOCD debug targets.
 It delegates programming operations to the external `avrdude` executable while
@@ -12,8 +12,8 @@ OpenOCD keeps a consistent command surface for scripts, packages, and examples.
 
 | Item | Status |
 | --- | --- |
-| AVRDUDE MCU catalog | Delegated through installed `avrdude` and its `avrdude.conf` |
-| AVRDUDE programmer catalog | Delegated through installed `avrdude` |
+| AVRDUDE MCU catalog | Compiled into OpenOCD as `avrdude_catalog`; runtime operations still use the selected AVRDUDE binary |
+| AVRDUDE programmer catalog | Compiled into OpenOCD as `avrdude_catalog`; runtime operations still use the selected AVRDUDE binary |
 | Flash write/read/verify/erase | Supported through `-U` and `-e` operations |
 | EEPROM write/read/verify | Supported by selecting `eeprom` memory |
 | Fuse and lock bits | Available only through explicit `avrdude raw ...` commands |
@@ -22,6 +22,26 @@ OpenOCD keeps a consistent command surface for scripts, packages, and examples.
 
 The upstream AVRDUDE audit snapshot from July 21, 2026 found 406 part blocks
 and 174 programmer blocks in `src/avrdude.conf.in`.
+
+This tree also keeps a generated support index under
+`support/catalogs/avrdude/`. Regenerate it from an installed AVRDUDE or source
+checkout with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\support\generate-avrdude-catalog.ps1 -Config path\to\avrdude.conf
+```
+
+The generated catalog is also compiled into OpenOCD under `src/avrdude/`.
+The selected installed AVRDUDE binary still decides the exact part and
+programmer support available for delegated runtime programming.
+
+Query the compiled catalog without loading the Tcl bridge:
+
+```powershell
+openocd -c "avrdude_catalog summary" -c shutdown
+openocd -c "avrdude_catalog parts atmega328p" -c shutdown
+openocd -c "avrdude_catalog programmers usbasp" -c shutdown
+```
 
 ## Flow
 

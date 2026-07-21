@@ -8,6 +8,10 @@ local_audit_copy: artifacts/vendor-sources/avrdude
 catalog:
   parts: 406
   programmers: 174
+generated_metadata:
+  parts: support/catalogs/avrdude/parts.yml
+  programmers: support/catalogs/avrdude/programmers.yml
+  generator: tools/support/generate-avrdude-catalog.ps1
 openocd_files:
   bridge: tcl/programmer/avrdude/common.tcl
   docs: docs/programmers/avrdude.md

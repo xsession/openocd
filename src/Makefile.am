@@ -53,6 +53,7 @@ MINGWLDADD =
 endif
 
 %C%_libopenocd_la_LIBADD = \
+	%D%/avrdude/libavrdude.la \
 	%D%/xsvf/libxsvf.la \
 	%D%/svf/libsvf.la \
 	%D%/pld/libpld.la \
@@ -85,6 +86,7 @@ CLEANFILES += %D%/startup_tcl.inc
 #	rm -f $(distdir)/%D%/startup_tcl.inc
 
 include %D%/helper/Makefile.am
+include %D%/avrdude/Makefile.am
 include %D%/jtag/Makefile.am
 include %D%/transport/Makefile.am
 include %D%/xsvf/Makefile.am

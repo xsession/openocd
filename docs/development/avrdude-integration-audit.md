@@ -53,7 +53,7 @@ Important implementation files seen in the audit copy include:
 | Choice | Decision |
 | --- | --- |
 | Copy AVRDUDE source into OpenOCD | No |
-| Import all part/programmer tables as native data | No |
+| Import all part/programmer tables as native data | Yes, generated under `src/avrdude` |
 | Provide immediate broad user access | Yes, through `tcl/programmer/avrdude/common.tcl` |
 | Native OpenOCD protocol ports | Deferred to focused backend batches |
 
@@ -68,6 +68,47 @@ it is not marked as native OpenOCD debug or flash backend support.
 | `tcl/programmer/avrdude/common.tcl` | OpenOCD Tcl command bridge to external `avrdude` |
 | `docs/programmers/avrdude.md` | User documentation and examples |
 | `docs/development/avrdude-integration-audit.md` | Maintainer audit and native-port roadmap |
+| `tools/support/generate-avrdude-catalog.ps1` | Generator for OpenOCD support metadata from `avrdude.conf` |
+| `support/catalogs/avrdude/parts.yml` | Generated AVRDUDE part index |
+| `support/catalogs/avrdude/programmers.yml` | Generated AVRDUDE programmer index |
+| `src/avrdude/avrdude_catalog.c` | Native OpenOCD command handlers for the compiled catalog |
+| `src/avrdude/avrdude_catalog.h` | Native catalog API and data structs |
+| `src/avrdude/avrdude_catalog_data.c` | Generated C data for 406 parts and 174 programmers |
+
+## Generated Support Catalog
+
+The generated catalog brings AVRDUDE's MCU and programmer knowledge into the
+OpenOCD support index without claiming native OpenOCD protocol support.
+
+Generate from a specific AVRDUDE catalog:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\support\generate-avrdude-catalog.ps1 -Config path\to\avrdude.conf
+```
+
+If no config is passed, the generator checks `AVRDUDE_CONF`, an installed
+`avrdude`, and `artifacts/vendor-sources/avrdude/src/avrdude.conf.in`.
+
+The generated support catalog was refreshed from the audited upstream source
+copy at `artifacts/vendor-sources/avrdude/src/avrdude.conf.in` and produced:
+
+| Generated item | Count |
+| --- | ---: |
+| AVRDUDE parts | 406 |
+| AVRDUDE programmers | 174 |
+
+The generator also works with older installed AVRDUDE packages, such as the
+Arduino-bundled AVRDUDE 6.3-era catalog, but those outputs will naturally
+contain fewer parts and programmers.
+
+The same generator writes `src/avrdude/avrdude_catalog_data.c`, so the catalog
+is compiled into the OpenOCD executable. Native query commands:
+
+```powershell
+.\artifacts\windows\openocd-windows-x86_64\bin\openocd.exe -c "avrdude_catalog summary" -c shutdown
+.\artifacts\windows\openocd-windows-x86_64\bin\openocd.exe -c "avrdude_catalog parts atmega328p" -c shutdown
+.\artifacts\windows\openocd-windows-x86_64\bin\openocd.exe -c "avrdude_catalog programmers usbasp" -c shutdown
+```
 
 ## Safety Rules
 
