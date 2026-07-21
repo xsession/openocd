@@ -1,0 +1,18 @@
+name: Texas Instruments
+slug: ti
+status: integrated
+runtime_paths:
+  targets: tcl/target/ti
+  boards: tcl/board/ti
+  interfaces: tcl/interface/ti
+docs:
+  - docs/targets/ti-c2000-support.md
+  - docs/programmers/ti-xds100.md
+  - docs/usage/xds110.md
+audit:
+  source: https://github.com/TexasInstruments/ti-openocd
+  checklist: docs/development/vendor-audit-phased-checklist.md
+notes:
+  - XDS100v2 and XDS100v3 use OpenOCD's FTDI backend.
+  - XDS110 uses OpenOCD's native xds110 backend.
+  - Real C2000 hardware attach and flash validation remain gated.

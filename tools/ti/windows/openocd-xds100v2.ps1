@@ -3,6 +3,7 @@
 [CmdletBinding()]
 param(
   [string]$OpenOcd = '',
+  [Alias('s')]
   [string]$Scripts = '',
   [string]$Serial = '',
   [switch]$NoAutoInstall,

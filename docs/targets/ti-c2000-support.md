@@ -18,10 +18,20 @@ Convenience board files are also provided:
 
 ```text
 board/ti/launchxl-f28069m-xds100v2.cfg
+board/ti/tms320f280049-xds100v2.cfg
+board/ti/tms320f280049-xds100v3.cfg
+board/ti/tms320f28069-xds100v2.cfg
+board/ti/tms320f28069-xds100v3.cfg
+board/ti/tms320f28m35x-xds100v2.cfg
+board/ti/tms320f28m35x-xds100v3.cfg
 board/ti/tms320f28069-xds110.cfg
 board/ti/tms320f280049-xds110.cfg
 board/ti/tms320f28m35x-xds110.cfg
 ```
+
+The XDS100 board files are discovery-only.  They select JTAG, set a conservative
+adapter speed, and create the target.  They do not define flash banks or perform
+erase/program/security operations.
 
 ## Implemented C28x backend features
 
@@ -135,17 +145,19 @@ secondary TAP topology.
 
 ## Build validation performed
 
-The target library and executable were built locally with:
+The Phase 7 validation built the full native executable locally with:
 
 ```text
-./bootstrap
-./configure --disable-werror --enable-dummy --enable-internal-jimtcl
-make -j8 src/target/libtarget.la
-make -j8 src/openocd
+../configure --enable-internal-jimtcl --disable-werror --disable-doxygen-html --disable-doxygen-pdf --disable-buspirate
+make -j4
 ```
 
-Smoke tests loaded all three target configs with the dummy JTAG adapter and
-confirmed that a C28x target is created and the `c28x info` command works.
+`--disable-buspirate` was used only to avoid an unrelated MinGW `termios.h`
+build failure in the Bus Pirate serial adapter.  FTDI/MPSSE, XDS110, and dummy
+adapter support remained enabled.
+
+Smoke tests loaded the C2000 target configs, all six XDS100 board files, all six
+XDS100 examples, and selected unrelated board configs.
 
 ## Remaining hardware validation
 
@@ -153,6 +165,10 @@ The OpenOCD backend is now present and buildable, but real C28x silicon still
 needs verified private transport opcodes or a TI-published debug-TAP packet
 specification.  Without those values, full hardware halt/resume/register/memory
 operations correctly return an error instead of sending guessed JTAG commands.
+
+F28M35x/C2000 flash support is also intentionally blocked until real hardware
+passes ICEPick secondary-TAP discovery, halt, register reads, safe RAM reads,
+and destructive flash behavior tests on recoverable hardware.
 
 ## CCS-native GTI/TRG metadata
 

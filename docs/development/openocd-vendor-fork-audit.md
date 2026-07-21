@@ -47,6 +47,7 @@ The local tree already has broad MCU and adapter coverage:
 | RISC-V collaboration | `https://github.com/riscv-collab/riscv-openocd` | RISC-V debug module fixes, SBA behavior, target quirks | Local RISC-V target present; code diff required |
 | Texas Instruments | `https://github.com/TexasInstruments/ti-openocd` | TI release branch, XDS110/XDS100 configs, AM/K3/MSP/C2000 target scripts | Local TI tree heavily extended; use as primary TI diff source |
 | Microchip FPGA | `https://github.com/microchip-fpga/openocd` | PIC64GX/MPFS board and target scripts, FlashPro interfaces | Local Microchip target/programmer work present; compare for PIC64GX naming |
+| AVRDUDE | `https://github.com/avrdudes/avrdude.git` | AVR MCU/programmer catalog and programming protocol implementations | Integrated as delegated external bridge; native protocol ports deferred |
 | Nuvoton | `https://github.com/OpenNuvoton/Nuvoton_Tools` | Nu-Link/Nu-Link2/Nu-Link3 tooling, customized OpenOCD references | Local Nu-Link driver present; driver/package diff required |
 | Nuvoton OpenOCD | `https://github.com/OpenNuvoton/OpenOCD-Nuvoton` | NuMicro M0/M4/M23 targets and legacy Nu-Link flow | Added to audit script |
 | Nordic | `https://github.com/NordicSemiconductor` and upstream OpenOCD | nRF51/nRF52/nRF53/nRF54/nRF91 configs and flash behavior | Local Nordic target/board configs present |
@@ -219,6 +220,26 @@ foreach ($Board in $Boards) {
 if ($Failed.Count) { throw "Failed boards: $($Failed -join ', ')" }
 ```
 
+## Integrated TI Hardware Lane: 2026-07-21
+
+The phased TI C2000/XDS100/XDS110 lane is integrated through build,
+packaging, board examples, and documentation:
+
+- XDS100v2 and XDS100v3 use the existing `ftdi` backend.
+- XDS110 uses the existing native `xds110` backend.
+- Windows packages include XDS100v2/v3 WinUSB helpers for FTDI `MI_00`.
+- C2000 target creation is validated for F28M35x through the `c28x` backend.
+- Six XDS100 C2000 board files and six matching examples are present.
+- Native build and Windows Docker package build passed.
+
+Remaining gates:
+
+- real XDS100/XDS110 attach on powered hardware;
+- F28M35x ICEPick secondary-TAP routing on hardware;
+- C28x halt/resume/step/register/memory operations with verified transport;
+- F28M35x/C2000 flash erase/write/verify/protect behavior on recoverable
+  hardware.
+
 Result: all 11 LPF3 board configs loaded with the rebuilt Windows package.
 
 ## Integrated Batch 3: 2026-07-21
@@ -308,4 +329,26 @@ Next integration candidates:
    LaunchXL-F28069M attach flow, and C28x target creation tests.
 2. Import Espressif as a full backend batch if ESP32-C5/C61/P4 support is
    needed.
-3. Import WCH as a full backend batch if CH32/WCH-Link support is needed.
+3. Port AVRDUDE protocol families natively only after the delegated bridge is
+   validated with real AVR hardware.
+4. Import WCH as a full backend batch if CH32/WCH-Link support is needed.
+
+## AVRDUDE Bridge Batch: 2026-07-21
+
+AVRDUDE was added to the audit as an external programming ecosystem rather
+than an OpenOCD fork. The audited shallow checkout is pinned to commit
+`7154723b9efa8bad989b2b339c303aa9d12014e2`; `v8.2` resolves to
+`65dd419fdde8a018f718a07351c674121edba2cd`.
+
+The audit counted 406 `part` blocks and 174 `programmer` blocks in
+`src/avrdude.conf.in`. Instead of copying that catalog and protocol code into
+OpenOCD, this tree now provides `tcl/programmer/avrdude/common.tcl`, a command
+bridge that invokes the user's installed `avrdude` executable.
+
+Result:
+
+- broad delegated access to AVRDUDE-supported MCUs and programmers;
+- user docs in `docs/programmers/avrdude.md`;
+- maintainer audit and native-port queue in
+  `docs/development/avrdude-integration-audit.md`;
+- no native OpenOCD AVR protocol backend is claimed by this batch.

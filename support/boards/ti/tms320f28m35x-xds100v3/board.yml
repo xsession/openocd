@@ -1,0 +1,20 @@
+name: TMS320F28M35x with XDS100v3
+vendor: ti
+status: experimental
+soc: ti/tms320f28m35x
+programmer: ti/xds100v3
+runtime_files:
+  board: tcl/board/ti/tms320f28m35x-xds100v3.cfg
+  target: tcl/target/ti/tms320f28m35x.cfg
+  interface: tcl/interface/ti/xds100v3.cfg
+examples:
+  - examples/c2000/tms320f28m35x-xds100v3.cfg
+docs:
+  - docs/targets/ti-c2000-support.md
+  - docs/programmers/ti-xds100.md
+validation:
+  package_config_load: passed
+  real_hardware_attach: pending
+  destructive_flash: deferred
+safe_commands:
+  low_speed_attach: openocd -s ./tcl -f board/ti/tms320f28m35x-xds100v3.cfg -c "adapter speed 100" -c init

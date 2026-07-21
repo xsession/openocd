@@ -5,6 +5,7 @@ param(
   [ValidateSet('v2', 'v3')]
   [string]$ProbeVersion = 'v2',
   [string]$OpenOcd = '',
+  [Alias('s')]
   [string]$Scripts = '',
   [string]$Serial = '',
   [switch]$NoAutoInstall,

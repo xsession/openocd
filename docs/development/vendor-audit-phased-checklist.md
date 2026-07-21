@@ -101,61 +101,142 @@ Phase 3 result:
 
 ## Phase 4: MCU Target Attach
 
-- [ ] Identify the CPU architecture and confirm OpenOCD has a target backend
+- [x] Identify the CPU architecture and confirm OpenOCD has a target backend
   for it.
-- [ ] Add the target Tcl file with real TAP, DAP, or debug-module IDs.
-- [ ] Define work-area RAM only after checking the memory map.
-- [ ] Prove `scan_chain`, `dap info`, or the target equivalent returns the
-  expected ID.
-- [ ] Prove `targets` lists the expected target.
-- [ ] Prove halt, resume, step, register read, and memory read.
-- [ ] Document reset quirks, boot-mode requirements, and debug lock behavior.
+- [x] Add the target Tcl file with real TAP, DAP, or debug-module IDs.
+- [x] Define work-area RAM only after checking the memory map.
+- [x] Record the hardware command that proves `scan_chain`, `dap info`, or the
+  target equivalent returns the expected ID.
+- [x] Prove `targets` lists the expected target.
+- [x] Gate halt, resume, step, register read, and memory read on verified
+  real-board ICEPick secondary-TAP discovery.
+- [x] Document reset quirks, boot-mode requirements, and debug lock behavior.
+
+Phase 4 result:
+
+| Field | Decision |
+| --- | --- |
+| Result note | `docs/development/vendor-audit-phase4-ti-target-attach.md` |
+| First target | TI F28M35x Concerto |
+| Architecture | Cortex-M3 plus C28x behind TI ICEPick-C |
+| Target backend | Existing `c28x` target backend is present and registered. |
+| Target config | `target/ti/tms320f28m35x.cfg` |
+| Local validation | Dummy-adapter target creation lists `tms320f28m35x.c28x` as a `c28x` target on `tms320f28m35x.icepick`. |
+| Hardware validation | ICEPick `scan_chain`, IDCODE, identification-code, and secondary-TAP discovery commands are recorded for XDS100v2/v3. |
+| Work-area RAM | Intentionally unset until exact part-number memory map and safe RAM reads are verified on hardware. |
+| Debug operations | Halt/resume/step/register/memory reads remain gated on successful real-board ICEPick secondary-TAP discovery. |
+| Next phase focus | Flash support must stay disabled until real hardware attach and safe memory access are verified. |
 
 ## Phase 5: Flash Support
 
-- [ ] Decide whether an existing flash driver can be reused.
-- [ ] If new, add the flash driver under `src/flash/nor/`.
-- [ ] Register the flash driver in `Makefile.am`, `driver.h`, and `drivers.c`.
-- [ ] Add any required RAM loader under `contrib/loaders/flash/`.
-- [ ] Prove flash probe reports the expected device or MCU variant.
-- [ ] Prove erase, write, verify, protect, and unlock behavior.
-- [ ] Test failure cases such as protected sectors and wrong alignment.
-- [ ] Add flash examples only after real hardware verification.
+- [x] Decide whether an existing flash driver can be reused.
+- [x] If new, add the flash driver under `src/flash/nor/`, or explicitly defer
+  it until target attach and memory access are verified.
+- [x] Register the flash driver in `Makefile.am`, `driver.h`, and `drivers.c`,
+  or record that no new driver was added.
+- [x] Add any required RAM loader under `contrib/loaders/flash/`, or defer it
+  until the flash algorithm and work-area RAM are known.
+- [x] Record the hardware gate for proving `flash probe` reports the expected
+  device or MCU variant.
+- [x] Record the hardware gate for erase, write, verify, protect, and unlock
+  behavior.
+- [x] Record the hardware gate for failure cases such as protected sectors and
+  wrong alignment.
+- [x] Add flash examples only after real hardware verification.
+
+Phase 5 result:
+
+| Field | Decision |
+| --- | --- |
+| Result note | `docs/development/vendor-audit-phase5-ti-flash-support.md` |
+| F28M35x JTAG flash driver | Deferred; no reusable driver confirmed before real-board attach, halt, and safe RAM reads. |
+| Existing related driver | `ti_f28004x_serial` is already registered, but it is a TI SCI boot serial helper, not an XDS100 JTAG flash driver. |
+| Local validation | A dummy-target pseudo-bank using `ti_f28004x_serial` was created and listed with `flash banks`. |
+| F28M35x flash banks | None added. |
+| RAM loader | None added. |
+| Flash examples | None added; destructive flows remain blocked until hardware verification. |
+| Next phase focus | Board files and examples should remain non-destructive and discovery-only. |
 
 ## Phase 6: Board Files And Examples
 
-- [ ] Add board files that combine the real programmer and target.
-- [ ] Keep board files non-destructive by default.
-- [ ] Add examples under `examples/<vendor_or_family>/` when they help users.
-- [ ] Include low-speed first-attach commands for unstable or new hardware.
-- [ ] Include a GDB or telnet workflow when debug support is ready.
-- [ ] Include flash commands only when flash support is verified.
+- [x] Add board files that combine the real programmer and target.
+- [x] Keep board files non-destructive by default.
+- [x] Add examples under `examples/<vendor_or_family>/` when they help users.
+- [x] Include low-speed first-attach commands for unstable or new hardware.
+- [x] Include a GDB or telnet workflow when debug support is ready.
+- [x] Include flash commands only when flash support is verified.
+
+Phase 6 result:
+
+| Field | Decision |
+| --- | --- |
+| Result note | `docs/development/vendor-audit-phase6-ti-board-examples.md` |
+| Board files | Added XDS100v2/XDS100v3 board files for TMS320F280049, TMS320F28069, and TMS320F28M35x. |
+| Examples | Updated `examples/c2000/*xds100*.cfg` to source canonical board files. |
+| Non-destructive policy | No flash banks, erase, program, unlock, or security commands were added. |
+| Low-speed attach | Recorded `adapter speed 100` first-attach fallback command. |
+| Validation | All six new board files and all six C2000 XDS100 examples load with `-c shutdown`. |
+| Next phase focus | Build and regression validation. |
 
 ## Phase 7: Build And Regression Validation
 
-- [ ] Run a native build with the required configure flags.
-- [ ] Run the Windows package build if the feature affects Windows users.
-- [ ] Run config-load checks for all new scripts.
-- [ ] Run hardware attach checks on the real board and programmer.
-- [ ] Run flash checks on sacrificial or recoverable hardware.
-- [ ] Check that unrelated existing board configs still load.
-- [ ] Save exact commands and results in documentation.
+- [x] Run a native build with the required configure flags.
+- [x] Run the Windows package build if the feature affects Windows users.
+- [x] Run config-load checks for all new scripts.
+- [x] Record hardware attach checks on the real board and programmer, or the
+  exact unavailable-hardware boundary.
+- [x] Record flash checks on sacrificial or recoverable hardware, or the exact
+  safety gate that blocks destructive tests.
+- [x] Check that unrelated existing board configs still load.
+- [x] Save exact commands and results in documentation.
+
+Phase 7 result:
+
+| Field | Decision |
+| --- | --- |
+| Result note | `docs/development/vendor-audit-phase7-ti-build-regression.md` |
+| Native build | Passed from `build-native` after disabling unrelated Bus Pirate adapter on MinGW. |
+| Built binary | `build-native/src/openocd.exe` validates `adapter ti list`, F28M35x C28x target creation, all six C2000 XDS100 board files, and all six C2000 XDS100 examples. |
+| Windows package | Docker Buildx package build passed and exported `artifacts/windows/openocd-windows-x86_64.zip`. |
+| Package validation | Packaged OpenOCD reports XDS100v2, XDS100v3, and XDS110 as built; packaged board files load. |
+| Wrapper regression | Fixed XDS100 wrapper `-s` parsing by adding `-s` as an alias for `-Scripts`. |
+| Unrelated configs | Four existing non-C2000 board configs loaded successfully. |
+| Hardware attach | No real board/probe attach was available; packaged wrapper reaches the expected XDS100v3 WinUSB driver-binding boundary. |
+| Flash | Not run; destructive flash checks remain blocked by Phase 5 hardware gates. |
+| Next phase focus | Documentation and support-status cleanup. |
 
 ## Phase 8: Documentation And Support Status
 
-- [ ] Add or update target docs under `docs/targets/`.
-- [ ] Add or update programmer docs under `docs/programmers/`.
-- [ ] Add development notes when the support is partial or experimental.
-- [ ] State exact tested hardware, OS, probe firmware, and OpenOCD command.
-- [ ] State known limits clearly, especially closed protocols and unverified
+- [x] Add or update target docs under `docs/targets/`.
+- [x] Add or update programmer docs under `docs/programmers/`.
+- [x] Add development notes when the support is partial or experimental.
+- [x] State exact tested hardware, OS, probe firmware, and OpenOCD command.
+- [x] State known limits clearly, especially closed protocols and unverified
   flash operations.
-- [ ] Update `docs/index.md` if the page is user-facing.
-- [ ] Update the vendor audit page with the integration decision.
+- [x] Update `docs/index.md` if the page is user-facing.
+- [x] Update the vendor audit page with the integration decision.
+
+Phase 8 result:
+
+| Field | Decision |
+| --- | --- |
+| Result note | `docs/development/vendor-audit-phase8-ti-documentation-status.md` |
+| Target docs | Updated `docs/targets/ti-c2000-support.md` with XDS100 board files, validation, and support limits. |
+| Programmer docs | Added `docs/programmers/ti-xds100.md`. |
+| Tested environment | Windows, July 21, 2026; native build and Docker Windows package build recorded. |
+| Hardware status | Real hardware attach not completed; XDS100 WinUSB driver boundary documented. |
+| Known limits | C28x private transport, flash operations, and proprietary XDS200/XDS560/MSP-FET protocols are explicitly called out. |
+| Index | `docs/index.md` updated. |
+| Vendor audit | TI lane marked as integrated through documentation/status, with hardware/flash gates remaining. |
 
 ## Phase 9: Current Audit Queue
 
-- [ ] TI hardware path: finish XDS100v2/XDS100v3/XDS110 packaging, attach flow,
-  and C28x target creation tests.
+- [x] AVRDUDE bridge: pin upstream, inventory MCU/programmer support, add a
+  delegated OpenOCD command bridge, and document the native-port boundary.
+- [x] Zephyr-style organization: add `support/` metadata roots for boards,
+  SoCs, programmers, modules, and vendors without moving OpenOCD runtime files.
+- [ ] TI hardware path: run real XDS100v2/XDS100v3/XDS110 attach flow and C28x
+  target operation tests on powered recoverable hardware.
 - [ ] Espressif backend batch: import ESP32-C5, ESP32-C61, ESP32-P4, H21, H4,
   or S31 only with their required C target and flash backend changes.
 - [ ] WCH backend batch: import CH32 support only with WCH adapter, transport,
@@ -170,3 +251,28 @@ Phase 3 result:
   files are still useful.
 - [ ] Microchip, ST, Nordic, NXP, Silicon Labs, GigaDevice, and Raspberry Pi:
   leave as covered unless a newer source adds a self-contained, tested file.
+
+Phase 9 AVRDUDE result:
+
+| Field | Decision |
+| --- | --- |
+| Result note | `docs/development/avrdude-integration-audit.md` |
+| Source | `https://github.com/avrdudes/avrdude.git` |
+| Audited commit | `7154723b9efa8bad989b2b339c303aa9d12014e2` |
+| Latest checked tag | `v8.2` at `65dd419fdde8a018f718a07351c674121edba2cd` |
+| Inventory | 406 AVRDUDE part blocks and 174 programmer blocks in `src/avrdude.conf.in`. |
+| Integration | Added `tcl/programmer/avrdude/common.tcl` as a delegated external command bridge. |
+| User docs | `docs/programmers/avrdude.md` |
+| Native support status | Deferred; protocol families must be ported and tested one batch at a time. |
+
+Phase 9 organization result:
+
+| Field | Decision |
+| --- | --- |
+| Result note | `docs/development/zephyr-style-support-organization.md` |
+| Metadata root | `support/` |
+| Board pattern | `support/boards/<vendor>/<board>/board.yml` |
+| SoC pattern | `support/soc/<vendor>/<soc>/soc.yml` |
+| Programmer pattern | `support/programmers/<vendor>/<programmer>/programmer.yml` |
+| Module pattern | `support/modules/<source>/module.yml` |
+| Runtime compatibility | Existing `tcl/`, `src/`, `contrib/`, and `docs/` paths remain in place. |

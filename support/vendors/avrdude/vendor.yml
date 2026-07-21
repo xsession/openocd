@@ -1,0 +1,15 @@
+name: AVRDUDE
+slug: avrdude
+status: delegated
+runtime_paths:
+  programmers: tcl/programmer/avrdude
+docs:
+  - docs/programmers/avrdude.md
+  - docs/development/avrdude-integration-audit.md
+audit:
+  source: https://github.com/avrdudes/avrdude.git
+  commit: 7154723b9efa8bad989b2b339c303aa9d12014e2
+  tag: v8.2
+notes:
+  - AVRDUDE is an external AVR programming ecosystem, not an OpenOCD fork.
+  - Support is delegated through the installed avrdude executable.

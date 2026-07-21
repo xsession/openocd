@@ -1,0 +1,23 @@
+name: avrdude
+status: delegated
+source: https://github.com/avrdudes/avrdude.git
+commit: 7154723b9efa8bad989b2b339c303aa9d12014e2
+tag: v8.2
+license: GPL-2.0-or-later
+local_audit_copy: artifacts/vendor-sources/avrdude
+catalog:
+  parts: 406
+  programmers: 174
+openocd_files:
+  bridge: tcl/programmer/avrdude/common.tcl
+  docs: docs/programmers/avrdude.md
+  audit: docs/development/avrdude-integration-audit.md
+native_port_queue:
+  - isp-stk500
+  - updi
+  - tpi-pdi
+  - avr-jtag-debugwire
+  - usbasp-usbtiny
+  - avrftdi
+  - linuxgpio-linuxspi
+  - serial-bootloaders

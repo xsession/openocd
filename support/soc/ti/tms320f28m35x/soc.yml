@@ -1,0 +1,22 @@
+name: TMS320F28M35x
+vendor: ti
+family: C2000 Concerto
+status: experimental
+architecture:
+  - Cortex-M3
+  - C28x
+debug:
+  transport: jtag
+  router: TI ICEPick-C
+runtime_files:
+  target: tcl/target/ti/tms320f28m35x.cfg
+docs:
+  - docs/targets/ti-c2000-support.md
+validation:
+  config_load: passed
+  c28x_target_create: passed
+  real_hardware_attach: pending
+  flash: deferred
+notes:
+  - C28x target creation is validated with the dummy adapter.
+  - Secondary-TAP discovery and flash remain gated on recoverable hardware.

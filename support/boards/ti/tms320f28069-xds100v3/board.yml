@@ -1,0 +1,18 @@
+name: TMS320F28069 with XDS100v3
+vendor: ti
+status: experimental
+soc: ti/tms320f28069
+programmer: ti/xds100v3
+runtime_files:
+  board: tcl/board/ti/tms320f28069-xds100v3.cfg
+  target: tcl/target/ti/tms320f28069.cfg
+  interface: tcl/interface/ti/xds100v3.cfg
+examples:
+  - examples/c2000/tms320f28069-xds100v3.cfg
+docs:
+  - docs/targets/ti-c2000-support.md
+  - docs/programmers/ti-xds100.md
+validation:
+  package_config_load: passed
+  real_hardware_attach: pending
+  destructive_flash: deferred

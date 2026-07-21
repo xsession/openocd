@@ -1,0 +1,16 @@
+name: XDS100v3
+vendor: ti
+status: integrated
+backend: ftdi
+transport: jtag
+runtime_files:
+  interface: tcl/interface/ti/xds100v3.cfg
+  windows_helper: tools/ti/windows/openocd-xds100v3.ps1
+docs:
+  - docs/programmers/ti-xds100.md
+validation:
+  package_adapter_list: passed
+  windows_driver_helper: integrated
+  real_probe_open: pending
+notes:
+  - Bind WinUSB to the FTDI debug interface, usually MI_00.

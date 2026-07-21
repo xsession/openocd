@@ -1,0 +1,18 @@
+name: TMS320F280049
+vendor: ti
+family: C2000
+status: experimental
+architecture:
+  - C28x
+debug:
+  transport: jtag
+runtime_files:
+  target: tcl/target/ti/tms320f280049.cfg
+docs:
+  - docs/targets/ti-c2000-support.md
+validation:
+  config_load: passed
+  real_hardware_attach: pending
+  flash: deferred
+notes:
+  - Flash support through XDS100 JTAG remains deferred.

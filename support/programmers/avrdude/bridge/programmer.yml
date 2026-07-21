@@ -1,0 +1,21 @@
+name: AVRDUDE external bridge
+vendor: avrdude
+status: delegated
+backend: external-executable
+runtime_files:
+  bridge: tcl/programmer/avrdude/common.tcl
+docs:
+  - docs/programmers/avrdude.md
+  - docs/development/avrdude-integration-audit.md
+audit:
+  source: https://github.com/avrdudes/avrdude.git
+  commit: 7154723b9efa8bad989b2b339c303aa9d12014e2
+  parts: 406
+  programmers: 174
+validation:
+  openocd_tcl_load: passed
+  dry_run_command_build: passed
+  real_hardware_programming: pending
+notes:
+  - The installed avrdude executable supplies the actual MCU and programmer catalog.
+  - Fuse and lock-bit operations require explicit raw commands.

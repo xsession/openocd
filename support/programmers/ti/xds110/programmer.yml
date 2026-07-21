@@ -1,0 +1,17 @@
+name: XDS110
+vendor: ti
+status: integrated
+backend: xds110
+transport:
+  - jtag
+  - swd
+runtime_files:
+  interface: tcl/interface/ti/xds110.cfg
+docs:
+  - docs/usage/xds110.md
+  - docs/targets/ti-c2000-support.md
+validation:
+  package_adapter_list: passed
+  real_probe_open: pending
+notes:
+  - XDS110 uses OpenOCD's native xds110 adapter backend.

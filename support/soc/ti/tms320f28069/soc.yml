@@ -1,0 +1,18 @@
+name: TMS320F28069
+vendor: ti
+family: C2000
+status: experimental
+architecture:
+  - C28x
+debug:
+  transport: jtag
+runtime_files:
+  target: tcl/target/ti/tms320f28069.cfg
+docs:
+  - docs/targets/ti-c2000-support.md
+validation:
+  config_load: passed
+  real_hardware_attach: pending
+  flash: deferred
+notes:
+  - LaunchXL-F28069M/XDS100v2 real attach remains the next hardware gate.

@@ -35,7 +35,7 @@ openocd -s ./tcl -f examples/c2000/tms320f28m35x-xds100v3.cfg \
   -c "init; scan_chain; c2000_icepick_read_idcode; c2000_icepick_scan_sdtaps; shutdown"
 ```
 
-## Debug Or Program
+## Debug Session
 
 After discovery works, start OpenOCD without `shutdown`:
 
@@ -43,17 +43,8 @@ After discovery works, start OpenOCD without `shutdown`:
 openocd -s ./tcl -f examples/c2000/tms320f28069-xds100v3.cfg
 ```
 
-To program through the generic wrapper, use:
-
-```console
-openocd -s ./tcl \
-  -c "set XDS100_INTERFACE interface/ti/xds100v3.cfg" \
-  -c "set TARGET_CONFIG target/ti/tms320f28069.cfg" \
-  -f examples/program-xds100.cfg \
-  -c "program firmware.elf verify reset exit"
-```
-
-Replace the interface, target config, and firmware file for your board.
+Flash commands are intentionally omitted from these C2000 examples until erase,
+write, verify, protection, and recovery behavior are verified on real hardware.
 
 ## Troubleshooting
 
