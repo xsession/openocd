@@ -20,6 +20,7 @@ fork in addition to OpenOCD's standard manual under `doc/`.
 
 - [Source catalog](development/source-catalog.md)
 - [Repository layout](development/repository-layout.md)
+- [OpenOCD vendor fork audit](development/openocd-vendor-fork-audit.md)
 - [Unified feature manifest](../MERGE_MANIFEST.md)
 
 ## Development records
