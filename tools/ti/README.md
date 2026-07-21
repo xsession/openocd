@@ -64,12 +64,17 @@ the TI/FTDI serial driver.
 The Docker-built Windows package includes source-built libwdi tools for this:
 
 ```powershell
-Set-Location .\artifacts\windows\openocd-windows-x86_64\tools\windows\usb-driver
-Start-Process powershell -Verb RunAs -ArgumentList '-ExecutionPolicy Bypass -File .\install-xds100v2-winusb-mi00.ps1'
+Set-Location .\artifacts\windows\openocd-windows-x86_64
+.\openocd-xds100v2.cmd -Serial TI680LHO
 ```
 
-That installer uses `wdi-simple.exe` to bind only `VID_0403&PID_A6D0&MI_00` to
-WinUSB. If you prefer the GUI, run the packaged
+The wrapper starts OpenOCD with the LAUNCHXL-F28069M config. If OpenOCD reports
+`LIBUSB_ERROR_NOT_FOUND`, it starts the packaged WinUSB installer as
+Administrator, waits for you to reconnect USB, and retries OpenOCD. The
+installer uses `wdi-simple.exe` to bind only `VID_0403&PID_A6D0&MI_00` to
+WinUSB.
+
+If you prefer the GUI, run the packaged
 `bin\x64\zadig.exe`, enable **Options > List All Devices**, choose
 `XDS100 Class Debug Port` / `MI_00`, and install `WinUSB`. Do not change
 `XDS100 Class Auxiliary Port` / `MI_01`; that is the LaunchPad serial port.

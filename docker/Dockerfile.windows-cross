@@ -186,6 +186,7 @@ RUN set -eux; \
     cp -a tools/ti/windows/. "/out/${pkg}/tools/windows/usb-driver/"; \
     cp -a README* COPYING* LICENSE* "/out/${pkg}/" 2>/dev/null || true; \
     printf '@echo off\r\n%%~dp0bin\\openocd.exe %%*\r\n' > "/out/${pkg}/openocd.cmd"; \
+    printf '@echo off\r\npowershell -NoProfile -ExecutionPolicy Bypass -File "%%~dp0tools\\windows\\usb-driver\\openocd-xds100v2.ps1" %%*\r\n' > "/out/${pkg}/openocd-xds100v2.cmd"; \
     cd /out; \
     zip -r "${pkg}.zip" "${pkg}"
 

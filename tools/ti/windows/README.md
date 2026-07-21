@@ -3,8 +3,18 @@
 This folder is copied into the Docker-built Windows OpenOCD package under
 `tools/windows/usb-driver/`.
 
-`install-xds100v2-winusb-mi00.ps1` uses the packaged libwdi
-`wdi-simple.exe` to bind only the XDS100v2 debug interface to WinUSB:
+`openocd-xds100v2.ps1` is the easiest entry point. It starts OpenOCD with the
+LAUNCHXL-F28069M board config, detects the common `LIBUSB_ERROR_NOT_FOUND`
+driver-binding failure, runs the packaged WinUSB installer as Administrator,
+then retries OpenOCD after you reconnect USB:
+
+```powershell
+..\..\..\openocd-xds100v2.cmd -Serial TI680LHO
+```
+
+`install-xds100v2-winusb-mi00.ps1` can also be run directly. It uses the
+packaged libwdi `wdi-simple.exe` to bind only the XDS100v2 debug interface to
+WinUSB:
 
 ```powershell
 Start-Process powershell -Verb RunAs -ArgumentList '-ExecutionPolicy Bypass -File .\install-xds100v2-winusb-mi00.ps1'
