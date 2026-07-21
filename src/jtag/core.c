@@ -1573,14 +1573,22 @@ int jtag_init_inner(struct command_context *cmd_ctx)
 	 * wrong ... or that the IR capture value is wrong.  (The
 	 * latter is uncommon, but easily worked around:  provide
 	 * ircapture/irmask values during TAP setup.)
+	 *
+	 * Some non-standard JTAG routers return useful IDCODE data but fail the
+	 * generic Capture-IR sentinel check.  Honor "verify_ircapture disable"
+	 * for this startup validation pass too, matching normal IR scan checks.
 	 */
-	retval = jtag_validate_ircapture();
-	if (retval != ERROR_OK) {
-		/* The target might be powered down. The user
-		 * can power it up and reset it after firing
-		 * up OpenOCD.
-		 */
-		issue_setup = false;
+	if (jtag_verify_capture_ir) {
+		retval = jtag_validate_ircapture();
+		if (retval != ERROR_OK) {
+			/* The target might be powered down. The user
+			 * can power it up and reset it after firing
+			 * up OpenOCD.
+			 */
+			issue_setup = false;
+		}
+	} else {
+		LOG_DEBUG("Skipping IR capture validation because verify_ircapture is disabled");
 	}
 
 	if (issue_setup)

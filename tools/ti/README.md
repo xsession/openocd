@@ -118,3 +118,24 @@ For this specific LaunchPad, check the hardware before changing software:
 The fresh Docker-built OpenOCD binary in `artifacts/windows` includes the
 project-local `c28x` target type needed by
 `board/ti/launchxl-f28069m-xds100v2.cfg`.
+
+The current OpenOCD path now reaches the onboard ICEPick-C router through the
+XDS100v2 debug interface:
+
+```powershell
+.\artifacts\windows\openocd-windows-x86_64\openocd-xds100v2.cmd -Serial TI680LHO -NoAutoInstall -f board/ti/launchxl-f28069m-xds100v2.cfg -c init -c scan_chain -c "c2000_icepick_read_idcode" -c shutdown
+```
+
+Verified result on this workstation:
+
+```text
+JTAG tap: tms320f28069.icepick tap/device found: 0x0b95302f
+ICEPick device IDCODE: 0x0b95302f
+```
+
+The F28069 target config disables OpenOCD's generic startup Capture-IR sentinel
+check for this board. The ICEPick IDCODE is valid, but the visible router path
+does not return the generic trailing IR bits that OpenOCD expects. This removes
+the earlier `IR capture error at bit 6` during board detection. Full C28x
+halt/resume/register/memory debugging still depends on completing the private
+TI C28x debug transport commands.
