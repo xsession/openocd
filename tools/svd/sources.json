@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "sources": [
+    {
+      "id": "openocd-target-inventory",
+      "name": "OpenOCD target inventory",
+      "kind": "openocd-targets",
+      "path": "tcl/target",
+      "status": "inventory",
+      "notes": "Scans OpenOCD target configuration names and reports which have a matching local SVD."
+    },
+    {
+      "id": "ti-c2000",
+      "name": "Texas Instruments C2000/MSPM0",
+      "kind": "ti-c2000-toolchain",
+      "path": "tools/ti/c2000_toolchain",
+      "output": "svd/ti",
+      "status": "integrated",
+      "addressUnitBits": [8, 16],
+      "notes": "Delegates register extraction to the existing TI generator. CCS targetdb or an offline CMSIS-Pack is required."
+    },
+    {
+      "id": "microchip-dspic",
+      "name": "Microchip dsPIC/PIC",
+      "kind": "existing-tree",
+      "path": "svd/microchip",
+      "output": "svd/microchip",
+      "status": "cataloged",
+      "addressUnitBits": [8, 16],
+      "notes": "Catalogs generated dsPIC SVDs and validates them with the universal validator."
+    },
+    {
+      "id": "cmsis-pack-import",
+      "name": "Generic CMSIS-Pack import",
+      "kind": "cmsis-pack",
+      "output": "svd/vendor",
+      "status": "on-demand",
+      "addressUnitBits": [8, 16, 32],
+      "notes": "Imports any .svd members from a local .pack archive into a vendor output directory."
+    }
+  ]
+}

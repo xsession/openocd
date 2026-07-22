@@ -1,0 +1,22 @@
+name: universal-svd-generator
+status: integrated
+source: local-openocd-tree
+license: GPL-2.0-or-later
+summary: Repository-level CMSIS-SVD inventory, validation, import, and generator orchestration.
+tools:
+  cli: tools/svd/openocd_svd.py
+  sources: tools/svd/sources.json
+docs:
+  - tools/svd/README.md
+  - svd/README.md
+capabilities:
+  - validate committed CMSIS-SVD files
+  - inventory OpenOCD target configs against local SVD coverage
+  - import local CMSIS-Pack SVD members
+  - delegate TI C2000/MSPM0 generation to tools/ti/c2000_toolchain
+address_units:
+  supported_bits:
+    - 8
+    - 16
+    - 32
+  debugger_note: Use Cortex-Debug memoryAddressUnitBytes for non-byte-addressed targets.
