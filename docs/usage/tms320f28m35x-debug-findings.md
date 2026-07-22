@@ -37,7 +37,7 @@ The C28x target could also be monitored through the OpenOCD TCL port after the
 server was started:
 
 ```powershell
-python .\tools\support\c28x_openocd_wrapper.py monitor targets poll reg
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py monitor targets poll reg
 ```
 
 That returned the C28x target plus core registers such as `PC`, `SP`, `ACC`,
@@ -297,7 +297,7 @@ configuration would need to combine:
 The repository includes a generic C28x OpenOCD-side convenience wrapper:
 
 ```text
-tools/support/c28x_openocd_wrapper.py
+tools/debug-servers/ti/c2000/c28x_openocd_wrapper.py
 ```
 
 It makes the OpenOCD side look like a stable, ordinary external GDB server by
@@ -318,55 +318,55 @@ f280049-xds100v3
 Run local checks:
 
 ```powershell
-python .\tools\support\c28x_openocd_wrapper.py preflight --preset f28m35x-xds100v3
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py preflight --preset f28m35x-xds100v3
 ```
 
 Probe once:
 
 ```powershell
-python .\tools\support\c28x_openocd_wrapper.py probe --preset f28m35x-xds100v3 --elevate
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py probe --preset f28m35x-xds100v3 --elevate
 ```
 
 Run safe ICEPick/JTAG discovery:
 
 ```powershell
-python .\tools\support\c28x_openocd_wrapper.py discover --preset f28m35x-xds100v3 --elevate
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py discover --preset f28m35x-xds100v3 --elevate
 ```
 
 Start the OpenOCD server:
 
 ```powershell
-python .\tools\support\c28x_openocd_wrapper.py server --preset f28m35x-xds100v3 --elevate
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py server --preset f28m35x-xds100v3 --elevate
 ```
 
 Start the opt-in dual-core OpenOCD server:
 
 ```powershell
-python .\tools\support\c28x_openocd_wrapper.py server --preset f28m35x-dual-xds100v3 --elevate
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py server --preset f28m35x-dual-xds100v3 --elevate
 ```
 
 Intentionally test the M3 route:
 
 ```powershell
-python .\tools\support\c28x_openocd_wrapper.py probe --preset f28m35x-dual-xds100v3 --set F28M35X_M3_AUTO_ENABLE=1 --elevate
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py probe --preset f28m35x-dual-xds100v3 --set F28M35X_M3_AUTO_ENABLE=1 --elevate
 ```
 
 If OpenOCD is already running, send monitor commands through the TCL port:
 
 ```powershell
-python .\tools\support\c28x_openocd_wrapper.py monitor targets poll
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py monitor targets poll
 ```
 
 Generate a Cortex-Debug external-server template:
 
 ```powershell
-python .\tools\support\c28x_openocd_wrapper.py cortex-debug-json --preset f28m35x-xds100v3
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py cortex-debug-json --preset f28m35x-xds100v3
 ```
 
 Use another C28x board file without adding a preset:
 
 ```powershell
-python .\tools\support\c28x_openocd_wrapper.py server --board board/ti/my-c28x-board.cfg --elevate
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py server --board board/ti/my-c28x-board.cfg --elevate
 ```
 
 The generated Cortex-Debug template still requires a GDB executable that
@@ -447,7 +447,7 @@ Truncated register 16 in remote 'g' packet
 The same live OpenOCD process was monitorable through the TCL monitor:
 
 ```powershell
-python .\tools\support\c28x_openocd_wrapper.py monitor targets poll reg
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py monitor targets poll reg
 ```
 
 That returned both target entries and the C28x register list. Therefore the
@@ -462,7 +462,7 @@ The wrapper now includes a monitor-only GDB/RSP proxy for Cortex-Debug and
 ordinary GDB clients:
 
 ```powershell
-python .\tools\support\c28x_openocd_wrapper.py gdb-monitor-proxy
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py gdb-monitor-proxy
 ```
 
 Default ports:

@@ -13,11 +13,13 @@ fork in addition to OpenOCD's standard manual under `doc/`.
 - [TI XDS110 usage](usage/xds110.md)
 - [VS Code dual-core F28M35x debugging](usage/vscode-f28m35x-dual-core.md)
 - [TMS320F28M35x debug findings](usage/tms320f28m35x-debug-findings.md)
+- [Repo debug-server wrappers](../tools/debug-servers/README.md)
 - [TI C2000 toolchain source](development/source-catalog.md)
 
 ## Microchip programmers
 
 - [PICkit 2/3/4 and ICD 4 integration](programmers/microchip-pickit-icd.md)
+- [Microchip MDB GDB facade](usage/microchip-mdb-gdb-facade.md)
 - [AVRDUDE programmer bridge](programmers/avrdude.md)
 - [Microchip feature base](development/microchip-feature-base.md)
 

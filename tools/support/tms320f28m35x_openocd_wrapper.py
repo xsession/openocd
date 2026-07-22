@@ -7,4 +7,5 @@ import runpy
 
 
 if __name__ == "__main__":
-    runpy.run_path(str(Path(__file__).with_name("c28x_openocd_wrapper.py")), run_name="__main__")
+    wrapper = Path(__file__).resolve().parents[1] / "debug-servers" / "ti" / "c2000" / "c28x_openocd_wrapper.py"
+    runpy.run_path(str(wrapper), run_name="__main__")

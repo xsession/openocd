@@ -33,9 +33,9 @@ the firmware paths and GDB paths.
 From the OpenOCD repository root:
 
 ```powershell
-python .\tools\support\c28x_openocd_wrapper.py preflight --preset f28m35x-dual-xds100v3
-python .\tools\support\c28x_openocd_wrapper.py discover --preset f28m35x-dual-xds100v3 --elevate
-python .\tools\support\c28x_openocd_wrapper.py server --preset f28m35x-dual-xds100v3 --elevate
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py preflight --preset f28m35x-dual-xds100v3
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py discover --preset f28m35x-dual-xds100v3 --elevate
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py server --preset f28m35x-dual-xds100v3 --elevate
 ```
 
 Then run the VS Code task:

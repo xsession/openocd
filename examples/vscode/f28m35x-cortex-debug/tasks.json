@@ -6,7 +6,7 @@
       "type": "shell",
       "command": "python",
       "args": [
-        "${workspaceFolder}/tools/support/c28x_openocd_wrapper.py",
+        "${workspaceFolder}/tools/debug-servers/ti/c2000/c28x_openocd_wrapper.py",
         "preflight",
         "--preset",
         "f28m35x-dual-xds100v3"
@@ -18,7 +18,7 @@
       "type": "shell",
       "command": "python",
       "args": [
-        "${workspaceFolder}/tools/support/c28x_openocd_wrapper.py",
+        "${workspaceFolder}/tools/debug-servers/ti/c2000/c28x_openocd_wrapper.py",
         "discover",
         "--preset",
         "f28m35x-dual-xds100v3",
@@ -31,7 +31,7 @@
       "type": "shell",
       "command": "python",
       "args": [
-        "${workspaceFolder}/tools/support/c28x_openocd_wrapper.py",
+        "${workspaceFolder}/tools/debug-servers/ti/c2000/c28x_openocd_wrapper.py",
         "server",
         "--preset",
         "f28m35x-dual-xds100v3",
@@ -44,7 +44,7 @@
       "type": "shell",
       "command": "python",
       "args": [
-        "${workspaceFolder}/tools/support/c28x_openocd_wrapper.py",
+        "${workspaceFolder}/tools/debug-servers/ti/c2000/c28x_openocd_wrapper.py",
         "monitor",
         "targets",
         "poll",
@@ -57,7 +57,7 @@
       "type": "shell",
       "command": "python",
       "args": [
-        "${workspaceFolder}/tools/support/c28x_openocd_wrapper.py",
+        "${workspaceFolder}/tools/debug-servers/ti/c2000/c28x_openocd_wrapper.py",
         "gdb-monitor-proxy",
         "--m3-port",
         "3335",
@@ -83,7 +83,7 @@
       "type": "shell",
       "command": "python",
       "args": [
-        "${workspaceFolder}/tools/support/c28x_openocd_wrapper.py",
+        "${workspaceFolder}/tools/debug-servers/ti/c2000/c28x_openocd_wrapper.py",
         "probe",
         "--preset",
         "f28m35x-dual-xds100v3",
@@ -98,7 +98,7 @@
       "type": "shell",
       "command": "python",
       "args": [
-        "${workspaceFolder}/tools/support/c28x_openocd_wrapper.py",
+        "${workspaceFolder}/tools/debug-servers/ti/c2000/c28x_openocd_wrapper.py",
         "monitor",
         "shutdown"
       ],

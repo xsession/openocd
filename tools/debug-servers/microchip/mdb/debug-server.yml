@@ -1,0 +1,42 @@
+name: microchip-mdb-gdb-facade
+vendor: microchip
+kind: gdb-rsp-facade
+entry: mdb_gdb_wrapper.py
+default_host: 127.0.0.1
+default_port: 3340
+compatibility_entry:
+  - tools/support/microchip_mdb_gdb_wrapper.py
+external_dependencies:
+  - name: MPLAB X MDB
+    default_windows_path: C:/Program Files/Microchip/MPLABX/v6.25/mplab_platform/bin/mdb.bat
+    required: true
+  - name: GDB client
+    examples:
+      - arm-none-eabi-gdb
+    required: true
+  - name: Microchip hardware tool or simulator
+    examples:
+      - PICkit 4
+      - PICkit 5
+      - ICD 4
+      - ICD 5
+      - Snap
+      - Atmel-ICE
+      - EDBG
+    required: true
+repo_dependencies:
+  docs:
+    - docs/usage/microchip-mdb-gdb-facade.md
+    - docs/programmers/microchip-pickit-icd.md
+  examples:
+    - examples/vscode/microchip-mdb-cortex-debug/
+capabilities:
+  - MDB preflight
+  - connected programmer discovery
+  - GDB/RSP attach facade
+  - monitor command forwarding to MDB
+  - optional continue/step/halt/break translation
+limits:
+  - not a native OpenOCD target
+  - not a universal Microchip source-level GDB server
+  - MDB requires Device <part> before target-controller access

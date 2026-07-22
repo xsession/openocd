@@ -1,0 +1,62 @@
+name: ti-c2000-openocd-wrapper
+vendor: texas-instruments
+kind: openocd-debug-server-wrapper
+entry: c28x_openocd_wrapper.py
+compatibility_entry:
+  - tools/support/c28x_openocd_wrapper.py
+  - tools/support/tms320f28m35x_openocd_wrapper.py
+default_ports:
+  openocd_m3_gdb: 3333
+  openocd_c28x_gdb: 3334
+  openocd_tcl: 6666
+  openocd_telnet: 4444
+  monitor_proxy_m3_gdb: 3335
+  monitor_proxy_c28x_gdb: 3336
+external_dependencies:
+  - name: OpenOCD executable
+    default_windows_path: artifacts/windows/openocd-windows-x86_64/bin/openocd.exe
+    required: true
+  - name: XDS probe
+    examples:
+      - XDS100v2
+      - XDS100v3
+      - XDS110
+    required: true
+  - name: Windows libusb-compatible driver for XDS100 MI_00
+    required_when: Windows XDS100
+  - name: ARM GDB
+    examples:
+      - arm-none-eabi-gdb
+    required_for:
+      - Cortex-M3
+      - monitor-only proxy
+  - name: C28x-capable GDB/debug frontend
+    required_for:
+      - C28x source debugging
+repo_dependencies:
+  tcl:
+    - tcl/interface/ti/xds100v2.cfg
+    - tcl/interface/ti/xds100v3.cfg
+    - tcl/board/ti/tms320f28m35x-dual-core-xds100v2.cfg
+    - tcl/board/ti/tms320f28m35x-dual-core-xds100v3.cfg
+    - tcl/target/ti/tms320f28m35x-dual-core.cfg
+    - tcl/target/ti/c2000-icepick-scan.cfg
+  docs:
+    - docs/usage/tms320f28m35x-debug-findings.md
+    - docs/usage/vscode-f28m35x-dual-core.md
+    - docs/targets/ti-c2000-support.md
+  examples:
+    - examples/c2000/
+    - examples/vscode/f28m35x-cortex-debug/
+capabilities:
+  - OpenOCD preflight
+  - XDS100 Windows USB inventory
+  - C2000 ICEPick discovery
+  - OpenOCD server launch
+  - TCL monitor client
+  - Cortex-Debug launch template generation
+  - monitor-only dual GDB proxy
+limits:
+  - F28M35x M3 DAP route still requires hardware validation
+  - C28x source debugging requires a C28x-capable GDB/debug backend
+  - monitor-only proxy does not implement CPU execution debug

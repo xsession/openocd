@@ -35,6 +35,7 @@ the example files.
 | `program-xds100.cfg` | A reusable TI XDS100 wrapper for programming a selected target. |
 | `c2000/*.cfg` | TI C2000 examples using XDS100v2 or XDS100v3 probes. |
 | `vscode/f28m35x-cortex-debug/` | VS Code tasks and launch templates for F28M35x dual-core bring-up. |
+| `vscode/microchip-mdb-cortex-debug/` | VS Code attach template for the Microchip MDB GDB facade. |
 
 ## First Test: Start And Exit
 

@@ -44,27 +44,27 @@ examples/vscode/f28m35x-cortex-debug/
 Use this command first:
 
 ```powershell
-python .\tools\support\c28x_openocd_wrapper.py discover --preset f28m35x-dual-xds100v3 --elevate
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py discover --preset f28m35x-dual-xds100v3 --elevate
 ```
 
 Record the SDTAP output. After that, start OpenOCD and monitor the C28x target:
 
 ```powershell
-python .\tools\support\c28x_openocd_wrapper.py server --preset f28m35x-dual-xds100v3 --elevate
-python .\tools\support\c28x_openocd_wrapper.py monitor targets poll reg
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py server --preset f28m35x-dual-xds100v3 --elevate
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py monitor targets poll reg
 ```
 
 If dual-core init fails on the M3 TAP, fall back to the validated C28x-only
 preset:
 
 ```powershell
-python .\tools\support\c28x_openocd_wrapper.py server --preset f28m35x-xds100v3 --elevate
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py server --preset f28m35x-xds100v3 --elevate
 ```
 
 To intentionally reproduce the M3 route test:
 
 ```powershell
-python .\tools\support\c28x_openocd_wrapper.py probe `
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py probe `
   --preset f28m35x-dual-xds100v3 `
   --set F28M35X_M3_AUTO_ENABLE=1 `
   --elevate
@@ -175,7 +175,7 @@ validation point before Cortex-Debug source stepping can work on that core.
 For no-programming monitor-only work, start OpenOCD normally, then run:
 
 ```powershell
-python .\tools\support\c28x_openocd_wrapper.py gdb-monitor-proxy
+python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py gdb-monitor-proxy
 ```
 
 Attach Cortex-Debug to `localhost:3335` for the M3 monitor proxy and
