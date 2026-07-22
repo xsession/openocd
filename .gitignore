@@ -2,6 +2,7 @@
 
 # build output
 .tmp/
+tools/debug-servers/*/*/vendor/
 .libs
 .deps
 .dirstamp

@@ -22,6 +22,36 @@ python .\tools\debug-servers\microchip\mdb\mdb_gdb_wrapper.py `
 Expected result: MDB prints its command classes, including `deviceandtool`,
 `running`, `data`, `breakpoints`, and `programming`.
 
+## Extract MDB Locally
+
+To run from a repo-local copy of the vendor debug server, extract only the MDB
+runtime pieces you need:
+
+```powershell
+.\tools\debug-servers\microchip\mdb\extract-mdb-debug-server.ps1 `
+  -Force `
+  -IncludeUserModules `
+  -IncludePacks `
+  -PackName PICkit4_TP,dsPIC30F_DFP
+```
+
+This creates an ignored proprietary payload under:
+
+```text
+tools/debug-servers/microchip/mdb/vendor/mplabx-mdb-v6.25/
+```
+
+Use its launcher with `--mdb`:
+
+```powershell
+python .\tools\debug-servers\microchip\mdb\mdb_gdb_wrapper.py `
+  --mdb .\tools\debug-servers\microchip\mdb\vendor\mplabx-mdb-v6.25\mdb-local.cmd `
+  discover
+```
+
+Avoid extracting every MPLAB X device pack unless you have enough disk space.
+Add only the tool pack and device-family packs needed for your board.
+
 ## Run MDB Commands Directly
 
 List connected Microchip tools:

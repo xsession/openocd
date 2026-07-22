@@ -6,6 +6,14 @@ default_host: 127.0.0.1
 default_port: 3340
 compatibility_entry:
   - tools/support/microchip_mdb_gdb_wrapper.py
+local_extraction:
+  script: tools/debug-servers/microchip/mdb/extract-mdb-debug-server.ps1
+  ignored_destination: tools/debug-servers/microchip/mdb/vendor/mplabx-mdb-v6.25
+  entry: tools/debug-servers/microchip/mdb/vendor/mplabx-mdb-v6.25/mdb-local.cmd
+  tested_pack_filter:
+    - PICkit4_TP
+    - dsPIC30F_DFP
+  note: vendor payloads are proprietary and must stay ignored
 external_dependencies:
   - name: MPLAB X MDB
     default_windows_path: C:/Program Files/Microchip/MPLABX/v6.25/mplab_platform/bin/mdb.bat

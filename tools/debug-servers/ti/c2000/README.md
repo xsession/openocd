@@ -44,6 +44,58 @@ The wrapper does not vendor TI CCS, TI compiler tools, probe firmware, or
 Windows USB driver packages beyond the OpenOCD packaging helpers already in the
 tree.
 
+## Local Vendor Runtime Extraction
+
+To create a local, ignored copy of the TI CCS DebugServer runtime from an
+installed CCS toolset:
+
+```powershell
+.\tools\debug-servers\ti\c2000\extract-ti-debug-server.ps1 -Force
+```
+
+This writes:
+
+```text
+tools/debug-servers/ti/c2000/vendor/ccs-debugserver-20.4.0/
+```
+
+The extracted folder includes `dslite-local.cmd`, `dbgjtag-local.cmd`,
+`manifest.json`, `ccs_base/DebugServer`, `ccs_base/emulation`,
+`ccs_base/common/bin`, `ccs_base/common/uscif`, and the selected
+`ccs_base/common/targetdb` content.
+The launchers set `TI_APPDATA_DIR` to an ignored local folder so DSLite does
+not need to write to protected profile locations.
+
+For a smaller C2000-focused extraction:
+
+```powershell
+.\tools\debug-servers\ti\c2000\extract-ti-debug-server.ps1 `
+  -Force `
+  -TargetDbMode C2000
+```
+
+Use the local tools directly:
+
+```powershell
+.\tools\debug-servers\ti\c2000\vendor\ccs-debugserver-20.4.0\dslite-local.cmd help
+.\tools\debug-servers\ti\c2000\vendor\ccs-debugserver-20.4.0\dbgjtag-local.cmd -h
+```
+
+Probe identification through DSLite needs a CCS `.ccxml` file:
+
+```powershell
+.\tools\debug-servers\ti\c2000\vendor\ccs-debugserver-20.4.0\dslite-local.cmd `
+  identifyProbe `
+  --config path\to\your-board.ccxml
+```
+
+The C2000 extraction includes the F28M35x device XMLs and the
+`TIXDS100v3_Dot7_Connection.xml` connection definition needed to build that
+configuration in CCS.
+
+The `vendor/` payload is ignored by git because it contains proprietary TI
+files.
+
 ## Repo Dependencies
 
 - `tcl/interface/ti/xds100v2.cfg`

@@ -5,6 +5,18 @@ entry: c28x_openocd_wrapper.py
 compatibility_entry:
   - tools/support/c28x_openocd_wrapper.py
   - tools/support/tms320f28m35x_openocd_wrapper.py
+local_extraction:
+  script: tools/debug-servers/ti/c2000/extract-ti-debug-server.ps1
+  ignored_destination: tools/debug-servers/ti/c2000/vendor/ccs-debugserver-20.4.0
+  entries:
+    dslite: tools/debug-servers/ti/c2000/vendor/ccs-debugserver-20.4.0/dslite-local.cmd
+    dbgjtag: tools/debug-servers/ti/c2000/vendor/ccs-debugserver-20.4.0/dbgjtag-local.cmd
+  default_source: C:/ti/ccs2040/ccs
+  targetdb_modes:
+    - Full
+    - C2000
+    - None
+  note: vendor payloads are proprietary and must stay ignored
 default_ports:
   openocd_m3_gdb: 3333
   openocd_c28x_gdb: 3334

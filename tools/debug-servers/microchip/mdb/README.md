@@ -37,6 +37,35 @@ python .\tools\support\microchip_mdb_gdb_wrapper.py discover
 The wrapper does not vendor MPLAB X, MDB jars, device packs, or Microchip USB
 drivers.
 
+## Local Vendor Runtime Extraction
+
+To create a local, ignored copy of the MDB runtime from an installed MPLAB X
+toolset:
+
+```powershell
+.\tools\debug-servers\microchip\mdb\extract-mdb-debug-server.ps1 `
+  -Force `
+  -IncludeUserModules `
+  -IncludePacks `
+  -PackName PICkit4_TP,dsPIC30F_DFP
+```
+
+This writes:
+
+```text
+tools/debug-servers/microchip/mdb/vendor/mplabx-mdb-v6.25/
+```
+
+The extracted folder includes `mdb-local.cmd`, `run-mdb-local.ps1`,
+`manifest.json`, `mdb.jar`, `mdbcore`, `thirdparty`, DFP packs, user MDB
+modules, and the MPLAB-bundled Java runtime. The `vendor/` payload is ignored
+by git because it contains proprietary vendor files.
+
+Copying every MPLAB X DFP can exceed local disk capacity. Use `-PackName` to
+extract only the tool packs and device-family packs you need. Add more pack
+names later, for example `PICkit5_TP`, `ICD5_TP`, `PIC24F-GA-GB_DFP`, or a
+specific PIC32 DFP available under `C:\Program Files\Microchip\MPLABX\v6.25\packs`.
+
 ## Repo Dependencies
 
 - `docs/usage/microchip-mdb-gdb-facade.md`
