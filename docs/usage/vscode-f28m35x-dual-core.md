@@ -75,6 +75,7 @@ For the shared PIC, AVR, C2000 and generic multi-core launch templates, see
       "executable": "${workspaceFolder}/build/m3.elf",
       "gdbPath": "arm-none-eabi-gdb",
       "gdbTarget": "localhost:3333",
+      "memoryAddressUnitBytes": 1,
       "runToEntryPoint": "main",
       "showDevDebugOutput": "raw"
     },

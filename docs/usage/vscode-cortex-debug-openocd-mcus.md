@@ -90,3 +90,25 @@ These snippets intentionally use `servertype: "external"` and
 `overrideAttachCommands`, so they avoid Cortex-M-only assumptions while still
 using Cortex-Debug's register, memory, disassembly and peripheral views when
 the selected GDB and SVD support the target.
+
+## Address Units
+
+Set `memoryAddressUnitBytes` in each launch configuration so memory and
+peripheral reads use the target architecture's address step:
+
+```json
+{
+  "memoryAddressUnitBytes": 1
+}
+```
+
+Use `1` for byte-addressed targets such as ARM Cortex-M and AVR. Use `2` for
+16-bit word-addressed targets such as TI C2000 C28x and Microchip dsPIC/PIC24.
+
+Cortex-Debug still talks to GDB/OpenOCD in bytes internally. This setting scales
+addresses at the debug-adapter boundary, so a displayed C28x or dsPIC address
+of `0x1000` maps to byte address `0x2000` when OpenOCD performs the actual
+memory read. The legacy Cortex-Debug memory dump also groups 16-bit sessions as
+word cells. The peripheral viewer receives the same debug session and SVD
+context; keep generated SVD addresses in the same target address units selected
+by `memoryAddressUnitBytes`.
