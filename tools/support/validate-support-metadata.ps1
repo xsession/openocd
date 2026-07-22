@@ -46,7 +46,7 @@ $allowedStatuses = @(
   'blocked'
 )
 
-$pathPattern = '(tcl|docs|examples|tools|support)/[A-Za-z0-9_./-]+'
+$pathPattern = '(?<![A-Za-z0-9_./-])(src|tcl|docs|examples|tools|support)/[A-Za-z0-9_./-]+'
 $statusPattern = '^\s*status:\s*([A-Za-z0-9_-]+)\s*$'
 $files = Get-ChildItem -LiteralPath $supportRoot -Recurse -File -Include *.yml,*.md
 

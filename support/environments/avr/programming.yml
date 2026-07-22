@@ -1,0 +1,37 @@
+name: AVR programming environment
+status: experimental
+catalogs:
+  mcus: support/catalogs/avrdude/parts.yml
+  programmers: support/catalogs/avrdude/programmers.yml
+native_source:
+  command_module: src/avr/avr_catalog.c
+  catalog_data: src/avr/avr_catalog_data.c
+  catalog_api: src/avr/avr_catalog.h
+  usbasp_programmer: src/avr/programmers/usbasp.c
+  imported_backend_source: src/avr/backends/avrdude
+  imported_backend_manifest: src/avr/backends/avrdude/SOURCE_MANIFEST.yml
+commands:
+  mcu_summary: mcu summary
+  mcu_list: mcu list
+  programmer_summary: programmer summary
+  programmer_list: programmer list
+  backend_status: avr status
+  backend_list: avr backend list
+  backend_show: avr backend show
+  usbasp_probe: avr usbasp probe
+  usbasp_spi: avr usbasp spi
+  usbasp_signature: avr usbasp signature
+fallback:
+  delegated_bridge: tcl/programmer/avrdude/common.tcl
+  docs: docs/programmers/avrdude.md
+native_backend_queue:
+  - stk500
+  - stk500v2
+  - serialupdi
+  - usbasp: isp-native
+  - usbtiny
+  - jtagice
+  - debugwire
+  - avrftdi
+  - linuxgpio
+  - linuxspi

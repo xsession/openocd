@@ -28,7 +28,8 @@
 #include <target/arm_adi_v5.h>
 #include <target/arm_tpiu_swo.h>
 #include <rtt/rtt.h>
-#include <avrdude/avrdude_catalog.h>
+#include <avr/avr_catalog.h>
+#include <avr/programmers/usbasp.h>
 
 #include <server/server.h>
 #include <server/gdb_server.h>
@@ -236,7 +237,8 @@ struct command_context *global_cmd_ctx;
 
 static int (* const command_registrants[])(struct command_context *cmd_ctx_value) = {
 	openocd_register_commands,
-	avrdude_catalog_register_commands,
+	avr_catalog_register_commands,
+	avr_usbasp_register_commands,
 	server_register_commands,
 	gdb_register_commands,
 	log_register_commands,

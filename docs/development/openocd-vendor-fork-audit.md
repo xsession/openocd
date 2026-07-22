@@ -341,13 +341,16 @@ than an OpenOCD fork. The audited shallow checkout is pinned to commit
 `65dd419fdde8a018f718a07351c674121edba2cd`.
 
 The audit counted 406 `part` blocks and 174 `programmer` blocks in
-`src/avrdude.conf.in`. Instead of copying that catalog and protocol code into
-OpenOCD, this tree now provides `tcl/programmer/avrdude/common.tcl`, a command
-bridge that invokes the user's installed `avrdude` executable.
+`src/avrdude.conf.in`. That MCU and programmer catalog is now generated into
+OpenOCD-native source under `src/avr/` and exposed by the native `mcu` and
+`programmer` commands. Protocol execution remains separate: until individual
+AVR protocol backends are ported, `tcl/programmer/avrdude/common.tcl` remains
+as a fallback bridge.
 
 Result:
 
-- broad delegated access to AVRDUDE-supported MCUs and programmers;
+- native OpenOCD MCU and programmer catalog commands;
+- fallback delegated access to AVRDUDE-supported programming operations;
 - user docs in `docs/programmers/avrdude.md`;
 - maintainer audit and native-port queue in
   `docs/development/avrdude-integration-audit.md`;

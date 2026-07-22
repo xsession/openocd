@@ -1,8 +1,9 @@
 # AVRDUDE Programmer Bridge
 
-This OpenOCD fork includes a source-level AVRDUDE catalog import and a Tcl
-bridge for using AVRDUDE from an OpenOCD session. It is intended for AVR
-programming workflows where AVRDUDE already supports the MCU and programmer.
+This OpenOCD fork imports AVR MCU and programmer knowledge into native OpenOCD
+catalog commands, with AVRDUDE recorded only as one upstream source for that
+knowledge. A Tcl bridge remains available as a fallback while individual AVR
+programming protocols are ported as native OpenOCD backends.
 
 The bridge does not turn AVRDUDE protocols into native OpenOCD debug targets.
 It delegates programming operations to the external `avrdude` executable while
@@ -12,8 +13,8 @@ OpenOCD keeps a consistent command surface for scripts, packages, and examples.
 
 | Item | Status |
 | --- | --- |
-| AVRDUDE MCU catalog | Compiled into OpenOCD as `avrdude_catalog`; runtime operations still use the selected AVRDUDE binary |
-| AVRDUDE programmer catalog | Compiled into OpenOCD as `avrdude_catalog`; runtime operations still use the selected AVRDUDE binary |
+| AVR MCU catalog | Compiled into OpenOCD and exposed as `mcu summary` / `mcu list` |
+| AVR programmer catalog | Compiled into OpenOCD and exposed as `programmer summary` / `programmer list` |
 | Flash write/read/verify/erase | Supported through `-U` and `-e` operations |
 | EEPROM write/read/verify | Supported by selecting `eeprom` memory |
 | Fuse and lock bits | Available only through explicit `avrdude raw ...` commands |
@@ -28,20 +29,40 @@ This tree also keeps a generated support index under
 checkout with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools\support\generate-avrdude-catalog.ps1 -Config path\to\avrdude.conf
+powershell -ExecutionPolicy Bypass -File tools\support\generate-avr-catalog.ps1 -Config path\to\avrdude.conf
 ```
 
-The generated catalog is also compiled into OpenOCD under `src/avrdude/`.
+The generated catalog is also compiled into OpenOCD under `src/avr/`.
 The selected installed AVRDUDE binary still decides the exact part and
 programmer support available for delegated runtime programming.
 
-Query the compiled catalog without loading the Tcl bridge:
+Query the compiled native catalogs without loading the Tcl bridge:
 
 ```powershell
-openocd -c "avrdude_catalog summary" -c shutdown
-openocd -c "avrdude_catalog parts atmega328p" -c shutdown
-openocd -c "avrdude_catalog programmers usbasp" -c shutdown
+openocd -c "mcu summary" -c shutdown
+openocd -c "mcu list atmega328p" -c shutdown
+openocd -c "programmer list usbasp" -c shutdown
+openocd -c "avr status" -c shutdown
+openocd -c "avr backend list" -c shutdown
+openocd -c "avr backend show usbasp" -c shutdown
+openocd -c "avr usbasp probe" -c shutdown
+openocd -c "avr usbasp spi 0xac 0x53 0x00 0x00" -c shutdown
+openocd -c "avr usbasp signature" -c shutdown
 ```
+
+The full AVRDUDE backend source is imported under `src/avr/backends/avrdude`
+as the basis for native OpenOCD AVR protocol ports. The `avr backend` commands
+expose the imported protocol-family registry, including source files and the
+next porting step for each family. Backends are enabled only after their
+protocol family builds and validates inside OpenOCD.
+
+The native USBasp component lives under `src/avr/programmers/usbasp.c`.
+`avr usbasp probe` opens a USBasp-compatible device through OpenOCD's libusb
+path, asks the firmware for capabilities with the AVRDUDE-derived vendor
+request, reports TPI and 3 MHz SCK support, and disconnects the programmer.
+`avr usbasp spi` sends one raw four-byte AVR ISP command after entering
+programming mode. `avr usbasp signature` reads the standard three-byte AVR
+device signature.
 
 ## Flow
 

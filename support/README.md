@@ -1,7 +1,7 @@
 # Zephyr-Style Support Index
 
-This directory organizes locally integrated MCU, board, programmer, and
-external-tool support using a Zephyr-inspired layout.
+This directory organizes locally integrated MCU, board, programmer, catalog,
+environment, and external-tool support using a Zephyr-inspired layout.
 
 OpenOCD runtime files still live in their standard locations, such as `tcl/`,
 `src/`, `contrib/`, and `docs/`. The files here are metadata indexes that make
@@ -12,21 +12,26 @@ batches.
 
 ```text
 support/
-├── boards/<vendor>/<board>/
-│   ├── board.yml
-│   ├── README.md
-│   └── support/
-├── soc/<vendor>/<soc-or-family>/
-│   ├── soc.yml
-│   └── README.md
-├── programmers/<vendor>/<programmer>/
-│   ├── programmer.yml
-│   └── README.md
-├── modules/<source-or-tool>/
-│   ├── module.yml
-│   └── README.md
-└── vendors/<vendor>/
-    └── vendor.yml
+|-- boards/<vendor>/<board>/
+|   |-- board.yml
+|   |-- README.md
+|   `-- support/
+|-- catalogs/<source>/
+|   |-- parts.yml
+|   `-- programmers.yml
+|-- environments/<family>/
+|   `-- programming.yml
+|-- soc/<vendor>/<soc-or-family>/
+|   |-- soc.yml
+|   `-- README.md
+|-- programmers/<vendor>/<programmer>/
+|   |-- programmer.yml
+|   `-- README.md
+|-- modules/<source-or-tool>/
+|   |-- module.yml
+|   `-- README.md
+`-- vendors/<vendor>/
+    `-- vendor.yml
 ```
 
 ## Rules
@@ -40,7 +45,9 @@ support/
    based, or delegated to an external executable.
 5. Every module entry must pin the upstream source and clarify whether files
    are imported, generated, or delegated.
-6. Do not copy a whole external repository into `support/`; use it as an audit
+6. Environment entries tie together catalogs, runtime commands, fallback tools,
+   and native backend queues for a programming/debug family.
+7. Do not copy a whole external repository into `support/`; use it as an audit
    map.
 
 ## Status Keywords

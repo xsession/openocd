@@ -53,7 +53,7 @@ Important implementation files seen in the audit copy include:
 | Choice | Decision |
 | --- | --- |
 | Copy AVRDUDE source into OpenOCD | No |
-| Import all part/programmer tables as native data | Yes, generated under `src/avrdude` |
+| Import all part/programmer tables as native data | Yes, generated under `src/avr` |
 | Provide immediate broad user access | Yes, through `tcl/programmer/avrdude/common.tcl` |
 | Native OpenOCD protocol ports | Deferred to focused backend batches |
 
@@ -68,12 +68,16 @@ it is not marked as native OpenOCD debug or flash backend support.
 | `tcl/programmer/avrdude/common.tcl` | OpenOCD Tcl command bridge to external `avrdude` |
 | `docs/programmers/avrdude.md` | User documentation and examples |
 | `docs/development/avrdude-integration-audit.md` | Maintainer audit and native-port roadmap |
-| `tools/support/generate-avrdude-catalog.ps1` | Generator for OpenOCD support metadata from `avrdude.conf` |
+| `tools/support/generate-avr-catalog.ps1` | Generator for OpenOCD AVR support metadata from `avrdude.conf` |
 | `support/catalogs/avrdude/parts.yml` | Generated AVRDUDE part index |
 | `support/catalogs/avrdude/programmers.yml` | Generated AVRDUDE programmer index |
-| `src/avrdude/avrdude_catalog.c` | Native OpenOCD command handlers for the compiled catalog |
-| `src/avrdude/avrdude_catalog.h` | Native catalog API and data structs |
-| `src/avrdude/avrdude_catalog_data.c` | Generated C data for 406 parts and 174 programmers |
+| `src/avr/avr_catalog.c` | Native OpenOCD `mcu` and `programmer` command handlers for the compiled catalog |
+| `src/avr/avr_catalog.h` | Native catalog API and data structs |
+| `src/avr/avr_catalog_data.c` | Generated C data for 406 parts and 174 programmers |
+| `src/avr/programmers/usbasp.c` | Native OpenOCD USBasp probe, raw ISP transfer, and signature-read component |
+| `src/avr/backends/avrdude/` | Imported AVRDUDE backend source for native OpenOCD protocol-family ports |
+| `src/avr/backends/avrdude/SOURCE_MANIFEST.yml` | Imported backend source manifest |
+| `support/environments/avr/programming.yml` | Native AVR programming environment metadata and backend queue |
 
 ## Generated Support Catalog
 
@@ -83,7 +87,7 @@ OpenOCD support index without claiming native OpenOCD protocol support.
 Generate from a specific AVRDUDE catalog:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools\support\generate-avrdude-catalog.ps1 -Config path\to\avrdude.conf
+powershell -ExecutionPolicy Bypass -File tools\support\generate-avr-catalog.ps1 -Config path\to\avrdude.conf
 ```
 
 If no config is passed, the generator checks `AVRDUDE_CONF`, an installed
@@ -101,14 +105,39 @@ The generator also works with older installed AVRDUDE packages, such as the
 Arduino-bundled AVRDUDE 6.3-era catalog, but those outputs will naturally
 contain fewer parts and programmers.
 
-The same generator writes `src/avrdude/avrdude_catalog_data.c`, so the catalog
-is compiled into the OpenOCD executable. Native query commands:
+The same generator writes `src/avr/avr_catalog_data.c`, so the MCU and
+programmer catalogs are compiled into the OpenOCD executable. Native query
+commands:
 
 ```powershell
-.\artifacts\windows\openocd-windows-x86_64\bin\openocd.exe -c "avrdude_catalog summary" -c shutdown
-.\artifacts\windows\openocd-windows-x86_64\bin\openocd.exe -c "avrdude_catalog parts atmega328p" -c shutdown
-.\artifacts\windows\openocd-windows-x86_64\bin\openocd.exe -c "avrdude_catalog programmers usbasp" -c shutdown
+.\artifacts\windows\openocd-windows-x86_64\bin\openocd.exe -c "mcu summary" -c shutdown
+.\artifacts\windows\openocd-windows-x86_64\bin\openocd.exe -c "mcu list atmega328p" -c shutdown
+.\artifacts\windows\openocd-windows-x86_64\bin\openocd.exe -c "programmer list usbasp" -c shutdown
+.\artifacts\windows\openocd-windows-x86_64\bin\openocd.exe -c "avr status" -c shutdown
+.\artifacts\windows\openocd-windows-x86_64\bin\openocd.exe -c "avr backend list" -c shutdown
+.\artifacts\windows\openocd-windows-x86_64\bin\openocd.exe -c "avr backend show usbasp" -c shutdown
+.\artifacts\windows\openocd-windows-x86_64\bin\openocd.exe -c "avr usbasp probe" -c shutdown
+.\artifacts\windows\openocd-windows-x86_64\bin\openocd.exe -c "avr usbasp spi 0xac 0x53 0x00 0x00" -c shutdown
+.\artifacts\windows\openocd-windows-x86_64\bin\openocd.exe -c "avr usbasp signature" -c shutdown
 ```
+
+The backend source import is intentionally staged before linking the protocol
+drivers. The imported library still relies on AVRDUDE-generated parser outputs
+and application-level assumptions that need OpenOCD compatibility glue before
+each protocol family can be marked integrated.
+
+The native `avr backend` registry is compiled into OpenOCD so each imported
+protocol family has an explicit OpenOCD-side status, source-file list, scope,
+and next integration step. This registry is the handoff point from source import
+to family-by-family native ports.
+
+USBasp now has the first native programmer component in
+`src/avr/programmers/usbasp.c`. It uses OpenOCD's libusb helper layer and
+AVRDUDE's USBasp vendor request constants to open a device, read firmware
+capabilities, enter ISP programming mode, send raw four-byte ISP commands, read
+the standard AVR signature bytes, and disconnect. Typed flash, EEPROM, fuse,
+and lock-bit operations are still intentionally deferred until memory models
+and safety checks are in place.
 
 ## Safety Rules
 
@@ -129,7 +158,7 @@ is compiled into the OpenOCD executable. Native query commands:
 | UPDI | `serialupdi.c`, `updi_*.c` | New UPDI transport/programming backend |
 | TPI/PDI | AVRDUDE TPI/PDI paths | New AVR programming backend |
 | AVR JTAG/debugWIRE | `jtag*.c` | Debug-capable target/backend work |
-| USBasp/USBtiny | `usbasp.c`, `usbtiny.c` | USB programmer backend |
+| USBasp/USBtiny | `usbasp.c`, `usbtiny.c` | USBasp ISP command/signature native; USBtiny staged |
 | FTDI bitbang/JTAG | `avrftdi*.c` | Adapter/protocol bridge |
 | Linux GPIO/SPI | `linuxgpio.c`, `linuxspi.c` | Host-specific programmer backend |
 | Serial bootloaders | `arduino.c`, `urclock.c`, `xbee.c` | External or native bootloader backend |
