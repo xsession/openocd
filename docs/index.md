@@ -12,6 +12,7 @@ fork in addition to OpenOCD's standard manual under `doc/`.
 - [TI debug adapter support](development/ti-debug-adapters.md)
 - [TI XDS110 usage](usage/xds110.md)
 - [VS Code dual-core F28M35x debugging](usage/vscode-f28m35x-dual-core.md)
+- [TMS320F28M35x debug findings](usage/tms320f28m35x-debug-findings.md)
 - [TI C2000 toolchain source](development/source-catalog.md)
 
 ## Microchip programmers

@@ -17,19 +17,61 @@ the USB/JTAG probe.
 
 ## Current Repository Status
 
-The current `target/ti/tms320f28m35x.cfg` creates the C28x target endpoint and
-ICEPick discovery helpers. The Cortex-M3 path still needs hardware-discovered
-secondary-TAP routing before it can be marked supported.
+The conservative `target/ti/tms320f28m35x.cfg` creates the C28x target endpoint
+and ICEPick discovery helpers.
+
+The opt-in dual-core configuration is:
+
+```text
+target/ti/tms320f28m35x-dual-core.cfg
+board/ti/tms320f28m35x-dual-core-xds100v3.cfg
+board/ti/tms320f28m35x-dual-core-xds100v2.cfg
+```
+
+It enables the CCS-discovered ICEPick subpaths:
+
+```text
+M3   port 0x10, ARM CoreSight TAP ID 0x4ba00477, auto-enable off by default
+C28x port 0x11, C28x ProcID 0x5000A3F8
+```
+
+The ready-to-copy VS Code example lives here:
+
+```text
+examples/vscode/f28m35x-cortex-debug/
+```
 
 Use this command first:
 
 ```powershell
-.\artifacts\windows\openocd-windows-x86_64\openocd-xds100v3.cmd `
-  -f board/ti/tms320f28m35x-xds100v3.cfg `
-  -c "init; scan_chain; c2000_icepick_read_idcode; c2000_icepick_read_code; c2000_icepick_scan_sdtaps"
+python .\tools\support\c28x_openocd_wrapper.py discover --preset f28m35x-dual-xds100v3 --elevate
 ```
 
-Keep that OpenOCD session open and record the SDTAP output.
+Record the SDTAP output. After that, start OpenOCD and monitor the C28x target:
+
+```powershell
+python .\tools\support\c28x_openocd_wrapper.py server --preset f28m35x-dual-xds100v3 --elevate
+python .\tools\support\c28x_openocd_wrapper.py monitor targets poll reg
+```
+
+If dual-core init fails on the M3 TAP, fall back to the validated C28x-only
+preset:
+
+```powershell
+python .\tools\support\c28x_openocd_wrapper.py server --preset f28m35x-xds100v3 --elevate
+```
+
+To intentionally reproduce the M3 route test:
+
+```powershell
+python .\tools\support\c28x_openocd_wrapper.py probe `
+  --preset f28m35x-dual-xds100v3 `
+  --set F28M35X_M3_AUTO_ENABLE=1 `
+  --elevate
+```
+
+On the tested board, that enabled `tms320f28m35x.m3tap` but the M3 DAP examine
+returned `Invalid ACK (0)`.
 
 ## Parallel Debug Model
 
@@ -51,6 +93,13 @@ Use a compound launch only after OpenOCD exposes both targets.
 For the shared PIC, AVR, C2000 and generic multi-core launch templates, see
 `tools/vscode/cortex-debug/support/openocd-mcu-launch-examples.json` and
 `docs/usage/vscode-cortex-debug-openocd-mcus.md`.
+
+For a user workspace copy/paste example, use:
+
+```text
+examples/vscode/f28m35x-cortex-debug/launch.json
+examples/vscode/f28m35x-cortex-debug/tasks.json
+```
 
 ```json
 {
@@ -97,12 +146,17 @@ For the shared PIC, AVR, C2000 and generic multi-core launch templates, see
 Notes:
 
 - Cortex-Debug is appropriate for the Cortex-M3 session.
-- Cortex-Debug is not appropriate for the C28x session.
+- Cortex-Debug can monitor the C28x session through the monitor-only proxy
+  documented in `examples/vscode/f28m35x-cortex-debug`.
 - The C28x session requires a C28x-capable GDB/debug adapter frontend. If your
   TI toolchain does not provide GDB for C28x, use CCS or another TI-capable
-  debug frontend for that core.
+  debug frontend for source stepping on that core.
 - Both sessions must attach to the same OpenOCD process through different GDB
   ports.
+
+With the patched Cortex-Debug submodule, the C28x template may use
+`"targetCore": "c2000"` to avoid Cortex-specific defaults. That setting does
+not replace the need for a C28x-capable GDB.
 
 ## OpenOCD Target Requirements
 
@@ -113,9 +167,20 @@ tms320f28m35x.m3    cortex_m    localhost:3333
 tms320f28m35x.c28x  c28x        localhost:3334
 ```
 
-The repository does not yet claim this dual-target setup as validated. The M3
-secondary TAP must be identified on real hardware first, then the target config
-can safely create a Cortex-M DAP/target for it.
+The safe dual-core config now creates those two GDB services. Hardware
+validation showed M3 on `3333` with its TAP disabled by default, and C28x on
+`3334` examined and monitorable. The M3 route remains the next hardware
+validation point before Cortex-Debug source stepping can work on that core.
+
+For no-programming monitor-only work, start OpenOCD normally, then run:
+
+```powershell
+python .\tools\support\c28x_openocd_wrapper.py gdb-monitor-proxy
+```
+
+Attach Cortex-Debug to `localhost:3335` for the M3 monitor proxy and
+`localhost:3336` for the C28x monitor proxy. These ports forward `monitor`
+commands to OpenOCD's TCL monitor and do not provide source stepping.
 
 ## Bring-Up Order
 
@@ -136,6 +201,7 @@ scan_chain
 c2000_icepick_read_idcode
 c2000_icepick_read_code
 c2000_icepick_scan_sdtaps
+c2000_icepick_scan_tsttaps
 targets
 ```
 

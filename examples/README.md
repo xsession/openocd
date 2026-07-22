@@ -34,6 +34,7 @@ the example files.
 | `stlink-stm32f4.cfg` | A simple ST-Link plus STM32F4 example. |
 | `program-xds100.cfg` | A reusable TI XDS100 wrapper for programming a selected target. |
 | `c2000/*.cfg` | TI C2000 examples using XDS100v2 or XDS100v3 probes. |
+| `vscode/f28m35x-cortex-debug/` | VS Code tasks and launch templates for F28M35x dual-core bring-up. |
 
 ## First Test: Start And Exit
 
@@ -78,6 +79,21 @@ openocd -s ./tcl \
 ```
 
 Replace `firmware.elf` with your real firmware file.
+
+## VS Code F28M35x Bring-Up
+
+The `examples/vscode/f28m35x-cortex-debug/` folder contains beginner-friendly
+VS Code files for the F28M35x plus XDS100v3 workflow:
+
+- run OpenOCD preflight checks,
+- run ICEPick discovery,
+- start one shared OpenOCD server,
+- monitor the validated C28x target, and
+- stage the intended Cortex-M3 plus C28x compound launch.
+
+The C28x monitor flow works with the OpenOCD TCL monitor. Full simultaneous
+source debugging still requires OpenOCD to expose the Cortex-M3 target and a
+C28x-capable GDB/debug backend for the C28x target.
 
 ## Common Options
 

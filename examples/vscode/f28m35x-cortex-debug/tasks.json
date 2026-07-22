@@ -1,0 +1,108 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "F28M35x: preflight OpenOCD/XDS100v3",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "${workspaceFolder}/tools/support/c28x_openocd_wrapper.py",
+        "preflight",
+        "--preset",
+        "f28m35x-dual-xds100v3"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "F28M35x: discover ICEPick routes",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "${workspaceFolder}/tools/support/c28x_openocd_wrapper.py",
+        "discover",
+        "--preset",
+        "f28m35x-dual-xds100v3",
+        "--elevate"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "F28M35x: start OpenOCD server",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "${workspaceFolder}/tools/support/c28x_openocd_wrapper.py",
+        "server",
+        "--preset",
+        "f28m35x-dual-xds100v3",
+        "--elevate"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "F28M35x: monitor C28x snapshot",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "${workspaceFolder}/tools/support/c28x_openocd_wrapper.py",
+        "monitor",
+        "targets",
+        "poll",
+        "reg"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "F28M35x: start monitor-only GDB proxy",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "${workspaceFolder}/tools/support/c28x_openocd_wrapper.py",
+        "gdb-monitor-proxy",
+        "--m3-port",
+        "3335",
+        "--c28x-port",
+        "3336"
+      ],
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "f28m35x-monitor-proxy",
+        "pattern": {
+          "regexp": "^(.*)$",
+          "message": 1
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^F28M35x M3 monitor-only GDB proxy listening",
+          "endsPattern": "^F28M35x C28x monitor-only GDB proxy listening"
+        }
+      }
+    },
+    {
+      "label": "F28M35x: test M3 TAP route",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "${workspaceFolder}/tools/support/c28x_openocd_wrapper.py",
+        "probe",
+        "--preset",
+        "f28m35x-dual-xds100v3",
+        "--set",
+        "F28M35X_M3_AUTO_ENABLE=1",
+        "--elevate"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "F28M35x: stop OpenOCD server",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "${workspaceFolder}/tools/support/c28x_openocd_wrapper.py",
+        "monitor",
+        "shutdown"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}

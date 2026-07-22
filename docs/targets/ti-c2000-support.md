@@ -24,6 +24,8 @@ board/ti/tms320f28069-xds100v2.cfg
 board/ti/tms320f28069-xds100v3.cfg
 board/ti/tms320f28m35x-xds100v2.cfg
 board/ti/tms320f28m35x-xds100v3.cfg
+board/ti/tms320f28m35x-dual-core-xds100v2.cfg
+board/ti/tms320f28m35x-dual-core-xds100v3.cfg
 board/ti/tms320f28069-xds110.cfg
 board/ti/tms320f280049-xds110.cfg
 board/ti/tms320f28m35x-xds110.cfg
@@ -93,6 +95,13 @@ three supplied target files also annotate each target with CCS targetdb metadata
 | `tms320f280049.cfg` | `TMS320F280049` | `0x5000A3F8` | `0x10` | `../../emulation/gel/f280049.gel` |
 | `tms320f28m35x.cfg` | `F28M35x-C28x` | `0x5000A3F8` | `0x11` | `../../emulation/gel/f28m35h52c1_c28.gel` |
 
+The opt-in `target/ti/tms320f28m35x-dual-core.cfg` adds the Cortex-M3 endpoint
+on ICEPick port `0x10` with ARM CoreSight TAP ID `0x4ba00477`, then creates the
+C28x target on port `0x11`. With default OpenOCD GDB port allocation, M3 uses
+`3333` and C28x uses `3334`. The M3 TAP route is not auto-enabled by default;
+set `F28M35X_M3_AUTO_ENABLE=1` before sourcing the config when actively testing
+the M3 DAP route.
+
 The XDS110 binary driver also contains C28x memory command names and command
 IDs.  Disassembly of `ccs_base/common/uscif/jscxds110.dll` shows
 `C28X_MEMREAD = 0x33` and `C28X_MEMWRITE = 0x34`; the backend stores these
@@ -137,6 +146,7 @@ c2000_icepick_read_code
 c2000_icepick_router_read <register>
 c2000_icepick_router_write <register> <24-bit-value>
 c2000_icepick_scan_sdtaps
+c2000_icepick_scan_tsttaps
 c2000_support_status
 ```
 

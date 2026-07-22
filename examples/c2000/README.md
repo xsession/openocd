@@ -17,8 +17,14 @@ openocd -s ./tcl -f examples/c2000/<file>.cfg
 | `tms320f280049-xds100v3.cfg` | TMS320F280049 | XDS100v3 |
 | `tms320f28069-xds100v2.cfg` | TMS320F28069 | XDS100v2 |
 | `tms320f28069-xds100v3.cfg` | TMS320F28069 | XDS100v3 |
+| `tms320f28m35x-dual-core-xds100v2.cfg` | TMS320F28M35x Concerto Cortex-M3 + C28x | XDS100v2 |
+| `tms320f28m35x-dual-core-xds100v3.cfg` | TMS320F28M35x Concerto Cortex-M3 + C28x | XDS100v3 |
 | `tms320f28m35x-xds100v2.cfg` | TMS320F28M35x Concerto | XDS100v2 |
 | `tms320f28m35x-xds100v3.cfg` | TMS320F28M35x Concerto | XDS100v3 |
+
+The non-dual F28M35x configs are conservative C28x-focused examples. The
+dual-core examples expose M3 first and C28x second, so their default GDB ports
+are `3333` for M3 and `3334` for C28x.
 
 ## Safe Discovery Command
 
