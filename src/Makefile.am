@@ -60,6 +60,7 @@ endif
 	%D%/jtag/libjtag.la \
 	%D%/transport/libtransport.la \
 	%D%/flash/libflash.la \
+	%D%/programmer/libprogrammer.la \
 	%D%/target/libtarget.la \
 	%D%/server/libserver.la \
 	%D%/rtos/librtos.la \
@@ -95,5 +96,6 @@ include %D%/target/Makefile.am
 include %D%/rtos/Makefile.am
 include %D%/server/Makefile.am
 include %D%/flash/Makefile.am
+include %D%/programmer/Makefile.am
 include %D%/pld/Makefile.am
 include %D%/rtt/Makefile.am

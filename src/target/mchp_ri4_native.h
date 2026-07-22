@@ -33,6 +33,7 @@ struct mchp_ri4_native_caps {
 
 int mchp_ri4_native_open(struct mchp_ri4_native **session,
 	const struct mchp_ri4_native_config *config);
+int mchp_ri4_native_probe_usb(uint16_t vid, uint16_t pid, const char *serial);
 void mchp_ri4_native_close(struct mchp_ri4_native *session);
 void mchp_ri4_native_get_caps(struct mchp_ri4_native *session,
 	struct mchp_ri4_native_caps *caps);

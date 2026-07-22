@@ -48,6 +48,9 @@ flowchart LR
 ## VS Code Compound Shape
 
 Use a compound launch only after OpenOCD exposes both targets.
+For the shared PIC, AVR, C2000 and generic multi-core launch templates, see
+`tools/vscode/cortex-debug/support/openocd-mcu-launch-examples.json` and
+`docs/usage/vscode-cortex-debug-openocd-mcus.md`.
 
 ```json
 {

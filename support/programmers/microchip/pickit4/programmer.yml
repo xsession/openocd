@@ -1,0 +1,21 @@
+name: PICkit 4
+vendor: microchip
+status: experimental
+backend: ri4-native
+transport: usb-bulk
+runtime_files:
+  command_source: src/programmer/microchip/pickit4.c
+  ri4_transport: src/target/mchp_ri4_native.c
+  native_programmer: tcl/programmer/microchip/pickit4-ri4.cfg
+  cmsis_dap_interface: tcl/interface/microchip/pickit4-cmsis-dap.cfg
+  ipecmd_fallback: tcl/programmer/microchip/pickit4.cfg
+docs:
+  - docs/programmers/microchip-pickit-icd.md
+validation:
+  native_command_registration: pending
+  package_adapter_list: pending
+  real_probe_open: pending
+notes:
+  - Default RI4 application USB ID is 04d8:9012.
+  - RI4 capabilities and erase require a Microchip tool-pack scripts catalog.
+  - Keep MPLAB X/IPE closed while OpenOCD owns the USB interface.

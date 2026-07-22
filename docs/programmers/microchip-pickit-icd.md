@@ -7,7 +7,7 @@ these Microchip tools:
 |---|---|---:|---:|
 | PICkit 2 | `pk2cmd` | Yes, when the device exists in `PK2DeviceFile.dat` | No |
 | PICkit 3 | MPLAB IPECMD | Yes | No |
-| PICkit 4 | MPLAB IPECMD | Yes | `interface/microchip/pickit4-cmsis-dap.cfg` |
+| PICkit 4 | Native RI4 / MPLAB IPECMD fallback | Yes | `interface/microchip/pickit4-cmsis-dap.cfg` |
 | MPLAB ICD 4 | MPLAB IPECMD | Yes | `interface/microchip/icd4-cmsis-dap.cfg` |
 
 ## Architecture and scope
@@ -36,6 +36,10 @@ watchpoints, erase, write and verify operations. PICkit 2 and PICkit 3 use
 older, incompatible USB protocols; the reference project does not implement
 those transports, so they continue to use `pk2cmd` or IPECMD.
 
+PICkit 4 also has a native programmer command group compiled into OpenOCD:
+`pickit4`. It uses the same RI4 USB transport and script executor as the target
+path, and does not invoke MPLAB IPECMD.
+
 ## Installed OpenOCD files
 
 ```text
@@ -47,6 +51,7 @@ scripts/interface/microchip/pickit4-cmsis-dap.cfg
 scripts/interface/microchip/icd4-cmsis-dap.cfg
 scripts/programmer/microchip/pickit4-ri4.cfg
 scripts/programmer/microchip/icd4-ri4.cfg
+src/programmer/microchip/pickit4.c
 ```
 
 ## Local RI4 support for PICkit 4 and ICD 4
@@ -74,6 +79,23 @@ For ICD4, use `programmer/microchip/icd4-ri4.cfg`. Override
 `MCHP_RI4_PID` when the probe enumerates with a different application PID.
 OpenOCD owns the USB interface while the session is active, so MPLAB X/IPE
 must not use the same probe concurrently.
+
+The standalone native PICkit 4 programmer commands are useful for bring-up and
+automation where a full OpenOCD target script is not needed yet:
+
+```sh
+openocd -c "pickit4 status" -c shutdown
+openocd -c "pickit4 probe" -c shutdown
+openocd \
+  -c "pickit4 capabilities processor DSPIC30F5011 family DSPIC30F scripts /path/to/scripts.yaml.gz" \
+  -c shutdown
+openocd \
+  -c "pickit4 erase processor DSPIC30F5011 family DSPIC30F scripts /path/to/scripts.yaml.gz" \
+  -c shutdown
+```
+
+Use `serial <serial>`, `vid <vid>` or `pid <pid>` when multiple tools are
+connected or the probe enumerates with a non-default RI4 application PID.
 
 ## Backend installation
 

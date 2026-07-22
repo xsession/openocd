@@ -30,6 +30,7 @@
 #include <rtt/rtt.h>
 #include <avr/avr_catalog.h>
 #include <avr/programmers/usbasp.h>
+#include <programmer/microchip/pickit4.h>
 
 #include <server/server.h>
 #include <server/gdb_server.h>
@@ -239,6 +240,7 @@ static int (* const command_registrants[])(struct command_context *cmd_ctx_value
 	openocd_register_commands,
 	avr_catalog_register_commands,
 	avr_usbasp_register_commands,
+	microchip_pickit4_register_commands,
 	server_register_commands,
 	gdb_register_commands,
 	log_register_commands,

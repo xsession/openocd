@@ -727,6 +727,22 @@ int mchp_ri4_native_open(struct mchp_ri4_native **session_out,
 	return ERROR_OK;
 }
 
+int mchp_ri4_native_probe_usb(uint16_t vid, uint16_t pid, const char *serial)
+{
+	struct mchp_ri4_native *session = calloc(1, sizeof(*session));
+	if (!session)
+		return ERROR_FAIL;
+
+	const struct mchp_ri4_native_config config = {
+		.vid = vid,
+		.pid = pid,
+		.serial = serial,
+	};
+	int result = ri4_open_usb(session, &config);
+	mchp_ri4_native_close(session);
+	return result;
+}
+
 void mchp_ri4_native_close(struct mchp_ri4_native *session)
 {
 	if (!session)
