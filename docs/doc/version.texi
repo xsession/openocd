@@ -1,0 +1,4 @@
+@set UPDATED 17 July 2026
+@set UPDATED-MONTH July 2026
+@set EDITION 0.12.0+dev
+@set VERSION 0.12.0+dev
