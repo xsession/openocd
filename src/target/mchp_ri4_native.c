@@ -399,7 +399,8 @@ static int ri4_bulk(struct mchp_ri4_native *session, uint8_t endpoint,
 	int result = libusb_bulk_transfer(session->usb, endpoint, data, length,
 		transferred, timeout);
 	if (result != LIBUSB_SUCCESS) {
-		LOG_ERROR("mchp_ri4: USB endpoint 0x%02x failed: %s", endpoint,
+		LOG_ERROR("mchp_ri4: USB endpoint 0x%02x (%s) len=%d failed: %s", endpoint,
+			endpoint & 0x80 ? "IN" : "OUT", length,
 			libusb_error_name(result));
 		return ERROR_FAIL;
 	}
