@@ -699,6 +699,20 @@ static int ri4_open_usb(struct mchp_ri4_native *session,
 		LOG_WARNING("mchp_ri4: re-claim after clear_halt: %s",
 			libusb_error_name(result));
 	}
+	// Set alternate interface 0 — required on Windows/libusb to activate bulk endpoints
+	// after claim_interface. Without this, the device firmware may not route traffic
+	// to the bulk endpoints.
+	(void)libusb_set_interface_alt_setting(session->usb, RI4_INTERFACE, 0);
+	// Drain any stale data left on the side-channel IN endpoint from a previous
+	// session (e.g. PICkit4 was holding buffered data). Do NOT send
+	// RI4_NUCLEAR_RESET (0x86) — it causes the device to re-enumerate on USB,
+	// dropping the handle.
+	{
+		uint8_t drain[RI4_REPLY_SIZE];
+		int ntransferred = 0;
+		(void)libusb_bulk_transfer(session->usb, RI4_SIDE_IN, drain, sizeof(drain),
+			&ntransferred, 5000);
+	}
 	return ERROR_OK;
 #else
 	(void)session;
