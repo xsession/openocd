@@ -673,11 +673,30 @@ static int ri4_open_usb(struct mchp_ri4_native *session,
 			config->serial && *config->serial ? config->serial : "");
 		return ERROR_FAIL;
 	}
+	result = libusb_set_configuration(session->usb, 1);
+	if (result != LIBUSB_SUCCESS && result != LIBUSB_ERROR_BUSY)
+		LOG_WARNING("mchp_ri4: set_configuration failed: %s", libusb_error_name(result));
 	(void)libusb_set_auto_detach_kernel_driver(session->usb, 1);
 	result = libusb_claim_interface(session->usb, RI4_INTERFACE);
 	if (result != LIBUSB_SUCCESS) {
 		LOG_ERROR("mchp_ri4: cannot claim USB interface 0: %s", libusb_error_name(result));
 		return ERROR_FAIL;
+	}
+	// Clear endpoint stalls on all bulk endpoints. libusb_reset_device() fails
+	// with LIBUSB_ERROR_BUSY on Windows when the handle is still active, and
+	// leaves the device in an unusable state. Clearing halts is the reliable
+	// way to reset endpoint state without dropping the handle.
+	for (int ep = 0; ep < 4; ep++) {
+		(void)libusb_clear_halt(session->usb, RI4_SIDE_OUT);
+		(void)libusb_clear_halt(session->usb, RI4_SIDE_IN);
+		(void)libusb_clear_halt(session->usb, RI4_DATA_OUT);
+		(void)libusb_clear_halt(session->usb, RI4_DATA_IN);
+	}
+	// Re-claim after clears (needed on some OS/driver combos)
+	result = libusb_claim_interface(session->usb, RI4_INTERFACE);
+	if (result != LIBUSB_SUCCESS) {
+		LOG_WARNING("mchp_ri4: re-claim after clear_halt: %s",
+			libusb_error_name(result));
 	}
 	return ERROR_OK;
 #else
