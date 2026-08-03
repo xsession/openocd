@@ -1229,6 +1229,17 @@ int mchp_ri4_native_read(struct mchp_ri4_native *session,
 int mchp_ri4_native_write(struct mchp_ri4_native *session,
 	uint32_t address, const uint8_t *data, uint32_t length)
 {
+	/* Config memory on dsPIC33/PIC24 devices is at 0x1F00000+ */
+	if (address >= 0x1F00000) {
+		static const char *const cfg_names[] = {"WriteConfigmem", "WriteDevCfg"};
+		uint32_t params[] = {address, length};
+		int result = ri4_enter_programming(session);
+		if (result == ERROR_OK)
+			result = ri4_run_first(session, cfg_names, ARRAY_SIZE(cfg_names), params, ARRAY_SIZE(params),
+				(uint8_t *)data, length, RI4_SCRIPT_DOWNLOAD);
+		int exit_result = ri4_exit_programming(session);
+		return result == ERROR_OK ? exit_result : result;
+	}
 	static const char *const names[] = {"WriteProgmemPE", "WriteProgmem", "WriteProgmemDE", "WriteRAM"};
 	uint32_t params[] = {address, length};
 	int result = ri4_enter_programming(session);
