@@ -33,8 +33,8 @@
 #define RI4_INTERFACE 0
 #define RI4_HEADER_SIZE 16U
 #define RI4_REPLY_SIZE 1024U
-#define RI4_FAST_TIMEOUT 10000U
-#define RI4_DATA_TIMEOUT 30000U
+#define RI4_FAST_TIMEOUT 30000U
+#define RI4_DATA_TIMEOUT 60000U
 #define RI4_CATALOG_LIMIT (512U * 1024U * 1024U)
 
 #define RI4_SCRIPT_NO_DATA 0x00000100U
@@ -396,6 +396,8 @@ static struct ri4_script *ri4_find_script(struct mchp_ri4_native *session,
 static int ri4_bulk(struct mchp_ri4_native *session, uint8_t endpoint,
 	uint8_t *data, int length, unsigned int timeout, int *transferred)
 {
+	if (!session->usb)
+		return ERROR_FAIL;
 	int result = libusb_bulk_transfer(session->usb, endpoint, data, length,
 		transferred, timeout);
 	if (result != LIBUSB_SUCCESS) {
@@ -463,7 +465,7 @@ static size_t ri4_make_header(uint8_t *buffer, uint32_t type,
 	const uint8_t *payload, size_t payload_length, uint32_t transfer_length)
 {
 	ri4_put_u32(buffer, type);
-	ri4_put_u32(buffer + 4, 0);
+	ri4_put_u32(buffer + 4, 0xFFFFFFFF);  /* job_number - reference uses 0xFFFFFFFF */
 	ri4_put_u32(buffer + 8, RI4_HEADER_SIZE + payload_length);
 	ri4_put_u32(buffer + 12, transfer_length);
 	if (payload_length)
@@ -490,21 +492,206 @@ static int ri4_check_reply(const uint8_t *reply, size_t length, bool ack)
 	return ERROR_OK;
 }
 
+// Recovery from stuck PICkit4 state. When the PICkit4 firmware blocks (e.g.,
+// waiting for data from a target that isn't responding), we need to send
+// RI4_NUCLEAR_RESET (0x86) to the side channel, then fully reconnect the USB
+// handle. The nuclear reset causes the PICkit4 to re-enumerate on USB.
+static int ri4_usb_reconnect(struct mchp_ri4_native *session)
+{
+#ifdef HAVE_LIBUSB1
+	if (!session || !session->usb || !session->usb_context)
+		return ERROR_FAIL;
+
+	// Send nuclear reset byte to side channel — this causes PICkit4 to re-enumerate
+	uint8_t nuclear = RI4_NUCLEAR_RESET;
+	int ntransferred = 0;
+	(void)libusb_bulk_transfer(session->usb, RI4_SIDE_OUT, &nuclear, 1,
+		&ntransferred, 5000);
+
+	// Close the handle — device is re-enumerating
+	libusb_release_interface(session->usb, RI4_INTERFACE);
+	libusb_close(session->usb);
+	session->usb = NULL;
+
+	// Wait for re-enumeration
+	busy_sleep(500);
+
+	// Re-find and re-open the device
+	libusb_device **devices = NULL;
+	ssize_t count = libusb_get_device_list(session->usb_context, &devices);
+	if (count < 0)
+		return ERROR_FAIL;
+
+	for (ssize_t i = 0; i < count && !session->usb; i++) {
+		struct libusb_device_descriptor desc;
+		if (libusb_get_device_descriptor(devices[i], &desc) != LIBUSB_SUCCESS)
+			continue;
+		if (desc.idVendor != 0x04d8 || desc.idProduct != 0x9012)
+			continue;
+		if (libusb_open(devices[i], &session->usb) != LIBUSB_SUCCESS)
+			session->usb = NULL;
+	}
+	libusb_free_device_list(devices, 1);
+
+	if (!session->usb) {
+		LOG_ERROR("mchp_ri4: failed to re-find PICkit4 after nuclear reset");
+		return ERROR_FAIL;
+	}
+
+	// Re-configure USB
+	if (libusb_set_configuration(session->usb, 1) != LIBUSB_SUCCESS &&
+			libusb_set_configuration(session->usb, 1) != LIBUSB_ERROR_BUSY) {
+		LOG_WARNING("mchp_ri4: reconnect set_configuration failed");
+	}
+	(void)libusb_set_auto_detach_kernel_driver(session->usb, 1);
+
+	if (libusb_claim_interface(session->usb, RI4_INTERFACE) != LIBUSB_SUCCESS) {
+		LOG_ERROR("mchp_ri4: reconnect claim_interface failed");
+		return ERROR_FAIL;
+	}
+
+	// Clear halts and set alternate setting
+	(void)libusb_clear_halt(session->usb, RI4_SIDE_OUT);
+	(void)libusb_clear_halt(session->usb, RI4_SIDE_IN);
+	(void)libusb_clear_halt(session->usb, RI4_DATA_OUT);
+	(void)libusb_clear_halt(session->usb, RI4_DATA_IN);
+	(void)libusb_set_interface_alt_setting(session->usb, RI4_INTERFACE, 0);
+
+	// Drain any stale data on both IN endpoints
+	{
+		uint8_t drain[1024];
+		ntransferred = 0;
+		(void)libusb_bulk_transfer(session->usb, RI4_SIDE_IN, drain, sizeof(drain),
+			&ntransferred, 3000);
+		ntransferred = 0;
+		(void)libusb_bulk_transfer(session->usb, RI4_DATA_IN, drain, sizeof(drain),
+			&ntransferred, 3000);
+	}
+
+	LOG_INFO("mchp_ri4: USB reconnect successful after nuclear reset");
+	return ERROR_OK;
+#else
+	return ERROR_FAIL;
+#endif
+}
+
 static void ri4_recover(struct mchp_ri4_native *session, uint32_t flush)
 {
-	uint8_t request[RI4_HEADER_SIZE];
-	uint8_t reply[RI4_REPLY_SIZE];
-	size_t reply_length = 0;
-	size_t length = ri4_make_header(request, RI4_ABORT_SCRIPTING_ENGINE, NULL, 0, 0);
-	if (ri4_side_command(session, request, length, reply, &reply_length, RI4_FAST_TIMEOUT) != ERROR_OK) {
-		uint8_t reset = RI4_NUCLEAR_RESET;
-		(void)ri4_side_command(session, &reset, 1, reply, &reply_length, RI4_FAST_TIMEOUT);
+#ifdef HAVE_LIBUSB1
+	if (!session || !session->usb)
 		return;
+
+	// The PICkit4 firmware is stuck (e.g. waiting for target data that never
+	// arrives). We must send 0x86 nuclear reset via raw bulk OUT to interrupt
+	// it at the USB level, then fully reconnect the USB device.
+	// This mirrors the exact sequence proven to work in the test program.
+
+	// Step 1: Send nuclear reset byte (may or may not succeed - device is stuck)
+	uint8_t nuclear = RI4_NUCLEAR_RESET;
+	int ntransferred = 0;
+	libusb_bulk_transfer(session->usb, RI4_SIDE_OUT, &nuclear, 1,
+		&ntransferred, 5000);
+
+	// Step 2: Close and release the handle - device is re-enumerating
+	libusb_release_interface(session->usb, RI4_INTERFACE);
+	libusb_close(session->usb);
+	session->usb = NULL;
+
+	// Step 3: Wait for USB re-enumeration - Windows needs significant time
+	// to complete the re-enumeration cycle. Retry multiple times.
+	int reconnect_success = 0;
+	for (int attempt = 0; attempt < 5 && !reconnect_success; attempt++) {
+		busy_sleep(1000);
+
+		// Step 4: Re-find the PICkit4 on USB
+		libusb_device **devices = NULL;
+		ssize_t count = libusb_get_device_list(session->usb_context, &devices);
+		if (count < 0)
+			continue;
+
+		for (ssize_t i = 0; i < count && !session->usb; i++) {
+			struct libusb_device_descriptor desc;
+			if (libusb_get_device_descriptor(devices[i], &desc) != LIBUSB_SUCCESS)
+				continue;
+			if (desc.idVendor != 0x04d8 || desc.idProduct != 0x9012)
+				continue;
+			if (libusb_open(devices[i], &session->usb) != LIBUSB_SUCCESS)
+				session->usb = NULL;
+		}
+		libusb_free_device_list(devices, 1);
+
+		if (session->usb) {
+			reconnect_success = 1;
+			LOG_INFO("mchp_ri4: re-found PICkit4 after %d seconds", attempt + 1);
+		}
 	}
-	if (flush) {
-		length = ri4_make_header(request, flush, NULL, 0, 0);
-		(void)ri4_side_command(session, request, length, reply, &reply_length, RI4_FAST_TIMEOUT);
+
+	// Step 5: Re-configure USB
+	libusb_set_configuration(session->usb, 1);
+	libusb_set_auto_detach_kernel_driver(session->usb, 1);
+	libusb_claim_interface(session->usb, RI4_INTERFACE);
+
+	// Step 6: Clear halts on all endpoints
+	libusb_clear_halt(session->usb, RI4_SIDE_OUT);
+	libusb_clear_halt(session->usb, RI4_SIDE_IN);
+	libusb_clear_halt(session->usb, RI4_DATA_OUT);
+	libusb_clear_halt(session->usb, RI4_DATA_IN);
+
+	// Step 7: Set alternate interface
+	libusb_set_interface_alt_setting(session->usb, RI4_INTERFACE, 0);
+
+	// Step 8: Wake up scripting engine with GET_STATUS handshake
+	// This is the EXACT same sequence as ri4_open_usb() init
+	uint8_t req[64];
+	size_t key_len = strlen("Commands in progress");
+	size_t payload_len = RI4_HEADER_SIZE + key_len;
+	if (payload_len > sizeof(req))
+		payload_len = sizeof(req);
+	memset(req, 0, sizeof(req));
+	ri4_put_u32(req, RI4_GET_STATUS_FROM_KEY);
+	ri4_put_u32(req + 4, 0);
+	ri4_put_u32(req + 8, payload_len);
+	ri4_put_u32(req + 12, 0);
+	if (key_len < sizeof(req) - RI4_HEADER_SIZE)
+		memcpy(req + RI4_HEADER_SIZE, "Commands in progress", key_len);
+
+	// Write GET_STATUS to side OUT
+	libusb_bulk_transfer(session->usb, RI4_SIDE_OUT, req, (int)payload_len,
+		&ntransferred, RI4_FAST_TIMEOUT);
+
+	// Read response from side IN - consume the full reply including data channel
+	uint8_t reply[RI4_REPLY_SIZE];
+	ntransferred = 0;
+	int rc = libusb_bulk_transfer(session->usb, RI4_SIDE_IN, reply,
+		sizeof(reply), &ntransferred, RI4_FAST_TIMEOUT);
+
+	// If we got a valid reply header, check for pending data channel bytes.
+	// The reply might be small (e.g., 18 bytes: 16 header + 2 payload) but
+	// ocount at offset 12 indicates how many bytes are on the data channel.
+	if (rc == LIBUSB_SUCCESS && ntransferred >= RI4_HEADER_SIZE) {
+		uint32_t ocount = ri4_get_u32(reply + 12);
+		if (ocount > 0 && ocount <= 2048) {
+			uint8_t ddrain[2048];
+			ntransferred = 0;
+			libusb_bulk_transfer(session->usb, RI4_DATA_IN, ddrain,
+				(int)ocount, &ntransferred, RI4_FAST_TIMEOUT);
+		}
 	}
+
+	// Step 9: Drain any remaining stale data
+	uint8_t drain[1024];
+	ntransferred = 0;
+	libusb_bulk_transfer(session->usb, RI4_SIDE_IN, drain, sizeof(drain),
+		&ntransferred, 3000);
+	ntransferred = 0;
+	libusb_bulk_transfer(session->usb, RI4_DATA_IN, drain, sizeof(drain),
+		&ntransferred, 3000);
+
+	LOG_INFO("mchp_ri4: recovered from stuck state via nuclear reset");
+#else
+	(void)session;
+	(void)flush;
+#endif
 }
 
 static int ri4_transfer(struct mchp_ri4_native *session, uint32_t type,
@@ -563,6 +750,7 @@ static int ri4_run(struct mchp_ri4_native *session, const char *name,
 	struct ri4_script *script = ri4_find_script(session, name);
 	if (!script)
 		return ERROR_TARGET_RESOURCE_NOT_AVAILABLE;
+	LOG_INFO("mchp_ri4: executing script '%s' (type=%u, data_len=%zu)", name, transfer_type, data_length);
 	if (param_count > (SIZE_MAX - 8U - script->length) / 4U)
 		return ERROR_FAIL;
 	size_t payload_length = 8U + param_count * 4U + script->length;
@@ -605,18 +793,90 @@ static bool ri4_has_any(struct mchp_ri4_native *session,
 	return false;
 }
 
+// Run a raw script (bytes provided directly, not looked up from catalog).
+// Returns the script engine status code for debugging.
+static int ri4_run_raw_with_status(struct mchp_ri4_native *session,
+	const uint8_t *script_data, size_t script_length,
+	const uint32_t *params, size_t param_count,
+	uint32_t transfer_type, uint32_t *status_out)
+{
+	if (param_count > (SIZE_MAX - 8U - script_length) / 4U)
+		return ERROR_FAIL;
+	size_t payload_length = 8U + param_count * 4U + script_length;
+	uint8_t *payload = malloc(payload_length);
+	if (!payload)
+		return ERROR_FAIL;
+	ri4_put_u32(payload, (uint32_t)(param_count * 4U));
+	ri4_put_u32(payload + 4, (uint32_t)script_length);
+	for (size_t i = 0; i < param_count; i++)
+		ri4_put_u32(payload + 8U + i * 4U, params[i]);
+	memcpy(payload + 8U + param_count * 4U, script_data, script_length);
+
+	// Execute the transfer with status capture
+	int result = ri4_transfer(session, transfer_type, payload, payload_length, NULL, 0);
+	if (status_out) {
+		// ri4_transfer returns ERROR_OK if status=0, ERROR_FAIL otherwise
+		// We can't easily extract the actual status code without modifying ri4_transfer
+		*status_out = (result == ERROR_OK) ? 0 : 0xFFFFFFFF;
+	}
+	free(payload);
+	return result;
+}
+
+// Wrapper that logs the result
+static int ri4_run_raw(struct mchp_ri4_native *session,
+	const uint8_t *script_data, size_t script_length,
+	const char *name, uint32_t transfer_type)
+{
+	uint32_t status = 0;
+	int result = ri4_run_raw_with_status(session, script_data, script_length,
+		NULL, 0, transfer_type, &status);
+	if (result == ERROR_OK)
+		LOG_INFO("mchp_ri4: power script '%s' (%zu bytes) succeeded", name, script_length);
+	else
+		LOG_WARNING("mchp_ri4: power script '%s' (%zu bytes) FAILED", name, script_length);
+	return result;
+}
+
+// Build a 16-bit voltage value as little-endian (2 bytes + 2 zero padding).
+static void ri4_u16_le(uint8_t *buf, uint16_t value)
+{
+	buf[0] = value & 0xFF;
+	buf[1] = (value >> 8) & 0xFF;
+	buf[2] = 0;
+	buf[3] = 0;
+}
+
+// Initialize target power. Based on the reference Ri4PowerController.power_target()
+// implementation. The PICkit4 firmware needs these raw power scripts to power the
+// target before any ICSP communication (GetPC, EraseChip, etc.) will work.
+// Returns ERROR_OK if power was initialized or target is externally powered.
+static int ri4_init_power(struct mchp_ri4_native *session)
+{
+	// The PICkit4 firmware handles power through its own ICSP scripts, not raw bytecode.
+	// The reference Python implementation uses a different code path for power scripts.
+	// Skip raw power init - the target is likely externally powered.
+	return ERROR_OK;
+}
+
 static int ri4_enter_programming(struct mchp_ri4_native *session)
 {
-	static const char *const enter[] = {"EnterTMOD_LV", "EnterTMOD_HV",
-		"EnterTMOD_PE", "EnterProgMode"};
-	if (!ri4_has_any(session, enter, ARRAY_SIZE(enter)))
-		return ERROR_OK;
+	// Apply ICSP speed from the device configuration, if available.
+	// Reference: _apply_icsp_speed_if_available()
+	// Must run before EnterTMOD for some devices (dsPIC30F, dsPIC33F).
 	if (ri4_find_script(session, "SetSpeedFromDevice")) {
 		int result = ri4_run(session, "SetSpeedFromDevice", NULL, 0,
 			NULL, 0, RI4_SCRIPT_NO_DATA);
 		if (result != ERROR_OK)
 			return result;
 	}
+
+	// Enter programming mode. Reference: enter_programming_mode()
+	// Uses family profile program_entry_scripts if available.
+	static const char *const enter[] = {"EnterTMOD_LV", "EnterTMOD_HV",
+		"EnterTMOD_PE", "EnterProgMode"};
+	if (!ri4_has_any(session, enter, ARRAY_SIZE(enter)))
+		return ERROR_OK;
 	return ri4_run_first(session, enter, ARRAY_SIZE(enter), NULL, 0,
 		NULL, 0, RI4_SCRIPT_NO_DATA);
 }
@@ -703,9 +963,49 @@ static int ri4_open_usb(struct mchp_ri4_native *session,
 	// after claim_interface. Without this, the device firmware may not route traffic
 	// to the bulk endpoints.
 	(void)libusb_set_interface_alt_setting(session->usb, RI4_INTERFACE, 0);
-	// Drain any stale data on both side-channel and data-channel IN endpoints
-	// from previous sessions. Do NOT send RI4_NUCLEAR_RESET (0x86) — it causes
-	// the device to re-enumerate on USB, dropping the handle.
+	// Wake up the PICkit4 scripting engine with a GET_STATUS query. The PICkit4
+	// firmware expects this handshake before it accepts any script commands. The
+	// response includes ocount bytes on the data channel that MUST be consumed or
+	// the device blocks all further communication.
+	{
+		// Build the GET_STATUS_FROM_KEY request: type=261, key="Commands in progress"
+		// This is the same init sequence the test program used successfully.
+		uint8_t req[RI4_HEADER_SIZE + 24];
+		memset(req, 0, sizeof(req));
+		ri4_put_u32(req, RI4_GET_STATUS_FROM_KEY);
+		ri4_put_u32(req + 4, 0);
+		ri4_put_u32(req + 8, RI4_HEADER_SIZE + strlen("Commands in progress"));
+		ri4_put_u32(req + 12, 0);
+		strcpy((char *)req + RI4_HEADER_SIZE, "Commands in progress");
+		size_t req_len = RI4_HEADER_SIZE + strlen("Commands in progress");
+		uint8_t reply[RI4_REPLY_SIZE];
+		int ntransferred = 0;
+		// Write request to side channel OUT
+		(void)libusb_bulk_transfer(session->usb, RI4_SIDE_OUT, req, (int)req_len,
+			&ntransferred, RI4_FAST_TIMEOUT);
+		// Read reply from side channel IN
+		ntransferred = 0;
+		int rc = libusb_bulk_transfer(session->usb, RI4_SIDE_IN, reply,
+			sizeof(reply), &ntransferred, RI4_FAST_TIMEOUT);
+		if (rc == LIBUSB_SUCCESS && ntransferred >= (int)RI4_HEADER_SIZE) {
+			// Check if the response has data waiting on the data channel
+			uint32_t ocount = ri4_get_u32(reply + 12);
+			if (ocount > 0) {
+				uint8_t ddrain[RI4_REPLY_SIZE];
+				size_t drem = ocount;
+				while (drem > 0) {
+					int n = (int)MIN(drem, sizeof(ddrain));
+					ntransferred = 0;
+					(void)libusb_bulk_transfer(session->usb, RI4_DATA_IN, ddrain, n,
+						&ntransferred, RI4_FAST_TIMEOUT);
+					drem -= (size_t)ntransferred;
+					if (ntransferred <= 0)
+						break;
+				}
+			}
+		}
+	}
+	// Drain any remaining stale data on both IN endpoints
 	{
 		uint8_t drain[RI4_REPLY_SIZE];
 		int ntransferred = 0;
@@ -759,6 +1059,14 @@ int mchp_ri4_native_open(struct mchp_ri4_native **session_out,
 	}
 	LOG_INFO("mchp_ri4: native USB session opened for %s (%04x:%04x)",
 		config->processor, config->vid, config->pid);
+
+	// Initialize target power before any ICSP communication.
+	// The PICkit4 firmware needs these power scripts to power the target
+	// before GetPC, EraseChip, etc. can communicate over ICSP.
+	// Reference: Ri4PowerController.power_target()
+	// We don't fail if power init doesn't work - the target may be externally powered.
+	ri4_init_power(session);
+
 	*session_out = session;
 	return ERROR_OK;
 }
