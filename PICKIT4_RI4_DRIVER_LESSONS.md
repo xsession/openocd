@@ -105,6 +105,26 @@ if (!session->usb)
 
 This prevents segfaults when recovery fails to reconnect.
 
+### 7. Config Words Must Be Programmed
+
+dsPIC33/PIC24 devices store configuration bits at **0x1F00000+** (not the
+program memory range). Without config words, the chip won't start — oscillator,
+watchdog, brown-out, and boot behavior are all controlled here. The HEX file
+contains 8 config words that must be written with `WriteConfigmem` or `WriteDevCfg`
+scripts, not `WriteProgmemPE`.
+
+```c
+/* Config memory on dsPIC33/PIC24 devices is at 0x1F00000+ */
+if (address >= 0x1F00000) {
+    static const char *const cfg_names[] = {"WriteConfigmem", "WriteDevCfg"};
+    /* ... use config scripts instead of program memory scripts */
+}
+```
+
+**How we found it:** Firmware was flashed and verified but the target didn't run
+even after a power cycle. HEX analysis showed 8 config words at 0x1F00000-0x1F0001F
+that the driver was silently skipping.
+
 ## What Did NOT Work
 
 ### Raw Power Scripts
@@ -200,6 +220,10 @@ The 16-byte header:
 - `EraseChip` — Erase entire device
 - `WriteProgmemPE` — Write program memory (page erase)
 - `ReadProgmemPE` — Read program memory
+- `WriteConfigmem` — Write config words (addr >= 0x1F00000)
+- `ReadConfigmem` — Read config words (addr >= 0x1F00000)
+- `WriteDevCfg` — Alternate config write name
+- `ReadDevCfg` — Alternate config read name
 - `SetSpeedFromDevice` — Auto-negotiate ICSP speed
 
 ## Build Environment Notes
