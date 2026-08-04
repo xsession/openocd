@@ -52,6 +52,8 @@ int mchp_ri4_native_read(struct mchp_ri4_native *session,
 int mchp_ri4_native_write(struct mchp_ri4_native *session,
 	uint32_t address, const uint8_t *data, uint32_t length);
 int mchp_ri4_native_erase(struct mchp_ri4_native *session, unsigned int mode);
+int mchp_ri4_native_enter_programming(struct mchp_ri4_native *session);
+int mchp_ri4_native_exit_programming(struct mchp_ri4_native *session);
 int mchp_ri4_native_set_breakpoint(struct mchp_ri4_native *session,
 	unsigned int slot, uint32_t address);
 int mchp_ri4_native_set_watchpoint(struct mchp_ri4_native *session,

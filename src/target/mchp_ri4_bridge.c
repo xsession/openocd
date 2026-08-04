@@ -542,15 +542,26 @@ COMMAND_HANDLER(mchp_ri4_handle_erase)
 static int mchp_ri4_image(struct target *target, const char *path,
 	bool program, bool verify)
 {
+	struct mchp_ri4_bridge *bridge = target_to_mchp_ri4(target);
 	struct image image;
 	memset(&image, 0, sizeof(image));
 	int result = image_open(&image, path, NULL);
 	if (result != ERROR_OK)
 		return result;
+
 	if (program) {
-		result = mchp_ri4_bridge_mass_erase(target, 0);
+		/* Enter programming mode ONCE for the entire session, matching IPECMD.
+		 * dsPIC33 config words use a shadow buffer that only commits on exit.
+		 * The native read/write/erase functions skip enter/exit when already in
+		 * programming mode (in_programming flag), so all writes stay within one
+		 * session. We exit only after all operations complete. */
+		result = mchp_ri4_native_enter_programming(bridge->native);
 		if (result != ERROR_OK)
 			goto done;
+
+		result = mchp_ri4_bridge_mass_erase(target, 0);
+		if (result != ERROR_OK)
+			goto exit_prog;
 	}
 	uint8_t *buffer = malloc(MCHP_RI4_IMAGE_CHUNK);
 	uint8_t *actual = verify ? malloc(MCHP_RI4_IMAGE_CHUNK) : NULL;
@@ -589,6 +600,9 @@ static int mchp_ri4_image(struct target *target, const char *path,
 free_buffers:
 	free(actual);
 	free(buffer);
+exit_prog:
+	if (program)
+		mchp_ri4_native_exit_programming(bridge->native);
 done:
 	image_close(&image);
 	return result;

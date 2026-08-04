@@ -64,6 +64,7 @@ struct mchp_ri4_native {
 	char *processor;
 	char *family;
 	char *suffix;
+	bool in_programming;	/* true while bridge has called enter_programming */
 };
 
 static uint32_t ri4_get_u32(const uint8_t *buffer)
@@ -871,23 +872,41 @@ static int ri4_enter_programming(struct mchp_ri4_native *session)
 			return result;
 	}
 
-	// Enter programming mode. Reference: enter_programming_mode()
-	// Uses family profile program_entry_scripts if available.
+	// Enter programming mode. Skip if bridge already entered (bridge-managed session).
+	if (session->in_programming)
+		return ERROR_OK;
 	static const char *const enter[] = {"EnterTMOD_LV", "EnterTMOD_HV",
 		"EnterTMOD_PE", "EnterProgMode"};
 	if (!ri4_has_any(session, enter, ARRAY_SIZE(enter)))
 		return ERROR_OK;
-	return ri4_run_first(session, enter, ARRAY_SIZE(enter), NULL, 0,
+	int result = ri4_run_first(session, enter, ARRAY_SIZE(enter), NULL, 0,
 		NULL, 0, RI4_SCRIPT_NO_DATA);
+	if (result == ERROR_OK)
+		session->in_programming = true;
+	return result;
 }
 
 static int ri4_exit_programming(struct mchp_ri4_native *session)
 {
 	static const char *const exit[] = {"ExitTMOD", "ExitProgMode"};
+	if (!session->in_programming)
+		return ERROR_OK;
+	session->in_programming = false;
 	if (!ri4_has_any(session, exit, ARRAY_SIZE(exit)))
 		return ERROR_OK;
 	return ri4_run_first(session, exit, ARRAY_SIZE(exit), NULL, 0,
 		NULL, 0, RI4_SCRIPT_NO_DATA);
+}
+
+/* Public API — bridge calls these to wrap the entire programming session. */
+int mchp_ri4_native_enter_programming(struct mchp_ri4_native *session)
+{
+	return ri4_enter_programming(session);
+}
+
+int mchp_ri4_native_exit_programming(struct mchp_ri4_native *session)
+{
+	return ri4_exit_programming(session);
 }
 
 static int ri4_open_usb(struct mchp_ri4_native *session,
@@ -1216,62 +1235,58 @@ int mchp_ri4_native_set_pc(struct mchp_ri4_native *session, uint32_t pc)
 int mchp_ri4_native_read(struct mchp_ri4_native *session,
 	uint32_t address, uint8_t *data, uint32_t length)
 {
-	/* Config memory on dsPIC33/PIC24 devices is at 0x1F00000+ */
-	if (address >= 0x1F00000) {
-		static const char *const cfg_names[] = {"ReadConfigmem", "ReadDevCfg"};
-		uint32_t params[] = {address, length};
-		int result = ri4_enter_programming(session);
-		if (result == ERROR_OK)
-			result = ri4_run_first(session, cfg_names, ARRAY_SIZE(cfg_names), params, ARRAY_SIZE(params),
-			data, length, RI4_SCRIPT_UPLOAD);
-		int exit_result = ri4_exit_programming(session);
-		return result == ERROR_OK ? exit_result : result;
-	}
+	/* Config memory at 0x1F00000+ is handled by the same scripts as program memory
+	 * — the PICkit4 firmware internally maps config addresses to hardware registers.
+	 * This matches the Python reference which uses write_program() for all segments. */
 	static const char *const names[] = {"ReadProgmemPE", "ReadProgmem", "ReadProgmemDE", "ReadRAM"};
 	uint32_t params[] = {address, length};
+	bool entered = !session->in_programming;
 	int result = ri4_enter_programming(session);
 	if (result == ERROR_OK)
 		result = ri4_run_first(session, names, ARRAY_SIZE(names), params, ARRAY_SIZE(params),
 		data, length, RI4_SCRIPT_UPLOAD);
-	int exit_result = ri4_exit_programming(session);
-	return result == ERROR_OK ? exit_result : result;
+	if (entered) {
+		int exit_result = ri4_exit_programming(session);
+		return result == ERROR_OK ? exit_result : result;
+	}
+	return result;
 }
 
 int mchp_ri4_native_write(struct mchp_ri4_native *session,
 	uint32_t address, const uint8_t *data, uint32_t length)
 {
-	/* Config memory on dsPIC33/PIC24 devices is at 0x1F00000+ */
-	if (address >= 0x1F00000) {
-		static const char *const cfg_names[] = {"WriteConfigmem", "WriteDevCfg"};
-		uint32_t params[] = {address, length};
-		int result = ri4_enter_programming(session);
-		if (result == ERROR_OK)
-			result = ri4_run_first(session, cfg_names, ARRAY_SIZE(cfg_names), params, ARRAY_SIZE(params),
-				(uint8_t *)data, length, RI4_SCRIPT_DOWNLOAD);
-		int exit_result = ri4_exit_programming(session);
-		return result == ERROR_OK ? exit_result : result;
-	}
+	/* Config memory at 0x1F00000+ is handled by the same scripts as program memory
+	 * — the PICkit4 firmware internally maps config addresses to hardware registers.
+	 * This matches the Python reference which uses write_program() for all segments. */
 	static const char *const names[] = {"WriteProgmemPE", "WriteProgmem", "WriteProgmemDE", "WriteRAM"};
 	uint32_t params[] = {address, length};
+	bool entered = !session->in_programming;
 	int result = ri4_enter_programming(session);
 	if (result == ERROR_OK)
 		result = ri4_run_first(session, names, ARRAY_SIZE(names), params, ARRAY_SIZE(params),
 		(uint8_t *)data, length, RI4_SCRIPT_DOWNLOAD);
-	int exit_result = ri4_exit_programming(session);
-	return result == ERROR_OK ? exit_result : result;
+	if (entered) {
+		int exit_result = ri4_exit_programming(session);
+		return result == ERROR_OK ? exit_result : result;
+	}
+	return result;
 }
 
 int mchp_ri4_native_erase(struct mchp_ri4_native *session, unsigned int mode)
 {
 	static const char *const erase[] = {"EraseChip", "EraseProgmemRange"};
+	bool entered = !session->in_programming;
 	int result = ri4_enter_programming(session);
 	if (result != ERROR_OK)
 		return result;
 	uint32_t value = mode;
 	result = ri4_run_first(session, erase, ARRAY_SIZE(erase),
 		mode ? &value : NULL, mode ? 1 : 0, NULL, 0, RI4_SCRIPT_NO_DATA);
-	int exit_result = ri4_exit_programming(session);
-	return result == ERROR_OK ? exit_result : result;
+	if (entered) {
+		int exit_result = ri4_exit_programming(session);
+		return result == ERROR_OK ? exit_result : result;
+	}
+	return result;
 }
 
 int mchp_ri4_native_set_breakpoint(struct mchp_ri4_native *session,
