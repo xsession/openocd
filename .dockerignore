@@ -6,6 +6,8 @@ build-*
 artifacts
 docker/data/dist
 gens
+externals
+samples
 tools/microchip/open_microchip_tools/vendor
 tools/microchip/open_microchip_tools/vscode_extension/out
 tools/microchip/open_microchip_tools/vscode_extension/*.vsix
@@ -22,3 +24,4 @@ tools/ti/c2000_toolchain/extension/*.vsix
 *.log
 .cache
 .DS_Store
+docs/_build
