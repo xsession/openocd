@@ -20,7 +20,7 @@ artifacts.
 |-- testing/              Test infrastructure
 |-- tools/                Maintenance tools plus curated TI/Microchip feature tooling
 |-- udev/                 Linux USB permission rules
-`-- README.DOCKER_PACKAGING.md
+`-- docs/deployment/docker-packaging.md   (Docker packaging guide)
 ```
 
 ## Ownership boundaries

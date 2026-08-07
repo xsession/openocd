@@ -44,7 +44,7 @@ fork in addition to OpenOCD's standard manual under `doc/`.
 - [Vendor audit phase 11 support validation tooling](development/vendor-audit-phase11-support-validation-tooling.md)
 - [AVRDUDE integration audit](development/avrdude-integration-audit.md)
 - [OpenOCD vendor fork audit](development/openocd-vendor-fork-audit.md)
-- [Unified feature manifest](../MERGE_MANIFEST.md)
+- [Unified feature manifest](development/merge-manifest.md)
 
 ## Development records
 

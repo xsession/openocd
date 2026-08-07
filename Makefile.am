@@ -84,29 +84,15 @@ EXTRA_DIST += \
 	LICENSES/stand-alone/Apache-2.0 \
 	LICENSES/stand-alone/GPL-3.0 \
 	tools/logger.pl \
-	tools/microchip \
 	tools/ti \
 	tools/rlink_make_speed_table \
 	tools/st7_dtc_as \
 	contrib \
 	svd \
-	docs/development/microchip-feature-base.md \
-	docs/development/source-catalog.md \
-	docs/development/avrdude-integration-audit.md \
-	docs/development/vendor-audit-phase9-avrdude-support-index.md \
-	docs/development/vendor-audit-phase10-backend-hardware-queue.md \
-	docs/development/vendor-audit-phase11-support-validation-tooling.md \
-	docs/development/zephyr-style-support-organization.md \
-	docs/programmers/microchip-pickit-icd.md \
-	docs/programmers/avrdude.md \
-	docs/programmers/ti-xds100.md \
-	docs/usage/vscode-f28m35x-dual-core.md \
-	docs/openocd-course \
-	docs/index.md \
+	docs \
 	support \
-	tools/support \
-	MERGE_MANIFEST.md \
-	UNIFIED_VERSION
+	docs/development/merge-manifest.md \
+	docs/development/unified-version
 
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
@@ -154,15 +140,15 @@ dist-hook:
 		mv $(distdir)/ChangeLog.tmp $(distdir)/ChangeLog; \
 	fi
 	rm -rf \
-		$(distdir)/tools/microchip/open_microchip_tools/vendor \
-		$(distdir)/tools/microchip/open_microchip_tools/vscode_extension/out \
-		$(distdir)/tools/microchip/open_microchip_tools/vscode_extension/*.vsix \
 		$(distdir)/tools/ti/c2000_toolchain/svd \
 		$(distdir)/tools/ti/c2000_toolchain/sources \
 		$(distdir)/tools/ti/c2000_toolchain/extension/out \
 		$(distdir)/tools/ti/c2000_toolchain/extension/node_modules \
 		$(distdir)/tools/ti/c2000_toolchain/extension/*.vsix \
-		$(distdir)/tools/ti/c2000_toolchain/.venv
+		$(distdir)/tools/ti/c2000_toolchain/.venv \
+		$(distdir)/externals/open_microchip_tools/vendor \
+		$(distdir)/externals/open_microchip_tools/__pycache__ \
+		$(distdir)/externals/open_microchip_tools/**/__pycache__
 	for i in $$($(TCL_FILES)); do \
 		j="$(distdir)/$(TCL_PATH)/$$i" && \
 		mkdir -p "$$(dirname $$j)" && \

@@ -11,7 +11,7 @@ services:
     devices:
       - /dev/bus/usb:/dev/bus/usb
     volumes:
-      - ./data/config:/work/config:ro
+      - ../docker/config:/work/config:ro
       - ./data/examples:/work/examples:ro
     ports:
       - "3333:3333" # GDB

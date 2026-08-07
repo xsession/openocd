@@ -118,5 +118,5 @@ The unified package is checked for:
 - OpenOCD compilation when the build environment provides all dependencies;
 - archive checksums.
 
-See [`MERGE_MANIFEST.md`](MERGE_MANIFEST.md) for the exact merge contents and
+See [`docs/development/merge-manifest.md`](docs/development/merge-manifest.md) for the exact merge contents and
 validation status.

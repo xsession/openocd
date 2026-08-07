@@ -1,4 +1,0 @@
-using sysbus
-mach create "c2000-debug-smoke"
-machine LoadPlatformDescription @examples/renode/c2000-smoke.repl
-pause
