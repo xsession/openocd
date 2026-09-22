@@ -391,7 +391,7 @@ close-out is recorded in
 
 ## Support Validation Tooling Batch: 2026-07-21
 
-Phase 11 added `tools/support/validate-support-metadata.ps1`, a lightweight
+Phase 11 added `support/validate-support-metadata.ps1`, a lightweight
 PowerShell validator for the Zephyr-style `support/` metadata tree. It checks
 status vocabulary and repository-relative path references without requiring an
 external YAML parser.

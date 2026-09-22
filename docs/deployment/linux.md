@@ -27,9 +27,11 @@ Or with the helper script:
 $ BUILD_ARM64=1 ./docker/scripts/build-linux-package.sh
 ```
 
-```{warning}
-`exec /bin/sh: exec format error` means the Docker engine cannot execute the ARM64 base image. It is an emulation/runner problem, not an OpenOCD source failure.
-```
+!!! warning
+
+    `exec /bin/sh: exec format error` means the Docker engine cannot execute
+    the ARM64 base image. It is an emulation/runner problem, not an OpenOCD
+    source failure.
 
 ## Install
 

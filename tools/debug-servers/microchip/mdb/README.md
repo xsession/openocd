@@ -19,12 +19,6 @@ python .\tools\debug-servers\microchip\mdb\mdb_gdb_wrapper.py discover --support
 python .\tools\debug-servers\microchip\mdb\mdb_gdb_wrapper.py server --port 3340
 ```
 
-The compatibility path still works:
-
-```powershell
-python .\tools\support\microchip_mdb_gdb_wrapper.py discover
-```
-
 ## External Dependencies
 
 - MPLAB X MDB, default Windows path:

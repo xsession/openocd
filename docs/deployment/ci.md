@@ -9,7 +9,7 @@ Recommended jobs:
 - Windows x86-64 cross-package on `ubuntu-latest`.
 - macOS x86-64 on an Intel macOS runner when available.
 - macOS ARM64 on an Apple Silicon runner.
-- Sphinx HTML documentation and link checking.
+- MkDocs Material HTML documentation with strict build validation.
 
 Use immutable dependency versions and pin action major versions. Upload package archives as workflow artifacts for pull requests, then attach them to GitHub Releases for tags.
 

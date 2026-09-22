@@ -1,0 +1,162 @@
+site_name: OpenOCD Build, Debug, and Deployment Guide
+site_description: Cross-platform OpenOCD build, programming, target, and deployment documentation.
+site_url: https://xsession.github.io/openocd/
+repo_url: https://github.com/xsession/openocd
+repo_name: xsession/openocd
+edit_uri: edit/master/docs/
+docs_dir: docs
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.indexes
+    - navigation.instant
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.action.edit
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+extra_css:
+  - _static/custom.css
+extra_javascript:
+  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
+  - javascripts/mermaid-init.js
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist
+
+strict: true
+
+nav:
+  - Home: index.md
+  - Getting started:
+      - Overview: getting-started/overview.md
+      - Prerequisites: getting-started/prerequisites.md
+      - Quick start: getting-started/quickstart.md
+  - Deployment:
+      - Overview: deployment/index.md
+      - Linux: deployment/linux.md
+      - Windows: deployment/windows.md
+      - macOS: deployment/macos.md
+      - Docker packaging: deployment/docker-packaging.md
+      - Artifacts: deployment/artifacts.md
+      - CI: deployment/ci.md
+      - Troubleshooting: deployment/troubleshooting.md
+  - Targets:
+      - TI C2000 support: targets/ti-c2000-support.md
+      - TI MSPM0C1103: targets/ti-mspm0c1103.md
+      - TI TMS320 family: targets/ti-tms320-family-support.md
+  - Programmers:
+      - AVRDUDE bridge: programmers/avrdude.md
+      - Microchip PICkit and ICD: programmers/microchip-pickit-icd.md
+      - TI XDS100: programmers/ti-xds100.md
+  - Usage:
+      - Configuration: usage/configuration.md
+      - First session: usage/first-session.md
+      - Debuggers: usage/debuggers.md
+      - Microchip MDB facade: usage/microchip-mdb-gdb-facade.md
+      - TI C2000 debug findings: usage/tms320f28m35x-debug-findings.md
+      - VS Code and Cortex-Debug MCUs: usage/vscode-cortex-debug-openocd-mcus.md
+      - VS Code F28M35x dual core: usage/vscode-f28m35x-dual-core.md
+      - XDS100: usage/xds100.md
+      - XDS110: usage/xds110.md
+  - OpenOCD course:
+      - Course overview: openocd-course/README.md
+      - Instructor guide: openocd-course/instructor-guide.md
+      - Syllabus: openocd-course/syllabus.md
+      - Lab index: openocd-course/lab-index.md
+      - Assessment rubric: openocd-course/assessment-rubric.md
+      - Labs:
+          - 01 Environment and first run: openocd-course/labs/lab01-environment-and-first-run.md
+          - 02 Architecture map: openocd-course/labs/lab02-openocd-architecture-map.md
+          - 03 Tcl command basics: openocd-course/labs/lab03-tcl-command-basics.md
+          - 04 Interface, target, and board files: openocd-course/labs/lab04-interface-target-board-files.md
+          - 05 JTAG and SWD: openocd-course/labs/lab05-jtag-and-swd-concepts.md
+          - 06 Reset and adapter speed: openocd-course/labs/lab06-reset-and-adapter-speed.md
+          - 07 GDB server workflow: openocd-course/labs/lab07-gdb-server-workflow.md
+          - 08 Target state and memory: openocd-course/labs/lab08-target-state-and-memory.md
+          - 09 Flash driver concepts: openocd-course/labs/lab09-flash-driver-concepts.md
+          - 10 Safe flash workflow: openocd-course/labs/lab10-safe-flash-workflow.md
+          - 11 USB probe diagnostics: openocd-course/labs/lab11-usb-probe-and-driver-diagnostics.md
+          - 12 Windows package paths: openocd-course/labs/lab12-windows-package-and-script-paths.md
+          - 13 Writing interface configs: openocd-course/labs/lab13-writing-interface-configs.md
+          - 14 Writing target configs: openocd-course/labs/lab14-writing-target-configs.md
+          - 15 Writing board configs: openocd-course/labs/lab15-writing-board-configs.md
+          - 16 TI C2000 case study: openocd-course/labs/lab16-ti-c2000-xds100-case-study.md
+          - 17 XDS100 driver automation: openocd-course/labs/lab17-xds100-driver-binding-automation.md
+          - 18 AVRDUDE bridge: openocd-course/labs/lab18-avrdude-bridge-and-delegation.md
+          - 19 Vendor fork audit: openocd-course/labs/lab19-vendor-fork-audit.md
+          - 20 Support metadata: openocd-course/labs/lab20-zephyr-style-support-metadata.md
+          - 21 Build and regression: openocd-course/labs/lab21-build-and-regression-strategy.md
+          - 22 Backend triage: openocd-course/labs/lab22-backend-batch-triage.md
+          - 23 Documentation and releases: openocd-course/labs/lab23-documentation-and-release-notes.md
+          - 24 Capstone support package: openocd-course/labs/lab24-capstone-support-package.md
+  - Reference:
+      - Configure flags: reference/configure-flags.md
+      - Output layout: reference/output-layout.md
+      - Support matrix: reference/support-matrix.md
+      - Legacy command manual: reference/legacy-manual.md
+  - Development:
+      - Documentation workflow: development/documentation.md
+      - Documentation architecture: development/documentation-architecture.md
+      - Debug-server wrappers: development/debug-server-wrappers.md
+      - Repository layout: development/repository-layout.md
+      - Source catalog: development/source-catalog.md
+      - Build system: development/build-system.md
+      - Build review: development/build-review.md
+      - Fix notes: development/fix-notes.md
+      - Change history: development/change-history.md
+      - Merge manifest: development/merge-manifest.md
+      - Adding vendor support: development/adding-new-vendor-mcu-programmer.md
+      - TI debug adapters: development/ti-debug-adapters.md
+      - Microchip feature organization: development/microchip-feature-base.md
+      - PICkit 4 RI4 lessons: development/pickit4-ri4-lessons.md
+      - AVRDUDE integration audit: development/avrdude-integration-audit.md
+      - Vendor fork audit: development/openocd-vendor-fork-audit.md
+      - Zephyr-style support organization: development/zephyr-style-support-organization.md
+      - Vendor audit checklist: development/vendor-audit-phased-checklist.md
+      - Vendor audit phase 1: development/vendor-audit-phase1-ti-triage.md
+      - Vendor audit phase 2: development/vendor-audit-phase2-ti-config.md
+      - Vendor audit phase 3: development/vendor-audit-phase3-ti-programmer.md
+      - Vendor audit phase 4: development/vendor-audit-phase4-ti-target-attach.md
+      - Vendor audit phase 5: development/vendor-audit-phase5-ti-flash-support.md
+      - Vendor audit phase 6: development/vendor-audit-phase6-ti-board-examples.md
+      - Vendor audit phase 7: development/vendor-audit-phase7-ti-build-regression.md
+      - Vendor audit phase 8: development/vendor-audit-phase8-ti-documentation-status.md
+      - Vendor audit phase 9: development/vendor-audit-phase9-avrdude-support-index.md
+      - Vendor audit phase 10: development/vendor-audit-phase10-backend-hardware-queue.md
+      - Vendor audit phase 11: development/vendor-audit-phase11-support-validation-tooling.md
+      - Integration chat 2026-07-17: development/chat-record-2026-07-17.md
+      - Integration chat 2026-07-21: development/chat-record-2026-07-21.md

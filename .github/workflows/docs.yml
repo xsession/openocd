@@ -5,15 +5,19 @@ on:
     branches: [master, main]
     paths:
       - "docs/**"
-      - "build/containers/docs.Dockerfile"
-      - "build/scripts/build-docs.sh"
+      - "docker/Dockerfile.docs"
+      - "docker/scripts/build-docs.sh"
+      - "mkdocs.yml"
+      - "tools/docs/**"
       - ".github/workflows/docs.yml"
       - "README.md"
   pull_request:
     paths:
       - "docs/**"
-      - "build/containers/docs.Dockerfile"
-      - "build/scripts/build-docs.sh"
+      - "docker/Dockerfile.docs"
+      - "docker/scripts/build-docs.sh"
+      - "mkdocs.yml"
+      - "tools/docs/**"
       - ".github/workflows/docs.yml"
       - "README.md"
   workflow_dispatch:
@@ -34,7 +38,8 @@ jobs:
           cache: pip
           cache-dependency-path: docs/requirements.txt
       - run: pip install -r docs/requirements.txt
-      - run: sphinx-build -W --keep-going -b html docs docs/_build/html
+      - run: python3 tools/docs/generate_support_tables.py --check
+      - run: python3 -m mkdocs build --strict --site-dir docs/_build/html
       - uses: actions/upload-artifact@v4
         with:
           name: openocd-documentation-html

@@ -43,4 +43,5 @@ Build every Docker-supported target, including Linux ARM64:
 $ docker buildx bake -f docker/docker-bake.hcl all
 ```
 
-See {doc}`../deployment/troubleshooting` before enabling ARM64 emulation on an x86-64 Windows host.
+See [Build troubleshooting](../deployment/troubleshooting.md) before enabling
+ARM64 emulation on an x86-64 Windows host.

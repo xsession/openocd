@@ -1,10 +1,13 @@
 # Documentation development
 
-## Why Sphinx
+## MkDocs site
 
-Sphinx is used for the deployment site because it provides searchable, cross-linked HTML; PDF and man-page builders; validation; and future Doxygen integration through Breathe. MyST keeps authoring in Markdown. Furo provides a readable responsive theme.
+MkDocs Material is the primary site generator. It provides searchable,
+cross-linked HTML, responsive navigation, code-copy controls, Mermaid diagrams,
+and strict validation while keeping the source authoring format as Markdown.
 
-Typst remains a good optional downstream format for brochures or polished release handbooks, but it is not the primary documentation engine because it does not replace a searchable versioned website and API cross-references as effectively.
+The upstream Texinfo manual, generated Info/man pages, and Doxygen API inputs
+remain specialist build outputs and are not replaced by this site.
 
 ## Local build with Python
 
@@ -12,7 +15,8 @@ Typst remains a good optional downstream format for brochures or polished releas
 $ python -m venv .venv-docs
 $ . .venv-docs/bin/activate
 $ pip install -r docs/requirements.txt
-$ sphinx-build -W --keep-going -b html docs docs/_build/html
+$ python3 tools/docs/generate_support_tables.py --check
+$ python3 -m mkdocs build --strict --site-dir docs/_build/html
 ```
 
 Windows PowerShell:
@@ -21,7 +25,8 @@ Windows PowerShell:
 py -m venv .venv-docs
 .\.venv-docs\Scripts\Activate.ps1
 pip install -r docs\requirements.txt
-sphinx-build -W --keep-going -b html docs docs\_build\html
+python tools/docs/generate_support_tables.py --check
+python -m mkdocs build --strict --site-dir docs\_build\html
 ```
 
 ## Docker build
@@ -39,3 +44,6 @@ $ docker build -f docker/Dockerfile.docs --target export \
 - Include expected artifact paths.
 - Put failure messages in the troubleshooting page.
 - Link to the legacy command manual instead of copying it.
+- Keep navigation entries in `mkdocs.yml` when adding a new user-facing page.
+- Regenerate `docs/reference/support-matrix.md` after changing board,
+  interface, FPGA/CPLD, SVD, or support metadata files.

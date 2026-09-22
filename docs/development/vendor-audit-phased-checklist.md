@@ -322,7 +322,7 @@ Phase 11 result:
 | Field | Decision |
 | --- | --- |
 | Result note | `docs/development/vendor-audit-phase11-support-validation-tooling.md` |
-| Implementation | `tools/support/validate-support-metadata.ps1` |
+| Implementation | `support/validate-support-metadata.ps1` |
 | Hardware/backend imports | None; no matching hardware or simulator validation is available in this workspace. |
 | Validation | Support metadata path and status validation passed with `powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\support\validate-support-metadata.ps1`. |
 

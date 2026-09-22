@@ -2,9 +2,6 @@ name: ti-c2000-openocd-wrapper
 vendor: texas-instruments
 kind: openocd-debug-server-wrapper
 entry: c28x_openocd_wrapper.py
-compatibility_entry:
-  - tools/support/c28x_openocd_wrapper.py
-  - tools/support/tms320f28m35x_openocd_wrapper.py
 local_extraction:
   script: tools/debug-servers/ti/c2000/extract-ti-debug-server.ps1
   ignored_destination: tools/debug-servers/ti/c2000/vendor/ccs-debugserver-20.4.0

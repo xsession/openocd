@@ -18,7 +18,7 @@ Maintained source belongs in the categorized project tree below.
 | Path | Purpose |
 |---|---|
 | `tools/ti/` | TI C2000/MSPM0 generators, debug helpers, CCS bridge, Renode examples, and serial flashing helper. |
-| `tools/microchip/` | Microchip RI4, IPECMD, MDBCore, Renode co-simulation, simulator, and VS Code helper tooling. |
+| `tools/debug-servers/microchip/mdb/` | Repo-local MDB debug-server wrapper and external-runtime extraction helpers. |
 | `tools/release/`, `tools/scripts/`, and legacy tool files | Existing OpenOCD maintenance and release utilities. |
 
 ## Data and examples
@@ -26,7 +26,7 @@ Maintained source belongs in the categorized project tree below.
 | Path | Purpose |
 |---|---|
 | `svd/` | Curated debugger-facing SVD files committed with the fork. Generator source lives under `tools/`. |
-| `examples/` | Ready-to-run board, target, adapter, and programming examples. |
+| `examples/` | Ready-to-run board, target, adapter, VS Code, and programming examples. |
 | `testing/` | OpenOCD test infrastructure and regression scripts. |
 
 ## Documentation and packaging
@@ -55,4 +55,3 @@ When a feature from `gens/` is promoted into the project:
    vendor databases, and duplicate OpenOCD snapshots.
 3. Add a short `OPENOCD_IMPORT.md` in the imported feature directory.
 4. Register the maintained destination in docs and distribution metadata.
-

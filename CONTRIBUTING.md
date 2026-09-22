@@ -8,8 +8,10 @@ Thank you for improving this OpenOCD fork.
 2. Run the relevant native or containerized build.
 3. Update tests and documentation when behavior changes.
 4. Avoid committing generated files from `artifacts/`, `.build/`, or `docs/_build/`.
-5. Keep platform-specific compatibility changes isolated under `build/scripts/`.
+5. Keep platform-specific compatibility changes isolated under `docker/scripts/`.
 
 For upstream coding conventions and patch guidance, see [`HACKING`](HACKING).
 For packaging architecture, see
 [`docs/development/build-system.md`](docs/development/build-system.md).
+For the repository ownership map, see
+[`docs/development/repository-layout.md`](docs/development/repository-layout.md).

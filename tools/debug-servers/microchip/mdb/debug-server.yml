@@ -4,8 +4,6 @@ kind: gdb-rsp-facade
 entry: mdb_gdb_wrapper.py
 default_host: 127.0.0.1
 default_port: 3340
-compatibility_entry:
-  - tools/support/microchip_mdb_gdb_wrapper.py
 local_extraction:
   script: tools/debug-servers/microchip/mdb/extract-mdb-debug-server.ps1
   ignored_destination: tools/debug-servers/microchip/mdb/vendor/mplabx-mdb-v6.25

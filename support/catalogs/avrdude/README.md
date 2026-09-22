@@ -13,7 +13,7 @@ Generated files:
 Regenerate the catalog with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools\support\generate-avr-catalog.ps1 -Config path\to\avrdude.conf
+powershell -ExecutionPolicy Bypass -File support\generate-avr-catalog.ps1 -Config path\to\avrdude.conf
 ```
 
 If `-Config` is omitted, the generator checks `AVRDUDE_CONF`, an installed

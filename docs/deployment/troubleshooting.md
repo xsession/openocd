@@ -36,7 +36,7 @@ The Docker preparation script can fetch pinned commits, but a complete checkout 
 
 ## `exec format error` for ARM64
 
-Enable binfmt/QEMU or use a native ARM64 runner. See {doc}`linux`.
+Enable binfmt/QEMU or use a native ARM64 runner. See [Linux packages](linux.md).
 
 ## Dependency download failures
 

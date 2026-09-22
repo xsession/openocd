@@ -68,7 +68,7 @@ it is not marked as native OpenOCD debug or flash backend support.
 | `tcl/programmer/avrdude/common.tcl` | OpenOCD Tcl command bridge to external `avrdude` |
 | `docs/programmers/avrdude.md` | User documentation and examples |
 | `docs/development/avrdude-integration-audit.md` | Maintainer audit and native-port roadmap |
-| `tools/support/generate-avr-catalog.ps1` | Generator for OpenOCD AVR support metadata from `avrdude.conf` |
+| `support/generate-avr-catalog.ps1` | Generator for OpenOCD AVR support metadata from `avrdude.conf` |
 | `support/catalogs/avrdude/parts.yml` | Generated AVRDUDE part index |
 | `support/catalogs/avrdude/programmers.yml` | Generated AVRDUDE programmer index |
 | `src/avr/avr_catalog.c` | Native OpenOCD `mcu` and `programmer` command handlers for the compiled catalog |
@@ -87,7 +87,7 @@ OpenOCD support index without claiming native OpenOCD protocol support.
 Generate from a specific AVRDUDE catalog:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools\support\generate-avr-catalog.ps1 -Config path\to\avrdude.conf
+powershell -ExecutionPolicy Bypass -File support\generate-avr-catalog.ps1 -Config path\to\avrdude.conf
 ```
 
 If no config is passed, the generator checks `AVRDUDE_CONF`, an installed

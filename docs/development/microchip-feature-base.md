@@ -1,14 +1,17 @@
-# Microchip feature base
+# Microchip feature organization
 
-The clean-room Microchip tooling imported from `gens/` now lives at:
+The maintained Microchip implementation is intentionally split by ownership:
 
-```text
-tools/microchip/open_microchip_tools/
-```
+- Native RI4 and programmer support lives in `src/` and `tcl/`.
+- Curated SVD inputs live in `svd/microchip/`.
+- The repo-local MDB debug-server wrapper lives in
+  `tools/debug-servers/microchip/mdb/`.
+- User-facing presets and VS Code examples live in `examples/microchip/` and
+  `examples/vscode/microchip-mdb-cortex-debug/`.
 
-This makes the RI4 protocol research, host-side Python tools, simulator helpers,
-Renode co-simulation pieces, tests, and source-only VS Code integration part of
-the project tree instead of a loose generated artifact.
+There is no required `tools/microchip/` generated import or unresolved external
+submodule. Keeping those vendor/runtime assets out of the maintained tree makes
+checkout, packaging, and CI deterministic.
 
 The native OpenOCD driver remains the canonical runtime implementation:
 
@@ -18,14 +21,8 @@ The native OpenOCD driver remains the canonical runtime implementation:
 - `tcl/programmer/microchip/pickit4-ri4.cfg`
 - `tcl/programmer/microchip/icd4-ri4.cfg`
 
-The import intentionally excludes the generated feature base's older
-`openocd/overlay/` files. Those files describe an earlier external bridge path;
-the in-tree driver talks RI4 USB natively and is already registered with
-OpenOCD.
-
-The import also excludes `vendor/` MPLAB pack snapshots, tool firmware images,
-and built VS Code packages. If local asset collection is needed for hardware
-experiments, keep those generated files under the ignored
-`tools/microchip/open_microchip_tools/vendor/` directory and pass the relevant
-script catalog path through `MCHP_RI4_SCRIPTS`.
-
+The native in-tree driver talks RI4 USB directly and is already registered with
+OpenOCD. Proprietary MPLAB packs, tool firmware images, extracted MDB runtimes,
+and built VS Code packages are not source dependencies; keep any local copies
+under the ignored vendor directory owned by the corresponding tool, such as
+`tools/debug-servers/microchip/mdb/vendor/`.

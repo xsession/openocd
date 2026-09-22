@@ -21,13 +21,6 @@ python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py server --preset f2
 python .\tools\debug-servers\ti\c2000\c28x_openocd_wrapper.py gdb-monitor-proxy
 ```
 
-Compatibility paths still work:
-
-```powershell
-python .\tools\support\c28x_openocd_wrapper.py preflight
-python .\tools\support\tms320f28m35x_openocd_wrapper.py preflight
-```
-
 ## External Dependencies
 
 - OpenOCD binary, default packaged Windows path:

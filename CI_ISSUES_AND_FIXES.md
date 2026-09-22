@@ -148,6 +148,38 @@ Two build-time version paths were unsafe for this checkout:
 Twenty-four concurrent `guess-rev.sh` invocations completed without an index
 lock error. Lightweight tags are now recognized correctly.
 
+## Issue 5: documentation workflow was tied to the old site generator
+
+### Symptoms
+
+The documentation workflow and Docker image still invoked Sphinx and referred
+to the previous `build/` container/script locations. The Markdown corpus also
+contained Sphinx/MyST directives that MkDocs cannot render, and runtime support
+tables could drift away from the checked-in board, FPGA, cable, SVD, and board
+metadata files.
+
+### Fix
+
+- Replaced the Sphinx/MyST/Furo dependency set with MkDocs Material and
+  `pymdown-extensions`.
+- Added `mkdocs.yml` with explicit navigation for the complete documentation
+  corpus, including the 24-lab OpenOCD course.
+- Converted Sphinx-only directives and cross-references to MkDocs Markdown and
+  admonitions.
+- Kept `doc/openocd.texi` and `Doxyfile.in` as specialist manual/API paths
+  instead of duplicating them in the site.
+- Added `tools/docs/generate_support_tables.py`; CI checks that its generated
+  support matrix is current before running `mkdocs build --strict`.
+- Updated the documentation workflow, Dockerfile, and helper script to use the
+  `docker/` layout and MkDocs commands.
+
+### Verification
+
+- `python3 -m mkdocs build --strict --site-dir /tmp/openocd-mkdocs-site-final`
+- `python3 tools/docs/generate_support_tables.py --check`
+- Relative-link validation across all 91 Markdown files.
+- No remaining Sphinx/MyST directives in the MkDocs site.
+
 ## Validation performed
 
 The following checks were completed after the fixes:
@@ -159,6 +191,8 @@ The following checks were completed after the fixes:
 - `git diff --check`.
 - Recursive initialization of all remaining submodules.
 - Concurrent Git version detection to exercise the former lock race.
+- MkDocs strict build and generated support-matrix drift check.
+- Relative Markdown link validation across the site.
 
 The local container does not provide `tclsh` or `libtool`, so the ten
 Tcl-backed Microchip tests and a native Autotools build could not be executed
@@ -179,5 +213,10 @@ were not pushed to a remote branch.
 - `src/avr/Makefile.am`
 - `svd/README.md`
 - `testing/microchip_programmer/test_microchip_programmer.py`
+- `mkdocs.yml`
+- `docs/requirements.txt`
+- `tools/docs/generate_support_tables.py`
+- `docs/reference/support-matrix.md`
+- `.github/workflows/docs.yml`
+- `docker/Dockerfile.docs`
 - Removed gitlink: `externals/open_microchip_tools`
-

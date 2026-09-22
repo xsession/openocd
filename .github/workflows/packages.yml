@@ -5,9 +5,7 @@ on:
     branches: [master, main, custom-cores]
     tags: ["v*"]
     paths:
-      - "build/**"
-      - "compose.yaml"
-      - "docker-bake.hcl"
+      - "docker/**"
       - "configure.ac"
       - "Makefile.am"
       - "src/**"
@@ -15,9 +13,7 @@ on:
       - ".github/workflows/packages.yml"
   pull_request:
     paths:
-      - "build/**"
-      - "compose.yaml"
-      - "docker-bake.hcl"
+      - "docker/**"
       - "configure.ac"
       - "Makefile.am"
       - "src/**"
@@ -38,7 +34,7 @@ jobs:
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
       - name: Build Linux and Windows packages
-        run: docker buildx bake all
+        run: docker buildx bake -f docker/docker-bake.hcl all
       - uses: actions/upload-artifact@v4
         with:
           name: openocd-linux-windows-packages
@@ -61,7 +57,7 @@ jobs:
       - name: Install dependencies
         run: brew install autoconf automake libtool libusb libftdi hidapi libjaylink pkg-config texinfo
       - name: Build package
-        run: ./build/scripts/build-macos-package.sh
+        run: ./docker/scripts/build-macos-package.sh
       - uses: actions/upload-artifact@v4
         with:
           name: openocd-macos-${{ matrix.arch }}

@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Microchip MDB: monitor through GDB facade",
+      "type": "cortex-debug",
+      "request": "attach",
+      "servertype": "external",
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/firmware.elf",
+      "gdbPath": "arm-none-eabi-gdb",
+      "gdbTarget": "127.0.0.1:3340",
+      "overrideAttachCommands": [
+        "target-select extended-remote 127.0.0.1:3340",
+        "interpreter-exec console \"monitor discover\"",
+        "interpreter-exec console \"monitor supported\""
+      ],
+      "showDevDebugOutput": "raw"
+    }
+  ]
+}

@@ -9,7 +9,7 @@ debug probes, simulators, or recovery setup for safe integration.
 
 | File | Purpose |
 | --- | --- |
-| `tools/support/validate-support-metadata.ps1` | Validates support metadata status fields and repository-relative path references. |
+| `support/validate-support-metadata.ps1` | Validates support metadata status fields and repository-relative path references. |
 | `docs/development/vendor-audit-phase11-support-validation-tooling.md` | Records the Phase 11 implementation batch and validation result. |
 
 ## Validator Scope
@@ -29,13 +29,13 @@ Windows development shell.
 ## Command
 
 ```powershell
-.\tools\support\validate-support-metadata.ps1
+.\support\validate-support-metadata.ps1
 ```
 
 On systems with script execution disabled, use:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\support\validate-support-metadata.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\support\validate-support-metadata.ps1
 ```
 
 ## Result

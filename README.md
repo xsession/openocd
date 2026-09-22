@@ -107,6 +107,19 @@ openocd   -f programmer/microchip/pickit4.cfg   -c "microchip device dsPIC33EP12
 The PICkit/ICD presets are programming bridges. Full source-level dsPIC
 debugging still requires a dsPIC-capable target backend and GDB server.
 
+## Repository map
+
+- `src/` and `tcl/` contain the OpenOCD implementation and installed runtime
+  scripts.
+- `examples/` contains copy-paste configurations and VS Code launch examples.
+- `support/` contains curated hardware metadata and its validators.
+- `testing/` contains regression harnesses; `tools/` contains maintainer and
+  vendor integration tooling.
+- `docker/` and `.github/workflows/` contain reproducible packaging and CI.
+
+See [`docs/development/repository-layout.md`](docs/development/repository-layout.md)
+before adding a new file or directory.
+
 ## Validation
 
 The unified package is checked for:

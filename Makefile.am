@@ -60,6 +60,7 @@ AM_LDFLAGS += --coverage
 endif
 
 EXTRA_DIST += \
+	mkdocs.yml \
 	BUGS \
 	HACKING \
 	NEWTAPS \
@@ -85,12 +86,17 @@ EXTRA_DIST += \
 	LICENSES/stand-alone/GPL-3.0 \
 	tools/logger.pl \
 	tools/ti \
+	tools/docs \
 	tools/rlink_make_speed_table \
 	tools/st7_dtc_as \
+	examples \
 	contrib \
 	svd \
 	docs \
 	support \
+	testing/README.md \
+	tools/README.md \
+	CI_ISSUES_AND_FIXES.md \
 	docs/development/merge-manifest.md \
 	docs/development/unified-version
 

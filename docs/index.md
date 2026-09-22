@@ -1,7 +1,26 @@
-# Custom feature documentation
+# OpenOCD documentation
 
-This directory indexes the feature packs maintained by the `xsession/openocd`
-fork in addition to OpenOCD's standard manual under `doc/`.
+This site indexes the cross-platform build, deployment, programming, target,
+and development documentation maintained by the `xsession/openocd` fork.
+
+Start with [Getting started](getting-started/overview.md), or use the
+navigation for a focused workflow. The authoritative OpenOCD command and
+protocol manual remains the upstream-compatible [Texinfo manual](reference/legacy-manual.md).
+
+## Build and deployment
+
+- [Prerequisites](getting-started/prerequisites.md)
+- [Quick start](getting-started/quickstart.md)
+- [Docker packaging](deployment/docker-packaging.md)
+- [Build troubleshooting](deployment/troubleshooting.md)
+- [CI](deployment/ci.md)
+
+## Embedded development
+
+- [Configuration model](usage/configuration.md)
+- [First session](usage/first-session.md)
+- [Debuggers](usage/debuggers.md)
+- [Support matrix](reference/support-matrix.md)
 
 ## TI targets and probes
 
@@ -13,7 +32,7 @@ fork in addition to OpenOCD's standard manual under `doc/`.
 - [TI XDS110 usage](usage/xds110.md)
 - [VS Code dual-core F28M35x debugging](usage/vscode-f28m35x-dual-core.md)
 - [TMS320F28M35x debug findings](usage/tms320f28m35x-debug-findings.md)
-- [Repo debug-server wrappers](../tools/debug-servers/README.md)
+- [Repo debug-server wrappers](development/debug-server-wrappers.md)
 - [TI C2000 toolchain source](development/source-catalog.md)
 
 ## Microchip programmers
@@ -25,9 +44,9 @@ fork in addition to OpenOCD's standard manual under `doc/`.
 
 ## Repository merge
 
+- [Repository layout and ownership](development/repository-layout.md)
 - [OpenOCD university course](openocd-course/README.md)
 - [Source catalog](development/source-catalog.md)
-- [Repository layout](development/repository-layout.md)
 - [Adding a new vendor, MCU, and programmer](development/adding-new-vendor-mcu-programmer.md)
 - [Zephyr-style support organization](development/zephyr-style-support-organization.md)
 - [Vendor audit phased checklist](development/vendor-audit-phased-checklist.md)

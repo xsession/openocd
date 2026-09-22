@@ -1,0 +1,49 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Microchip MDB: preflight",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "${workspaceFolder}/tools/debug-servers/microchip/mdb/mdb_gdb_wrapper.py",
+        "--mdb",
+        "C:/Program Files/Microchip/MPLABX/v6.25/mplab_platform/bin/mdb.bat",
+        "preflight"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Microchip MDB: start GDB facade",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "${workspaceFolder}/tools/debug-servers/microchip/mdb/mdb_gdb_wrapper.py",
+        "--mdb",
+        "C:/Program Files/Microchip/MPLABX/v6.25/mplab_platform/bin/mdb.bat",
+        "server",
+        "--listen-host",
+        "127.0.0.1",
+        "--device",
+        "PIC32MX360F512L",
+        "--hwtool",
+        "PICkit4",
+        "--port",
+        "3340"
+      ],
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "microchip-mdb-facade",
+        "pattern": {
+          "regexp": "^(.*)$",
+          "message": 1
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^Use monitor commands for MDB",
+          "endsPattern": "^MDB GDB facade listening on"
+        }
+      }
+    }
+  ]
+}

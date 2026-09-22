@@ -5,6 +5,10 @@ on:
     paths:
       - 'tcl/programmer/microchip/**'
       - 'tcl/interface/microchip/**'
+      - 'src/flash/nor/mchp_ri4*'
+      - 'src/programmer/microchip/**'
+      - 'src/target/mchp_ri4*'
+      - 'examples/microchip/**'
       - 'testing/microchip_programmer/**'
       - 'svd/microchip/**'
       - 'contrib/60-openocd.rules'
@@ -13,6 +17,10 @@ on:
     paths:
       - 'tcl/programmer/microchip/**'
       - 'tcl/interface/microchip/**'
+      - 'src/flash/nor/mchp_ri4*'
+      - 'src/programmer/microchip/**'
+      - 'src/target/mchp_ri4*'
+      - 'examples/microchip/**'
       - 'testing/microchip_programmer/**'
       - 'svd/microchip/**'
       - 'contrib/60-openocd.rules'

@@ -130,9 +130,6 @@ dist/
 # generated/import staging and local vendor snapshots
 artifacts/
 gens/
-tools/microchip/open_microchip_tools/vendor/
-tools/microchip/open_microchip_tools/vscode_extension/out/
-tools/microchip/open_microchip_tools/vscode_extension/*.vsix
 tools/ti/c2000_toolchain/.venv/
 tools/ti/c2000_toolchain/sources/
 tools/ti/c2000_toolchain/svd/

@@ -14,8 +14,8 @@ This fork adds a binary deployment layer around the OpenOCD source tree:
 
 The repository keeps two documentation systems for different jobs:
 
-- `docs/`: Sphinx/MyST site for installation, packaging, CI, and task-oriented guides.
+- `docs/`: MkDocs site for installation, packaging, CI, and task-oriented guides.
 - `doc/openocd.texi`: upstream OpenOCD command and protocol reference.
 - `Doxyfile.in`: source-code API documentation for maintainers.
 
-The Sphinx site links to the legacy manual instead of duplicating thousands of command descriptions.
+The MkDocs site links to the legacy manual instead of duplicating thousands of command descriptions.

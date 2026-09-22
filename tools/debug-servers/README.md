@@ -8,5 +8,6 @@ manifests by vendor.
 | `microchip/mdb/` | GDB/RSP facade backed by Microchip MPLAB X MDB command files. |
 | `ti/c2000/` | OpenOCD wrapper and monitor-only GDB proxy for TI C2000/F28M35x bring-up. |
 
-The wrappers in `tools/support/` remain as compatibility launchers. New docs and
-examples should point here.
+The paths under this directory are the canonical entry points. Do not add
+duplicate compatibility launchers at the repository root; update the relevant
+vendor wrapper and its README when the command-line interface changes.

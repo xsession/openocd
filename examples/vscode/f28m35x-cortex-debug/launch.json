@@ -1,0 +1,91 @@
+{
+  "version": "0.2.0",
+  "compounds": [
+    {
+      "name": "F28M35x: monitor both cores, no programming",
+      "configurations": [
+        "F28M35x M3 monitor-only proxy",
+        "F28M35x C28x monitor-only proxy"
+      ],
+      "stopAll": true
+    },
+    {
+      "name": "F28M35x: Cortex-M3 + C28x acceptance gate",
+      "configurations": [
+        "F28M35x Cortex-M3 via OpenOCD, requires M3 DAP route",
+        "F28M35x C28x via OpenOCD, requires C28x GDB"
+      ],
+      "stopAll": true
+    }
+  ],
+  "configurations": [
+    {
+      "name": "F28M35x M3 monitor-only proxy",
+      "type": "cortex-debug",
+      "request": "attach",
+      "servertype": "external",
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/m3.elf",
+      "gdbPath": "arm-none-eabi-gdb",
+      "gdbTarget": "localhost:3335",
+      "overrideAttachCommands": [
+        "target-select extended-remote localhost:3335",
+        "interpreter-exec console \"monitor targets\"",
+        "interpreter-exec console \"monitor poll\""
+      ],
+      "showDevDebugOutput": "raw"
+    },
+    {
+      "name": "F28M35x C28x monitor-only proxy",
+      "type": "cortex-debug",
+      "request": "attach",
+      "servertype": "external",
+      "targetCore": "c2000",
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/c28x.out",
+      "gdbPath": "arm-none-eabi-gdb",
+      "gdbTarget": "localhost:3336",
+      "overrideAttachCommands": [
+        "target-select extended-remote localhost:3336",
+        "interpreter-exec console \"monitor targets\"",
+        "interpreter-exec console \"monitor poll\"",
+        "interpreter-exec console \"monitor reg\""
+      ],
+      "showDevDebugOutput": "raw"
+    },
+    {
+      "name": "F28M35x Cortex-M3 via OpenOCD, requires M3 DAP route",
+      "type": "cortex-debug",
+      "request": "attach",
+      "servertype": "external",
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/m3.elf",
+      "gdbPath": "arm-none-eabi-gdb",
+      "gdbTarget": "localhost:3333",
+      "memoryAddressUnitBytes": 1,
+      "runToEntryPoint": "main",
+      "postAttachCommands": [
+        "interpreter-exec console \"monitor targets\"",
+        "interpreter-exec console \"monitor poll\""
+      ],
+      "showDevDebugOutput": "raw"
+    },
+    {
+      "name": "F28M35x C28x via OpenOCD, requires C28x GDB",
+      "type": "cortex-debug",
+      "request": "attach",
+      "servertype": "external",
+      "targetCore": "c2000",
+      "cwd": "${workspaceFolder}",
+      "executable": "${workspaceFolder}/build/c28x.out",
+      "gdbPath": "C:/path/to/c28x-capable-gdb.exe",
+      "gdbTarget": "localhost:3334",
+      "memoryAddressUnitBytes": 2,
+      "postAttachCommands": [
+        "interpreter-exec console \"monitor targets\"",
+        "interpreter-exec console \"monitor poll\""
+      ],
+      "showDevDebugOutput": "raw"
+    }
+  ]
+}
