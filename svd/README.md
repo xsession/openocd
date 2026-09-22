@@ -22,8 +22,8 @@ data.
 
 ## Microchip dsPIC
 
-The top-level dsPIC SVD files were generated from the compressed Microchip EDC
-descriptors in `open_microchip_tools`:
+The dsPIC SVD files under `svd/microchip/` were generated from the compressed
+Microchip EDC descriptors in `open_microchip_tools`:
 
 | SVD | Source pack |
 |---|---|

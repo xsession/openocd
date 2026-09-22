@@ -72,7 +72,7 @@ SYSROOT=$WORK_DIR/$HOST_TRIPLET-root
 : ${MAKE_JOBS:=1}
 
 ## OpenOCD-only install dir for packaging
-: ${OPENOCD_TAG:=`git --git-dir=$OPENOCD_SRC/.git describe --tags`}
+: ${OPENOCD_TAG:=`git --git-dir=$OPENOCD_SRC/.git describe --tags --always --dirty`}
 PACKAGE_DIR=$WORK_DIR/openocd_${OPENOCD_TAG}_${HOST_TRIPLET}
 
 #######
@@ -199,4 +199,3 @@ make install-strip DESTDIR=$SYSROOT
 # Separate OpenOCD install w/o dependencies. OpenOCD will have to be linked
 # statically or have dependencies packaged/installed separately.
 make install-strip DESTDIR=$PACKAGE_DIR
-

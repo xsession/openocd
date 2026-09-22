@@ -14,16 +14,20 @@ usage() {
 
 cd "${1:-.}" || usage
 
+# Parallel builds may invoke this script from many compiler jobs at once.
+# Prevent read-only Git queries from trying to refresh the shared index.
+export GIT_OPTIONAL_LOCKS=0
+
 # Check for git and a git repo.
 if head=`git rev-parse --verify --short HEAD 2>/dev/null`; then
 
 	# If we are at a tagged commit (like "v2.6.30-rc6"), we ignore it,
 	# because this version is defined in the top level Makefile.
-	if [ -z "`git describe --exact-match 2>/dev/null`" ]; then
+	if [ -z "`git describe --tags --exact-match 2>/dev/null`" ]; then
 
 		# If we are past a tagged commit (like "v2.6.30-rc5-302-g72357d5"),
 		# we pretty print it.
-		if atag="`git describe 2>/dev/null`"; then
+		if atag="`git describe --tags 2>/dev/null`"; then
 			echo "$atag" | awk -F- '{printf("-%05d-%s", $(NF-1),$(NF))}'
 
 		# If we don't have a tag at all we print -g{commitish}.
@@ -37,12 +41,10 @@ if head=`git rev-parse --verify --short HEAD 2>/dev/null`; then
 	        printf -- '-svn%s' "`git svn find-rev $head`"
 	fi
 
-	# Update index only on r/w media
-	[ -w . ] && git update-index --refresh --unmerged > /dev/null
-
 	# Check for uncommitted changes
-	if git diff-index --name-only HEAD | grep -v "^scripts/package" \
-	    | read dummy; then
+	if git diff-index --quiet --ignore-submodules HEAD --; then
+		:
+	else
 		printf '%s' -dirty
 	fi
 

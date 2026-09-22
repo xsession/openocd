@@ -7,6 +7,3 @@
 [submodule "tools/vscode/cortex-debug"]
 	path = tools/vscode/cortex-debug
 	url = https://github.com/xsession/cortex-debug.git
-[submodule "externals/open_microchip_tools"]
-	path = externals/open_microchip_tools
-	url = https://github.com/xsession/open_microchip_tools.git

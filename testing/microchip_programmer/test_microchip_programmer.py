@@ -241,7 +241,7 @@ class MicrochipLocalIntegrationTests(unittest.TestCase):
         self.assertIn("&mchp_ri4_flash", flash_drivers)
 
     def test_generated_dspic_svds_are_present(self) -> None:
-        svd_dir = REPO_ROOT / "svd"
+        svd_dir = REPO_ROOT / "svd" / "microchip"
         for name in (
             "dspic30f5011.svd",
             "dspic33fj128mc802.svd",

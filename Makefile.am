@@ -145,10 +145,7 @@ dist-hook:
 		$(distdir)/tools/ti/c2000_toolchain/extension/out \
 		$(distdir)/tools/ti/c2000_toolchain/extension/node_modules \
 		$(distdir)/tools/ti/c2000_toolchain/extension/*.vsix \
-		$(distdir)/tools/ti/c2000_toolchain/.venv \
-		$(distdir)/externals/open_microchip_tools/vendor \
-		$(distdir)/externals/open_microchip_tools/__pycache__ \
-		$(distdir)/externals/open_microchip_tools/**/__pycache__
+		$(distdir)/tools/ti/c2000_toolchain/.venv
 	for i in $$($(TCL_FILES)); do \
 		j="$(distdir)/$(TCL_PATH)/$$i" && \
 		mkdir -p "$$(dirname $$j)" && \

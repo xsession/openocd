@@ -8,3 +8,8 @@
 	%D%/programmers/usbasp.h
 
 noinst_LTLIBRARIES += %D%/libavr.la
+
+if USE_LIBUSB1
+%C%_libavr_la_CPPFLAGS += $(LIBUSB1_CFLAGS)
+%C%_libavr_la_LIBADD += $(LIBUSB1_LIBS)
+endif
