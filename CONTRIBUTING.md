@@ -13,5 +13,7 @@ Thank you for improving this OpenOCD fork.
 For upstream coding conventions and patch guidance, see [`HACKING`](HACKING).
 For packaging architecture, see
 [`docs/development/build-system.md`](docs/development/build-system.md).
+For the source-grounded C4 architecture and runtime call flow, see
+[`docs/architecture/index.md`](docs/architecture/index.md).
 For the repository ownership map, see
 [`docs/development/repository-layout.md`](docs/development/repository-layout.md).

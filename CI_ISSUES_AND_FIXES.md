@@ -177,8 +177,36 @@ metadata files.
 
 - `python3 -m mkdocs build --strict --site-dir /tmp/openocd-mkdocs-site-final`
 - `python3 tools/docs/generate_support_tables.py --check`
-- Relative-link validation across all 91 Markdown files.
+- Relative-link validation across all 99 Markdown files.
 - No remaining Sphinx/MyST directives in the MkDocs site.
+
+## Issue 6: architecture was not discoverable from the documentation site
+
+### Symptoms
+
+The repository had useful source catalogs and vendor notes, but no coherent
+system context, runtime container model, component call flow, deployment view,
+or source-to-build map. The navigation also presented historical audit pages as
+one flat list, making the maintainer path difficult to follow.
+
+### Fix
+
+- Added a source-grounded C4 section under `docs/architecture/` with context,
+  container, component, deployment, build/release, source-map, and decision
+  pages.
+- Grouped development navigation into integration/tooling, vendor-audit, and
+  historical/merge sections.
+- Linked the architecture model from `README.md`, `CONTRIBUTING.md`, and the
+  documentation home page.
+- Removed the obsolete `docs/conf.py` Sphinx configuration.
+- Clarified the distinction between curated `examples/` and retained legacy
+  `samples/`.
+
+### Verification
+
+- The strict MkDocs build includes all C4 pages and diagrams.
+- All 99 Markdown files have resolvable relative links.
+- The generated support matrix remains current.
 
 ## Validation performed
 
@@ -187,7 +215,7 @@ The following checks were completed after the fixes:
 - Microchip Python test file: the three non-Tcl integration tests pass.
 - Shell syntax validation for `guess-rev.sh` and `contrib/cross-build.sh`.
 - Python bytecode compilation for the Microchip test file.
-- YAML parsing for all five GitHub workflow files.
+- YAML parsing for all six GitHub workflow files.
 - `git diff --check`.
 - Recursive initialization of all remaining submodules.
 - Concurrent Git version detection to exercise the former lock race.
@@ -201,6 +229,36 @@ passed before the stale SVD path caused the job to fail.
 
 GitHub Actions was not rerun from this workspace because the corrected changes
 were not pushed to a remote branch.
+
+## Issue 7: documentation was not published to GitHub Pages
+
+### Symptom
+
+The MkDocs workflow built an HTML artifact for inspection, but there was no
+workflow that uploaded the generated site to GitHub Pages. Documentation was
+therefore not published after a successful build.
+
+### Fix
+
+Added `.github/workflows/pages.yml` with separate build and deploy jobs. The
+workflow:
+
+- runs for documentation changes on `master` and `main`, or by manual dispatch;
+- performs the generated-support-table check and strict MkDocs build;
+- uploads only the generated `site/` directory with
+  `actions/upload-pages-artifact`;
+- deploys through the protected `github-pages` environment with the minimum
+  Pages and OIDC permissions.
+
+The repository Pages setting must use **GitHub Actions** as its publishing
+source. The expected public URL is <https://xsession.github.io/openocd/>.
+
+### Verification
+
+- The new workflow YAML parses with the other repository workflows.
+- The strict MkDocs build succeeds locally with the Pages output layout.
+- The Pages setup and failure modes are documented in
+  `docs/deployment/ci.md`.
 
 ## Changed files
 
@@ -217,6 +275,9 @@ were not pushed to a remote branch.
 - `docs/requirements.txt`
 - `tools/docs/generate_support_tables.py`
 - `docs/reference/support-matrix.md`
+- `docs/architecture/*.md`
+- `docs/conf.py` removed
 - `.github/workflows/docs.yml`
+- `.github/workflows/pages.yml`
 - `docker/Dockerfile.docs`
 - Removed gitlink: `externals/open_microchip_tools`

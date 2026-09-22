@@ -12,8 +12,9 @@ build-critical upstream paths are intentionally kept stable.
 |-- contrib/              Upstream utilities and integration assets
 |-- doc/                  Upstream Texinfo and man-page reference
 |-- docker/               Dockerfiles, Compose/Bake files, scripts, and runtime data
-|-- docs/                 MkDocs documentation and design records
+|-- docs/                 MkDocs documentation, C4 model, and design records
 |-- examples/             Ready-made OpenOCD usage and programming examples
+|-- samples/              Legacy/upstream sample configurations retained for compatibility
 |-- gens/                 Ignored staging area for generated/source-drop imports
 |-- src/                  OpenOCD implementation
 |-- svd/                  Curated committed SVD files
@@ -34,6 +35,8 @@ build-critical upstream paths are intentionally kept stable.
 - Small, user-facing configuration examples belong in `examples/`; hardware
   support metadata belongs in `support/` and runtime configs belong in `tcl/`.
 - User and operator documentation belongs in `docs/`.
+- Runtime architecture and C4 views belong in `docs/architecture/`; source
+  references in those pages must point to real implementation paths.
 - Curated vendor/tooling support belongs under `tools/<vendor>/`; generated
   feature drops stay in ignored `gens/` until reviewed.
 - Debugger data that is intentionally committed belongs in `svd/`; generator

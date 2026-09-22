@@ -54,6 +54,10 @@ See [`docs/programmers/microchip-pickit-icd.md`](docs/programmers/microchip-pick
 - VS Code and Cortex-Debug examples retained from the custom fork.
 
 See [`docs/index.md`](docs/index.md) for the custom documentation index.
+The source-grounded C4 model starts at
+[`docs/architecture/index.md`](docs/architecture/index.md).
+The rendered documentation is published at
+<https://xsession.github.io/openocd/>.
 
 ## Clone and bootstrap
 
@@ -112,6 +116,8 @@ debugging still requires a dsPIC-capable target backend and GDB server.
 - `src/` and `tcl/` contain the OpenOCD implementation and installed runtime
   scripts.
 - `examples/` contains copy-paste configurations and VS Code launch examples.
+- `samples/` contains legacy/upstream sample configurations retained for
+  compatibility; new curated examples belong in `examples/`.
 - `support/` contains curated hardware metadata and its validators.
 - `testing/` contains regression harnesses; `tools/` contains maintainer and
   vendor integration tooling.

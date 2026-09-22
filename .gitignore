@@ -140,5 +140,3 @@ tools/ti/c2000_toolchain/extension/*.vsix
 build-native/
 mplabx-mdb-v6.25
 ccs-debugserver-20.4.0
-
-.vscode/settings.json

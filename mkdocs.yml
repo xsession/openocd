@@ -128,35 +128,47 @@ nav:
       - Output layout: reference/output-layout.md
       - Support matrix: reference/support-matrix.md
       - Legacy command manual: reference/legacy-manual.md
+  - Architecture (C4):
+      - Overview: architecture/index.md
+      - System context: architecture/context.md
+      - Runtime containers: architecture/containers.md
+      - Components and call flow: architecture/components.md
+      - Deployment view: architecture/deployment.md
+      - Build and release: architecture/build-and-release.md
+      - Source map: architecture/source-map.md
+      - Architecture decisions: architecture/decisions.md
   - Development:
       - Documentation workflow: development/documentation.md
       - Documentation architecture: development/documentation-architecture.md
-      - Debug-server wrappers: development/debug-server-wrappers.md
       - Repository layout: development/repository-layout.md
       - Source catalog: development/source-catalog.md
       - Build system: development/build-system.md
       - Build review: development/build-review.md
-      - Fix notes: development/fix-notes.md
-      - Change history: development/change-history.md
-      - Merge manifest: development/merge-manifest.md
+      - Integration and tooling:
+          - Debug-server wrappers: development/debug-server-wrappers.md
+          - TI debug adapters: development/ti-debug-adapters.md
+          - Microchip feature organization: development/microchip-feature-base.md
+          - AVRDUDE integration audit: development/avrdude-integration-audit.md
+          - Vendor fork audit: development/openocd-vendor-fork-audit.md
+          - Zephyr-style support organization: development/zephyr-style-support-organization.md
       - Adding vendor support: development/adding-new-vendor-mcu-programmer.md
-      - TI debug adapters: development/ti-debug-adapters.md
-      - Microchip feature organization: development/microchip-feature-base.md
       - PICkit 4 RI4 lessons: development/pickit4-ri4-lessons.md
-      - AVRDUDE integration audit: development/avrdude-integration-audit.md
-      - Vendor fork audit: development/openocd-vendor-fork-audit.md
-      - Zephyr-style support organization: development/zephyr-style-support-organization.md
-      - Vendor audit checklist: development/vendor-audit-phased-checklist.md
-      - Vendor audit phase 1: development/vendor-audit-phase1-ti-triage.md
-      - Vendor audit phase 2: development/vendor-audit-phase2-ti-config.md
-      - Vendor audit phase 3: development/vendor-audit-phase3-ti-programmer.md
-      - Vendor audit phase 4: development/vendor-audit-phase4-ti-target-attach.md
-      - Vendor audit phase 5: development/vendor-audit-phase5-ti-flash-support.md
-      - Vendor audit phase 6: development/vendor-audit-phase6-ti-board-examples.md
-      - Vendor audit phase 7: development/vendor-audit-phase7-ti-build-regression.md
-      - Vendor audit phase 8: development/vendor-audit-phase8-ti-documentation-status.md
-      - Vendor audit phase 9: development/vendor-audit-phase9-avrdude-support-index.md
-      - Vendor audit phase 10: development/vendor-audit-phase10-backend-hardware-queue.md
-      - Vendor audit phase 11: development/vendor-audit-phase11-support-validation-tooling.md
-      - Integration chat 2026-07-17: development/chat-record-2026-07-17.md
-      - Integration chat 2026-07-21: development/chat-record-2026-07-21.md
+      - Vendor audit:
+          - Checklist: development/vendor-audit-phased-checklist.md
+          - Phase 1 - TI triage: development/vendor-audit-phase1-ti-triage.md
+          - Phase 2 - TI config: development/vendor-audit-phase2-ti-config.md
+          - Phase 3 - TI programmer: development/vendor-audit-phase3-ti-programmer.md
+          - Phase 4 - TI target attach: development/vendor-audit-phase4-ti-target-attach.md
+          - Phase 5 - TI flash support: development/vendor-audit-phase5-ti-flash-support.md
+          - Phase 6 - TI board examples: development/vendor-audit-phase6-ti-board-examples.md
+          - Phase 7 - TI build regression: development/vendor-audit-phase7-ti-build-regression.md
+          - Phase 8 - TI documentation status: development/vendor-audit-phase8-ti-documentation-status.md
+          - Phase 9 - AVRDUDE support index: development/vendor-audit-phase9-avrdude-support-index.md
+          - Phase 10 - Backend hardware queue: development/vendor-audit-phase10-backend-hardware-queue.md
+          - Phase 11 - Support validation tooling: development/vendor-audit-phase11-support-validation-tooling.md
+      - Historical and merge records:
+          - Fix notes: development/fix-notes.md
+          - Change history: development/change-history.md
+          - Merge manifest: development/merge-manifest.md
+          - Integration chat 2026-07-17: development/chat-record-2026-07-17.md
+          - Integration chat 2026-07-21: development/chat-record-2026-07-21.md

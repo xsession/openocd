@@ -22,6 +22,14 @@ protocol manual remains the upstream-compatible [Texinfo manual](reference/legac
 - [Debuggers](usage/debuggers.md)
 - [Support matrix](reference/support-matrix.md)
 
+## Architecture and maintenance
+
+- [C4 architecture overview](architecture/index.md)
+- [Source map for contributors](architecture/source-map.md)
+- [Build and release architecture](architecture/build-and-release.md)
+- [Repository layout](development/repository-layout.md)
+- [Adding a vendor, MCU, or programmer](development/adding-new-vendor-mcu-programmer.md)
+
 ## TI targets and probes
 
 - [TMS320 family support](targets/ti-tms320-family-support.md)

@@ -12,6 +12,8 @@ Typst is well suited to polished PDF output, but this project needs a searchable
 
 - `README.md`: concise landing page and working build commands.
 - `docs/`: task-oriented packaging, installation, runtime, and troubleshooting guide built by MkDocs.
+- `docs/architecture/`: source-grounded C4 context, container, component,
+  deployment, build, and decision views.
 - `doc/openocd.texi`: complete OpenOCD command reference.
 - `Doxyfile.in`: implementation/API reference.
 - `docs/development/change-history.md`: historical engineering record, not onboarding documentation.

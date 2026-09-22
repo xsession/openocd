@@ -27,6 +27,7 @@ Maintained source belongs in the categorized project tree below.
 |---|---|
 | `svd/` | Curated debugger-facing SVD files committed with the fork. Generator source lives under `tools/`. |
 | `examples/` | Ready-to-run board, target, adapter, VS Code, and programming examples. |
+| `samples/` | Legacy/upstream sample configurations retained for compatibility; add new curated examples to `examples/`. |
 | `testing/` | OpenOCD test infrastructure and regression scripts. |
 
 ## Documentation and packaging
